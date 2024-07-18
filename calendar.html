@@ -10,18 +10,58 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
     <style>
         #calendar-container {
-            width: 400px; /* Adjust as needed */
+            width: 600px; /* Adjust as needed */
             margin: 0 auto;
         }
         #calendar {
             max-width: 100%;
         }
+        .fc-event {
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .fc-event .fc-title {
+            max-width: 120px; /* Adjust as needed */
+            height: 20px;     /* Adjust as needed */
+            overflow: hidden; /* Hide overflow text */
+            text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+            white-space: nowrap; /* Prevent line breaks */
+            text-align: center;
+        }
+        /* Guide styles */
+        .guide {
+            margin-top: 20px;
+        }
+        .guide .color-box {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            margin-right: 10px;
+        }
+        .fc-event .fc-title {
+      max-width: 120px; /* Adjust as needed */
+      height: 20px;     /* Adjust as needed */
+      overflow: hidden; /* Hide overflow text */
+      text-overflow: ellipsis; /* Add ellipsis for overflowed text */
+      white-space: wrap; /* allow line breaks */
+      text-align: center;
+}
     </style>
 </head>
 <body>
     <div class="container mt-5">
         <div id="calendar-container">
             <div id="calendar"></div>
+        </div>
+        <div class="guide mt-4">
+            <h5>Event Color Guide:</h5>
+            <div>
+                <span class="color-box" style="background-color: blue;"></span> Blue: Event 2
+            </div>
+            <div>
+                <span class="color-box" style="background-color: red;"></span> Red: Event 1
+            </div>
         </div>
     </div>
 
@@ -40,14 +80,16 @@
                 header: {
                     left: 'prev,next today',
                     center: 'title',
-                    right: 'month,agendaWeek,agendaDay'
+                    right: ''
                 },
                 editable: true,
                 events: [
                     {
-                        title: 'Event 1',
+                        title: 'Event 1: Long title that might not fit well',
                         start: '2024-08-01',
-                        backgroundColor: 'red'
+                        end: '2024-08-02',
+                        backgroundColor: 'red',
+                        url: 'https://www.google.com' // This will make the event clickable and link to Google
                     },
                     {
                         title: 'Event 2',
@@ -55,7 +97,15 @@
                         end: '2024-08-10',
                         backgroundColor: 'blue'
                     }
-                ]
+                ],
+                eventRender: function(event, element) {
+                    // Add a link to the title
+                    if (event.url) {
+                        element.find('.fc-title').html('<a href="' + event.url + '" target="_blank">' + event.title + '</a>');
+                    }
+                    // Add a tooltip with the full title
+                    element.find('.fc-title').attr('title', event.title);
+                }
             });
         });
     </script>
