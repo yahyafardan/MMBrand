@@ -6,10 +6,10 @@
   <meta http-equiv="X-UA-Compatible" content="IE=edge">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-  <!-- For google icons  -->
+  <!-- For Google icons -->
   <link href="https://fonts.googleapis.com/icon?family=Material+Icons+Outlined" rel="stylesheet">
 
-  <title>Login form</title>
+  <title>Login Form</title>
 
   <style>
     body {
@@ -128,36 +128,6 @@
       }
     }
   </style>
-</head>
-
-<body>
-
-  <!-- for background -->
-  <div class="background"></div>
-
-  <!-- for form container -->
-  <div class="container">
-    <h2>Login</h2>
-    <form action="login.php" method="POST" onsubmit="return validateForm()">
-
-      <div class="form-item">
-        <span class="material-icons-outlined">
-          account_circle
-        </span>
-        <input type="text" name="user" id="user" placeholder="Email or Username">
-      </div>
-
-      <div class="form-item">
-        <span class="material-icons-outlined">
-          lock
-        </span>
-        <input type="password" name="pass" id="pass" placeholder="password">
-      </div>
-
-      <button type="submit">LOGIN</button>
-
-    </form>
-  </div>
 
   <script>
     function validateForm() {
@@ -175,6 +145,37 @@
       return true;
     }
   </script>
+</head>
+
+<body>
+
+  <!-- For background -->
+  <div class="background"></div>
+
+  <!-- For form container -->
+  <div class="container">
+    <h2>Login</h2>
+    <form action="redirct.php" method="POST" onsubmit="return validateForm()">
+
+      <div class="form-item">
+        <span class="material-icons-outlined">
+          account_circle
+        </span>
+        <input type="text" name="user" id="user" placeholder="Email or Username" required>
+      </div>
+
+      <div class="form-item">
+        <span class="material-icons-outlined">
+          lock
+        </span>
+        <input type="password" name="pass" id="pass" placeholder="Password" required>
+      </div>
+
+      <button type="submit">LOGIN</button>
+
+    </form>
+  </div>
+
 </body>
 
 </html>
