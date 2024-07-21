@@ -15,5 +15,6 @@ if ($_SESSION['role_name'] !== 'admin') {
 }
 
 // Page content for admins
-echo "Welcome, " . $_SESSION['username'] . "! This is the admin page.";
+// echo "Welcome, " . $_SESSION['username'] . "! This is the admin page.";
+require "admin.html";
 ?>
