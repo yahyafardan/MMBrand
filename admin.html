@@ -9,7 +9,7 @@
             font-family: Arial, sans-serif;
             background-color: #f7f9fc;
             color: #333;
-            margin: 0;
+            margin: 5%;
             padding: 0;
             display: flex;
             justify-content: center;
@@ -73,25 +73,46 @@
             background-color: #357abd;
         }
 
-        .checkbox-group {
+        .checkbox-group,
+        .radio-group {
             display: flex;
             flex-wrap: wrap;
             gap: 10px;
             margin-bottom: 16px;
         }
 
-        .checkbox-group label {
+        .checkbox-group label,
+        .radio-group label {
             margin: 0;
             display: flex;
             align-items: center;
             font-weight: normal;
+        }
+
+        .social-media-inputs {
+            margin-bottom: 16px;
+        }
+
+        .social-media-inputs div {
+            display: flex;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .social-media-inputs label {
+            margin: 0 8px 0 0;
+        }
+
+        .social-media-inputs input[type="text"] {
+            flex: 1;
+            padding: 5px;
         }
     </style>
 </head>
 <body>
     <h1>Client Posts Form</h1>
     <div class="form-container">
-        <form action="submit_client_post.php" method="POST">
+        <form id="client-posts-form" action="submit_client_post.php" method="POST">
             <label for="client_name">Client Name:</label>
             <input type="text" id="client_name" name="client_name" required><br>
 
@@ -113,16 +134,96 @@
             </div>
 
             <label for="hashtags">Hashtags:</label>
-            <textarea id="hashtags" name="hashtags"></textarea><br>
+            <textarea id="hashtags" name="hashtags" required></textarea><br>
 
             <label for="start_date">Start Date:</label>
             <input type="date" id="start_date" name="start_date" required><br>
 
-            <label for="duration">Duration (in years):</label>
-            <input type="step" id="duration" name="duration" required><br>
+            <label for="duration">Duration (in months):</label>
+            <input type="number" id="duration" name="duration" required><br>
+
+            <label>Social Media Platforms:</label>
+            <div class="checkbox-group" id="social-media-group">
+                <label><input type="checkbox" name="social_media[]" value="facebook"> Facebook</label>
+                <label><input type="checkbox" name="social_media[]" value="instagram"> Instagram</label>
+                <label><input type="checkbox" name="social_media[]" value="X"> X</label>
+                <label><input type="checkbox" name="social_media[]" value="linkedin"> LinkedIn</label>
+            </div>
+
+            <div class="social-media-inputs" id="social-media-inputs"></div>
+
+            <label>Language:</label>
+            <div class="radio-group">
+                <label><input type="radio" name="language" value="arabic" required> Arabic</label>
+                <label><input type="radio" name="language" value="english" required> English</label>
+                <label><input type="radio" name="language" value="both" required> Both</label>
+            </div>
 
             <input type="submit" value="Submit">
         </form>
     </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function () {
+            const dateInput = document.getElementById('start_date');
+            const today = new Date().toISOString().split('T')[0];
+            dateInput.value = today;
+
+            const socialMediaCheckboxes = document.querySelectorAll('input[name="social_media[]"]');
+            const socialMediaInputsContainer = document.getElementById('social-media-inputs');
+
+            socialMediaCheckboxes.forEach((checkbox) => {
+                checkbox.addEventListener('change', function () {
+                    const platform = checkbox.value;
+                    let inputDiv = document.querySelector(`.social-media-inputs div[data-platform="${platform}"]`);
+
+                    if (checkbox.checked) {
+                        if (!inputDiv) {
+                            inputDiv = document.createElement('div');
+                            inputDiv.setAttribute('data-platform', platform);
+                            inputDiv.innerHTML = `
+                                <label>${platform.charAt(0).toUpperCase() + platform.slice(1)} Account:</label>
+                                <input type="text" name="${platform}_account" placeholder="Enter account name" required>
+                            `;
+                            socialMediaInputsContainer.appendChild(inputDiv);
+                        }
+                    } else {
+                        if (inputDiv) {
+                            socialMediaInputsContainer.removeChild(inputDiv);
+                        }
+                    }
+                });
+            });
+
+            document.getElementById('client-posts-form').addEventListener('submit', function (event) {
+                const daysCheckboxes = document.querySelectorAll('input[name="days_of_posting[]"]');
+                const socialMediaCheckboxes = document.querySelectorAll('input[name="social_media[]"]');
+                
+                let oneDayChecked = false;
+                let oneSocialMediaChecked = false;
+
+                daysCheckboxes.forEach((checkbox) => {
+                    if (checkbox.checked) {
+                        oneDayChecked = true;
+                    }
+                });
+
+                socialMediaCheckboxes.forEach((checkbox) => {
+                    if (checkbox.checked) {
+                        oneSocialMediaChecked = true;
+                    }
+                });
+
+                if (!oneDayChecked) {
+                    alert('Please select at least one day of posting.');
+                    event.preventDefault();
+                }
+                if (!oneSocialMediaChecked) {
+                    alert('Please select at least one social media platform.');
+                    event.preventDefault();
+                }
+            });
+        });
+    </script>
 </body>
 </html>
