@@ -23,8 +23,6 @@ $date = new DateTime($start_date);
 $date->modify('first day of next month');
 $start_date = $date->format('Y-m-d'); // Format for MySQL DATE
 
-// Debug output to check formatted date
-echo "Formatted start_date: " . $start_date . "<br>";
 
 // Prepare SQL statement
 $sql = "INSERT INTO clients (
