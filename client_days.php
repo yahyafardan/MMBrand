@@ -1,32 +1,3 @@
-<?php
-session_start();
-
-if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
-    exit;
-}
-
-if ($_SESSION['role_name'] !== 'content') {
-    echo "Access denied.";
-    exit;
-}
-
-require 'db.php';
-
-if (!isset($pdo)) {
-    die("Database connection failed.");
-}
-
-try {
-    $sql = "SELECT client_name FROM clients";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute();
-    $clients = $stmt->fetchAll(PDO::FETCH_ASSOC);
-} catch (PDOException $e) {
-    echo "Query failed: " . $e->getMessage();
-}
-?>
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -58,9 +29,6 @@ try {
             white-space: nowrap; /* Prevent line breaks */
             text-align: center;
         }
-        .fc-day.fc-day-posting {
-            background-color: rgba(0, 255, 0, 0.3); /* Default green with transparency */
-        }
         /* Guide styles */
         .guide {
             margin-top: 20px;
@@ -75,31 +43,16 @@ try {
 </head>
 <body>
     <div class="container mt-5">
-        <h1>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
-        <h2>Select a Client:</h2>
-        <select name='client' id='clientSelect'>
-            <option value='' disabled selected>Select a client</option>
-            <?php
-            if ($clients) {
-                foreach ($clients as $client) {
-                    echo "<option value='" . htmlspecialchars($client['client_name']) . "'>" . htmlspecialchars($client['client_name']) . "</option>";
-                }
-            } else {
-                echo "<option value=''>No clients found</option>";
-            }
-            ?>
-        </select>
-        <div id='resultContainer'></div>
         <div id="calendar-container">
             <div id="calendar"></div>
         </div>
         <div class="guide mt-4">
             <h5>Event Color Guide:</h5>
             <div>
-                <span class="color-box" style="background-color: blue;"></span> Blue: Event 2
+                <span class="color-box" style="background-color: red;"></span> Red: Event 1
             </div>
             <div>
-                <span class="color-box" style="background-color: red;"></span> Red: Event 1
+                <span class="color-box" style="background-color: blue;"></span> Blue: Event 2
             </div>
         </div>
     </div>
@@ -114,7 +67,33 @@ try {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        $(document).ready(function() {
+            $('#calendar').fullCalendar({
+                header: {
+                    left: 'prev,next today',
+                    center: 'title',
+                    right: ''
+                },
+                editable: true,
+                events: function(start, end, timezone, callback) {
+                    $.ajax({
+                        url: 'fetch_events.php', // Adjust the endpoint as needed
+                        dataType: 'json',
+                        success: function(data) {
+                            var events = [];
+                            $(data).each(function() {
+                                events.push({
+                                    title: $(this).attr('title'),
+                                    start: $(this).attr('start'),
+                                    backgroundColor: $(this).attr('backgroundColor')
+                                });
+                            });
+                            callback(events);
+                        }
+                    });
+                }
+            });
+
             const clientSelect = document.getElementById('clientSelect');
             const resultContainer = document.getElementById('resultContainer');
 
@@ -193,21 +172,6 @@ try {
                     };
 
                     xhr.send('client_name=' + encodeURIComponent(clientName));
-                }
-            });
-
-            $('#calendar').fullCalendar({
-                header: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: ''
-                },
-                editable: true,
-                eventRender: function(event, element) {
-                    if (event.url) {
-                        element.find('.fc-title').html('<a href="' + event.url + '" target="_blank">' + event.title + '</a>');
-                    }
-                    element.find('.fc-title').attr('title', event.title);
                 }
             });
         });

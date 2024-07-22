@@ -12,25 +12,16 @@ $start_date = $_POST['start_date'];
 $duration = $_POST['duration'];
 $language = $_POST['language'];
 
-// Process social media platforms and accounts
-$facebook_account = isset($_POST['facebook_account']) ? $_POST['facebook_account'] : NULL;
-$instagram_account = isset($_POST['instagram_account']) ? $_POST['instagram_account'] : NULL;
-$X_account = isset($_POST['X_account']) ? $_POST['X_account'] : NULL;
-$linkedin_account = isset($_POST['linkedin_account']) ? $_POST['linkedin_account'] : NULL;
-
 // Convert start_date to the first day of the next month
 $date = new DateTime($start_date);
 $date->modify('first day of next month');
 $start_date = $date->format('Y-m-d'); // Format for MySQL DATE
 
-
-// Prepare SQL statement
+// Prepare SQL statement to insert client data
 $sql = "INSERT INTO clients (
-            client_name, n_of_posts, n_of_videos, days_of_posting, hashtags, start_date, duration,
-            facebook_account, instagram_account, X_account, linkedin_account, language
+            client_name, n_of_posts, n_of_videos, days_of_posting, hashtags, start_date, duration, language
         ) VALUES (
-            :client_name, :n_of_posts, :n_of_videos, :days_of_posting, :hashtags, :start_date, :duration,
-            :facebook_account, :instagram_account, :X_account, :linkedin_account, :language
+            :client_name, :n_of_posts, :n_of_videos, :days_of_posting, :hashtags, :start_date, :duration, :language
         )";
 
 $stmt = $pdo->prepare($sql);
@@ -43,14 +34,27 @@ $stmt->bindParam(':days_of_posting', $days_of_posting);
 $stmt->bindParam(':hashtags', $hashtags);
 $stmt->bindParam(':start_date', $start_date);
 $stmt->bindParam(':duration', $duration, PDO::PARAM_INT);
-$stmt->bindParam(':facebook_account', $facebook_account);
-$stmt->bindParam(':instagram_account', $instagram_account);
-$stmt->bindParam(':X_account', $X_account);
-$stmt->bindParam(':linkedin_account', $linkedin_account);
 $stmt->bindParam(':language', $language);
 
 try {
     $stmt->execute();
+
+    // Insert social media accounts
+    $sql = "INSERT INTO social_media (client_name, X_account, instagram_account, linkedin_account, facebook_account, youtube_account, snapchat_account, tiktok_account) 
+            VALUES (:client_name, :X_account, :instagram_account, :linkedin_account, :facebook_account, :youtube_account, :snapchat_account, :tiktok_account)";
+    $stmt = $pdo->prepare($sql);
+
+    $stmt->bindParam(':client_name', $client_name);
+    $stmt->bindParam(':X_account', $_POST['X_account']);
+    $stmt->bindParam(':instagram_account', $_POST['instagram_account']);
+    $stmt->bindParam(':linkedin_account', $_POST['linkedin_account']);
+    $stmt->bindParam(':facebook_account', $_POST['facebook_account']);
+    $stmt->bindParam(':youtube_account', $_POST['youtube_account']);
+    $stmt->bindParam(':snapchat_account', $_POST['snapchat_account']);
+    $stmt->bindParam(':tiktok_account', $_POST['tiktok_account']);
+
+    $stmt->execute();
+
     include "thankyouadmin.html";
 } catch (PDOException $e) {
     echo "Error: " . $e->getMessage();

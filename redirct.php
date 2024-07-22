@@ -56,11 +56,11 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     } elseif($_SESSION['role_name']=="design"){
 
-        header("Location: design.php"); // Redirect users to a design page
+        header("Location: design.php"); // Redirect users to a designer page
 
     } elseif($_SESSION['role_name']=="social_media"){
 
-        header("Location: social_media.php"); // Redirect to users to a social page
+        header("Location: social_media.php"); // Redirect to users to a social media page
 
     } elseif($_SESSION['role_name']=="client"){
 
