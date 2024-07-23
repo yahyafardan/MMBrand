@@ -149,7 +149,7 @@ try {
                                             'Sunday': 0
                                         };
                                         const dates = [];
-                                        let current = start.clone().day(days[dayOfWeek]);
+                                        let current = start.clone().day(days[days_of_posting]);
 
                                         if (current.isBefore(start)) {
                                             current.add(7, 'days');
@@ -165,9 +165,9 @@ try {
 
                                     const events = [];
                                     posting_days.forEach(day => {
-                                        const dayOfWeek = day.day_of_week;
-                                        const color = day.color || 'rgba(0, 255, 0, 0.3)';
-                                        const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
+                                        const dayOfWeek = day.days_of_posting;
+                                        const color = 'rgba(0, 255, 0, 0.3)'; // Default color if not specified
+                                        const dates = getDatesForDayOfWeek(days_of_posting, start_Date, end_Date);
 
                                         dates.forEach(date => {
                                             events.push({
@@ -184,7 +184,7 @@ try {
                                 }
                             } catch (e) {
                                 console.error('Failed to parse JSON:', e);
-                                resultContainer.innerHTML = '<p style="color: red;">Failed to parse response.</p>';
+                                resultContainer.innerHTML = '<p style="color: red;">Failed to pars1111e response.</p>';
                             }
                         } else {
                             console.error('Request failed. Status:', xhr.status);
