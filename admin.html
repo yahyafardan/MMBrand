@@ -107,6 +107,10 @@
             flex: 1;
             padding: 5px;
         }
+
+        .link-input {
+            margin-left: 8px;
+        }
     </style>
 </head>
 <body>
@@ -187,6 +191,7 @@
                             inputDiv.innerHTML = `
                                 <label>${platform.charAt(0).toUpperCase() + platform.slice(1)} Account:</label>
                                 <input type="text" name="${platform}_account" placeholder="Enter account name" required>
+                                <input type="text" name="${platform}_account_link" placeholder="Enter account link" class="link-input">
                             `;
                             socialMediaInputsContainer.appendChild(inputDiv);
                         }
