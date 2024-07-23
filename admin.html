@@ -189,9 +189,8 @@
                             inputDiv = document.createElement('div');
                             inputDiv.setAttribute('data-platform', platform);
                             inputDiv.innerHTML = `
-                                <label>${platform.charAt(0).toUpperCase() + platform.slice(1)} Account:</label>
-                                <input type="text" name="${platform}_account" placeholder="Enter account name" required>
-                                <input type="text" name="${platform}_account_link" placeholder="Enter account link" class="link-input">
+                                <label>${platform.charAt(0).toUpperCase() + platform.slice(1)} Link:</label>
+                                <input type="text" name="${platform}_account_link" placeholder="Enter account link" class="link-input" required>
                             `;
                             socialMediaInputsContainer.appendChild(inputDiv);
                         }

@@ -39,32 +39,23 @@ $stmt->bindParam(':language', $language);
 try {
     $stmt->execute();
 
-    // Insert social media accounts with links
+    // Insert social media account links
     $sql = "INSERT INTO social_media (
-                client_name, X_account, X_account_link, instagram_account, instagram_account_link, linkedin_account, linkedin_account_link, 
-                facebook_account, facebook_account_link, youtube_account, youtube_account_link, snapchat_account, snapchat_account_link, 
-                tiktok_account, tiktok_account_link
+                client_name, X_account_link, instagram_account_link, linkedin_account_link, 
+                facebook_account_link, youtube_account_link, snapchat_account_link, tiktok_account_link
             ) VALUES (
-                :client_name, :X_account, :X_account_link, :instagram_account, :instagram_account_link, :linkedin_account, :linkedin_account_link,
-                :facebook_account, :facebook_account_link, :youtube_account, :youtube_account_link, :snapchat_account, :snapchat_account_link,
-                :tiktok_account, :tiktok_account_link
+                :client_name, :X_account_link, :instagram_account_link, :linkedin_account_link,
+                :facebook_account_link, :youtube_account_link, :snapchat_account_link, :tiktok_account_link
             )";
     $stmt = $pdo->prepare($sql);
 
     $stmt->bindParam(':client_name', $client_name);
-    $stmt->bindParam(':X_account', $_POST['X_account']);
     $stmt->bindParam(':X_account_link', $_POST['X_account_link']);
-    $stmt->bindParam(':instagram_account', $_POST['instagram_account']);
     $stmt->bindParam(':instagram_account_link', $_POST['instagram_account_link']);
-    $stmt->bindParam(':linkedin_account', $_POST['linkedin_account']);
     $stmt->bindParam(':linkedin_account_link', $_POST['linkedin_account_link']);
-    $stmt->bindParam(':facebook_account', $_POST['facebook_account']);
     $stmt->bindParam(':facebook_account_link', $_POST['facebook_account_link']);
-    $stmt->bindParam(':youtube_account', $_POST['youtube_account']);
     $stmt->bindParam(':youtube_account_link', $_POST['youtube_account_link']);
-    $stmt->bindParam(':snapchat_account', $_POST['snapchat_account']);
     $stmt->bindParam(':snapchat_account_link', $_POST['snapchat_account_link']);
-    $stmt->bindParam(':tiktok_account', $_POST['tiktok_account']);
     $stmt->bindParam(':tiktok_account_link', $_POST['tiktok_account_link']);
 
     $stmt->execute();
