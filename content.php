@@ -118,6 +118,8 @@ try {
             const clientSelect = document.getElementById('clientSelect');
             const resultContainer = document.getElementById('resultContainer');
 
+            let startDate, endDate; // Declare global variables
+
             clientSelect.addEventListener('change', function() {
                 const clientName = this.value;
 
@@ -134,9 +136,8 @@ try {
                                 if (response.error) {
                                     resultContainer.innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
                                 } else {
-                                    const { start_date, end_date, posting_days } = response;
-                                    const startDate = moment(start_date);
-                                    const endDate = moment(end_date);
+                                    startDate = moment(response.start_date);
+                                    endDate = moment(response.end_date);
 
                                     function getDatesForDayOfWeek(dayOfWeek, start, end) {
                                         const days = {
@@ -164,9 +165,9 @@ try {
                                     }
 
                                     const events = [];
-                                    posting_days.forEach(day => {
+                                    response.posting_days.forEach(day => {
                                         const dayOfWeek = day; // day is already in correct format
-                                        const color = 'rgba(0, 255, 0, 0.3)'; // Default color if not specified
+                                        const color = 'red'; // Default color if not specified
                                         const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
 
                                         dates.forEach(date => {
@@ -181,6 +182,8 @@ try {
 
                                     $('#calendar').fullCalendar('removeEvents');
                                     $('#calendar').fullCalendar('addEventSource', events);
+
+                                    checkViewBounds(); // Check and adjust view bounds
                                 }
                             } catch (e) {
                                 console.error('Failed to parse JSON:', e);
@@ -196,6 +199,18 @@ try {
                 }
             });
 
+            function checkViewBounds() {
+                const calendar = $('#calendar').fullCalendar('getCalendar');
+                const view = calendar.view;
+                const viewStart = view.intervalStart;
+                const viewEnd = view.intervalEnd;
+
+                if (viewStart.isBefore(startDate) || viewEnd.isAfter(endDate)) {
+                    calendar.gotoDate(startDate);
+                    calendar.changeView('month', startDate);
+                }
+            }
+
             $('#calendar').fullCalendar({
                 header: {
                     left: 'prev,next today',
@@ -208,6 +223,11 @@ try {
                         element.find('.fc-title').html('<a href="' + event.url + '" target="_blank">' + event.title + '</a>');
                     }
                     element.find('.fc-title').attr('title', event.title);
+                },
+                viewRender: function(view) {
+                    if (startDate && endDate) {
+                        checkViewBounds();
+                    }
                 }
             });
         });
