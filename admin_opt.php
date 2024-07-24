@@ -55,9 +55,9 @@
 <body>
     <div class="options-container">
         <div class="option">
-            <h2>Option 1 Title</h2>
+            <h2>add a client </h2>
             <p>This is a brief description of Option 1. It provides an overview of what this option is about.</p>
-            <a href="https://example.com/option1" target="_blank">Click here for more details</a>
+            <a href="admin.html" >Click here to add a client</a>
         </div>
         
         <div class="option">

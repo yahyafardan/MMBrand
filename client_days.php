@@ -23,14 +23,14 @@ require 'db.php';
 //     exit;
 // }
 
-// Check if the client_name parameter is set
-// if (!isset($_POST['client_name'])) {
-//     header("HTTP/1.1 400 Bad Request");
-//     echo json_encode(["error" => "Client name is required."]);
-//     exit;
-// }
+// Check if the client_name parameter is set via POST or GET
+if (!isset($_REQUEST['client_name'])) {
+    header("HTTP/1.1 400 Bad Request");
+    echo json_encode(["error" => "Client name is required."]);
+    exit;
+}
 
-$client_name = "yahya";
+$client_name = $_POST['client_name'];
 
 try {
     // Fetch client dates

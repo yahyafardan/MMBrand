@@ -130,7 +130,7 @@ try {
                         if (xhr.status === 200) {
                             try {
                                 const response = JSON.parse(xhr.responseText);
-                                
+
                                 if (response.error) {
                                     resultContainer.innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
                                 } else {
@@ -149,7 +149,7 @@ try {
                                             'Sunday': 0
                                         };
                                         const dates = [];
-                                        let current = start.clone().day(days[days_of_posting]);
+                                        let current = start.clone().day(dayOfWeek);
 
                                         if (current.isBefore(start)) {
                                             current.add(7, 'days');
@@ -165,9 +165,9 @@ try {
 
                                     const events = [];
                                     posting_days.forEach(day => {
-                                        const dayOfWeek = day.days_of_posting;
+                                        const dayOfWeek = day; // day is already in correct format
                                         const color = 'rgba(0, 255, 0, 0.3)'; // Default color if not specified
-                                        const dates = getDatesForDayOfWeek(days_of_posting, start_Date, end_Date);
+                                        const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
 
                                         dates.forEach(date => {
                                             events.push({
@@ -184,7 +184,7 @@ try {
                                 }
                             } catch (e) {
                                 console.error('Failed to parse JSON:', e);
-                                resultContainer.innerHTML = '<p style="color: red;">Failed to pars1111e response.</p>';
+                                resultContainer.innerHTML = '<p style="color: red;">Failed to parse response.</p>';
                             }
                         } else {
                             console.error('Request failed. Status:', xhr.status);
