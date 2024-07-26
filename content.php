@@ -114,123 +114,138 @@ try {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const clientSelect = document.getElementById('clientSelect');
-            const resultContainer = document.getElementById('resultContainer');
+       document.addEventListener('DOMContentLoaded', function() {
+    const clientSelect = document.getElementById('clientSelect');
+    const resultContainer = document.getElementById('resultContainer');
 
-            let startDate, endDate; // Declare global variables
+    let startDate, endDate; // Declare global variables
 
-            clientSelect.addEventListener('change', function() {
-                const clientName = this.value;
+    clientSelect.addEventListener('change', function() {
+        const clientName = this.value;
 
-                if (clientName) {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', 'client_days.php', true);
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+        if (clientName) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'client_days.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-                    xhr.onload = function() {
-                        if (xhr.status === 200) {
-                            try {
-                                const response = JSON.parse(xhr.responseText);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
 
-                                if (response.error) {
-                                    resultContainer.innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
-                                } else {
-                                    startDate = moment(response.start_date);
-                                    endDate = moment(response.end_date);
+                        if (response.error) {
+                            resultContainer.innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
+                        } else {
+                            startDate = moment(response.start_date);
+                            endDate = adjustEndDate(moment(response.end_date));
 
-                                    function getDatesForDayOfWeek(dayOfWeek, start, end) {
-                                        const days = {
-                                            'Monday': 1,
-                                            'Tuesday': 2,
-                                            'Wednesday': 3,
-                                            'Thursday': 4,
-                                            'Friday': 5,
-                                            'Saturday': 6,
-                                            'Sunday': 0
-                                        };
-                                        const dates = [];
-                                        let current = start.clone().day(dayOfWeek);
+                            function getDatesForDayOfWeek(dayOfWeek, start, end) {
+                                const days = {
+                                    'Monday': 1,
+                                    'Tuesday': 2,
+                                    'Wednesday': 3,
+                                    'Thursday': 4,
+                                    'Friday': 5,
+                                    'Saturday': 6,
+                                    'Sunday': 0
+                                };
+                                const dates = [];
+                                let current = start.clone().day(days[dayOfWeek]);
 
-                                        if (current.isBefore(start)) {
-                                            current.add(7, 'days');
-                                        }
+                                if (current.isBefore(start)) {
+                                    current.add(7, 'days');
+                                }
 
-                                        while (current.isSameOrBefore(end)) {
-                                            dates.push(current.clone());
-                                            current.add(7, 'days');
-                                        }
+                                while (current.isSameOrBefore(end)) {
+                                    dates.push(current.clone());
+                                    current.add(7, 'days');
+                                }
 
-                                        return dates;
-                                    }
+                                return dates;
+                            }
 
-                                    const events = [];
-                                    response.posting_days.forEach(day => {
-                                        const dayOfWeek = day; // day is already in correct format
-                                        const color = 'red'; // Default color if not specified
-                                        const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
+                            const events = [];
+                            response.posting_days.forEach(dayString => {
+                                const daysArray = dayString.split(',').map(day => {
+                                    // Capitalize first letter and ensure correct format
+                                    return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+                                });
 
-                                        dates.forEach(date => {
-                                            events.push({
-                                                start: date.format('YYYY-MM-DD'),
-                                                end: date.format('YYYY-MM-DD'),
-                                                rendering: 'background',
-                                                backgroundColor: color
-                                            });
+                                daysArray.forEach(dayOfWeek => {
+                                    const color = 'red'; // Default color if not specified
+                                    const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
+                                    console.log('Dates for', dayOfWeek, ':', dates); // Print dates for debugging
+
+                                    dates.forEach(date => {
+                                        events.push({
+                                            start: date.format('YYYY-MM-DD'),
+                                            end: date.format('YYYY-MM-DD'),
+                                            rendering: 'background',
+                                            backgroundColor: color
                                         });
                                     });
+                                });
+                            });
 
-                                    $('#calendar').fullCalendar('removeEvents');
-                                    $('#calendar').fullCalendar('addEventSource', events);
+                            $('#calendar').fullCalendar('removeEvents');
+                            $('#calendar').fullCalendar('addEventSource', events);
 
-                                    checkViewBounds(); // Check and adjust view bounds
-                                }
-                            } catch (e) {
-                                console.error('Failed to parse JSON:', e);
-                                resultContainer.innerHTML = '<p style="color: red;">Failed to parse response.</p>';
-                            }
-                        } else {
-                            console.error('Request failed. Status:', xhr.status);
-                            resultContainer.innerHTML = '<p style="color: red;">Request failed. Status: ' + xhr.status + '</p>';
+                            checkViewBounds(); // Check and adjust view bounds
                         }
-                    };
-
-                    xhr.send('client_name=' + encodeURIComponent(clientName));
+                    } catch (e) {
+                        console.error('Failed to parse JSON:', e);
+                        resultContainer.innerHTML = '<p style="color: red;">Failed to parse response.</p>';
+                    }
+                } else {
+                    console.error('Request failed. Status:', xhr.status);
+                    resultContainer.innerHTML = '<p style="color: red;">Request failed. Status: ' + xhr.status + '</p>';
                 }
-            });
+            };
 
-            function checkViewBounds() {
-                const calendar = $('#calendar').fullCalendar('getCalendar');
-                const view = calendar.view;
-                const viewStart = view.intervalStart;
-                const viewEnd = view.intervalEnd;
+            xhr.send('client_name=' + encodeURIComponent(clientName));
+        }
+    });
 
-                if (viewStart.isBefore(startDate) || viewEnd.isAfter(endDate)) {
-                    calendar.gotoDate(startDate);
-                    calendar.changeView('month', startDate);
-                }
+    function adjustEndDate(endDate) {
+        // Extend endDate to cover the entire month after the original end date
+        return endDate.clone().endOf('month').add(1, 'month').startOf('month').subtract(1, 'day');
+    }
+
+    function checkViewBounds() {
+        const calendar = $('#calendar').fullCalendar('getCalendar');
+        const view = calendar.view;
+        const viewStart = view.intervalStart;
+        const viewEnd = view.intervalEnd;
+
+        if (viewStart.isBefore(startDate)) {
+            calendar.gotoDate(startDate);
+        }
+        if (viewEnd.isAfter(endDate)) {
+            calendar.gotoDate(endDate);
+        }
+    }
+
+    $('#calendar').fullCalendar({
+        header: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
+        },
+        editable: true,
+        eventRender: function(event, element) {
+            if (event.url) {
+                element.find('.fc-title').html('<a href="' + event.url + '" target="_blank">' + event.title + '</a>');
             }
+            element.find('.fc-title').attr('title', event.title);
+        },
+        viewRender: function(view) {
+            if (startDate && endDate) {
+                checkViewBounds();
+            }
+        }
+    });
+});
 
-            $('#calendar').fullCalendar({
-                header: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: ''
-                },
-                editable: true,
-                eventRender: function(event, element) {
-                    if (event.url) {
-                        element.find('.fc-title').html('<a href="' + event.url + '" target="_blank">' + event.title + '</a>');
-                    }
-                    element.find('.fc-title').attr('title', event.title);
-                },
-                viewRender: function(view) {
-                    if (startDate && endDate) {
-                        checkViewBounds();
-                    }
-                }
-            });
-        });
     </script>
 </body>
 </html>
