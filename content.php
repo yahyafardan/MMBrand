@@ -45,7 +45,8 @@ try {
         }
         /* Calendar container */
         #calendar-container {
-            width: 600px; /* Adjust as needed */
+            width: 80%;
+            height: ;: 80%; /* Adjust as needed */
             margin: 0 auto;
         }
         /* Calendar element styling */
@@ -164,209 +165,272 @@ try {
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
     <!-- Content Modal -->
-    <div class="modal fade" id="contentModal" tabindex="-1" role="dialog" aria-labelledby="contentModalLabel" aria-hidden="true">
-        <div class="modal-dialog" role="document">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="contentModalLabel">Write Content</h5>
-                    <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                        <span aria-hidden="true">&times;</span>
-                    </button>
-                </div>
-                <div class="modal-body">
-                    <div id="modalEventId" class="mb-3"></div> <!-- Placeholder for event ID -->
-                    <form id="contentForm">
-                        <div class="form-group">
-                            <label for="contentTitle">Title</label>
-                            <input type="text" class="form-control" id="contentTitle" placeholder="Enter title">
-                        </div>
-                        <div class="form-group">
-                            <label for="contentBody">Content</label>
-                            <textarea class="form-control" id="contentBody" rows="3" placeholder="Enter content"></textarea>
-                        </div>
-                        <button type="submit" class="btn btn-primary">Submit</button>
-                    </form>
-                </div>
-            </div>
-        </div>
+  <!-- Modal HTML -->
+  <div class="modal fade" id="contentModal" tabindex="-1" aria-labelledby="contentModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="contentForm" action="content.php" method="post">
+          <div class="mb-3">
+            <label for="eventTitle" class="form-label">Title</label>
+            <input type="text" class="form-control" id="eventTitle" name="eventTitle" required>
+          </div>
+          <div class="mb-3">
+            <label for="eventDescription" class="form-label">Description</label>
+            <textarea class="form-control" id="eventDescription" name="eventDescription" rows="3" required></textarea>
+          </div>
+          <div class="mb-3">
+            <label for="eventHashtags" class="form-label">Hashtags</label>
+            <input type="text" class="form-control" id="eventHashtags" name="eventHashtags">
+          </div>
+          <input type="hidden" id="eventDate" name="eventDate">
+          <input type="hidden" id="eventID" name="eventID">
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" id= "CloseButton"data-bs-dismiss="modal">Close</button>
+        <button type="button" class="btn btn-primary" id="saveButton">Save</button>
+        <button type="submit" class="btn btn-primary" id="submitButton" form="contentForm">Submit</button>
+      </div>
     </div>
+  </div>
+</div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const clientSelect = document.getElementById('clientSelect');
-            const resultContainer = document.getElementById('resultContainer');
-            let startDate, endDate; // Declare global variables
-            let selectedEvent; // Variable to keep track of selected event
 
-            clientSelect.addEventListener('change', function() {
-                const clientName = this.value;
+<script>
+   document.addEventListener('DOMContentLoaded', function() {
+    const clientSelect = document.getElementById('clientSelect');
+    const resultContainer = document.getElementById('resultContainer');
+    let startDate, endDate; // Declare global variables
+    let selectedEvent; // Variable to keep track of selected event
+    let selectedClient; // Variable to keep track of selected client
 
-                if (clientName) {
-                    const xhr = new XMLHttpRequest();
-                    xhr.open('POST', 'client_days.php', true);
-                    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    // Local Storage Key
+    const localStorageKey = 'modalSavedData';
 
-                    xhr.onload = function() {
-                        if (xhr.status === 200) {
-                            try {
-                                const response = JSON.parse(xhr.responseText);
+    function getSavedData() {
+        const data = localStorage.getItem(localStorageKey);
+        return data ? JSON.parse(data) : {};
+    }
 
-                                if (response.error) {
-                                    resultContainer.innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
-                                } else {
-                                    startDate = moment(response.start_date);
-                                    endDate = adjustEndDate(moment(response.end_date));
+    function saveDataToLocal(clientName, eventId, data) {
+        const savedData = getSavedData();
+        const key = `${clientName}_${eventId}`; // Composite key
+        savedData[key] = data;
+        localStorage.setItem(localStorageKey, JSON.stringify(savedData));
+    }
 
-                                    function getDatesForDayOfWeek(dayOfWeek, start, end) {
-                                        const days = {
-                                            'Monday': 1,
-                                            'Tuesday': 2,
-                                            'Wednesday': 3,
-                                            'Thursday': 4,
-                                            'Friday': 5,
-                                            'Saturday': 6,
-                                            'Sunday': 0
-                                        };
-                                        const dates = [];
-                                        let current = start.clone().day(days[dayOfWeek]);
+    function showModal(event) {
+        const savedData = getSavedData();
+        const key = `${selectedClient}_${event.id}`; // Composite key
+        const eventData = savedData[key] || {};
 
-                                        if (current.isBefore(start)) {
-                                            current.add(7, 'days');
-                                        }
+        document.getElementById('eventTitle').value = eventData.title || '';
+        document.getElementById('eventDescription').value = eventData.description || '';
+        document.getElementById('eventHashtags').value = eventData.hashtags || ''; // Set hashtags
+        document.getElementById('eventDate').value = event.start;
+        document.getElementById('eventID').value = event.id; // Set event ID
 
-                                        while (current.isSameOrBefore(end)) {
-                                            dates.push(current.clone());
-                                            current.add(7, 'days');
-                                        }
+        $('#contentModal').modal('show');
+    }
 
-                                        return dates;
-                                    }
+    clientSelect.addEventListener('change', function() {
+        selectedClient = this.value;
 
-                                    const events = [];
-                                    response.posting_days.forEach(dayString => {
-                                        const daysArray = dayString.split(',').map(day => {
-                                            return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
-                                        });
+        if (selectedClient) {
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'client_days.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-                                        daysArray.forEach(dayOfWeek => {
-                                            const color = 'purple'; // Purple color for events
-                                            const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
+            xhr.onload = function() {
+                if (xhr.status === 200) {
+                    try {
+                        const response = JSON.parse(xhr.responseText);
 
-                                            dates.forEach(date => {
-                                                if (date.isBetween(startDate, endDate, null, '[]')) {
-                                                    events.push({
-                                                        id: date.format('YYYY-MM-DD'), // Unique ID for each date
-                                                        start: date.format('YYYY-MM-DD'),
-                                                        end: date.format('YYYY-MM-DD'),
-                                                        rendering: 'background',
-                                                        backgroundColor: color,
-                                                        title: 'Event on ' + date.format('YYYY-MM-DD'), // Add a title for display
-                                                        hashtags: response.hashtag || [] // Add hashtags from response
-                                                    });
-                                                }
-                                            });
-                                        });
-                                    });
-
-                                    $('#calendar').fullCalendar('removeEvents');
-                                    $('#calendar').fullCalendar('addEventSource', events);
-
-                                    checkViewBounds(); // Check and adjust view bounds
-                                }
-                            } catch (e) {
-                                console.error('Failed to parse JSON:', e);
-                                resultContainer.innerHTML = '<p style="color: red;">Failed to parse response.</p>';
-                            }
+                        if (response.error) {
+                            resultContainer.innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
                         } else {
-                            console.error('Request failed. Status:', xhr.status);
-                            resultContainer.innerHTML = '<p style="color: red;">Request failed. Status: ' + xhr.status + '</p>';
+                            startDate = moment(response.start_date);
+                            endDate = adjustEndDate(moment(response.end_date));
+
+                            function getDatesForDayOfWeek(dayOfWeek, start, end) {
+                                const days = {
+                                    'Monday': 1,
+                                    'Tuesday': 2,
+                                    'Wednesday': 3,
+                                    'Thursday': 4,
+                                    'Friday': 5,
+                                    'Saturday': 6,
+                                    'Sunday': 0
+                                };
+                                const dates = [];
+                                let current = start.clone().day(days[dayOfWeek]);
+
+                                if (current.isBefore(start)) {
+                                    current.add(7, 'days');
+                                }
+
+                                while (current.isSameOrBefore(end)) {
+                                    dates.push(current.clone());
+                                    current.add(7, 'days');
+                                }
+
+                                return dates;
+                            }
+
+                            const events = [];
+                            response.posting_days.forEach(dayString => {
+                                const daysArray = dayString.split(',').map(day => {
+                                    return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+                                });
+
+                                daysArray.forEach(dayOfWeek => {
+                                    const color = 'purple'; // Purple color for events
+                                    const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
+
+                                    dates.forEach(date => {
+                                        if (date.isBetween(startDate, endDate, null, '[]')) {
+                                            events.push({
+                                                id: date.format('YYYY-MM-DD'), // Unique ID for each date
+                                                start: date.format('YYYY-MM-DD'),
+                                                end: date.format('YYYY-MM-DD'),
+                                                rendering: 'background',
+                                                backgroundColor: color,
+                                                title: 'Event on ' + date.format('YYYY-MM-DD'), // Add a title for display
+                                                hashtags: response.hashtags || [] // Add hashtags from response
+                                            });
+                                        }
+                                    });
+                                });
+                            });
+
+                            $('#calendar').fullCalendar('removeEvents');
+                            $('#calendar').fullCalendar('addEventSource', events);
+
+                            checkViewBounds(); // Check and adjust view bounds
                         }
-                    };
-
-                    xhr.send('client_name=' + encodeURIComponent(clientName));
+                    } catch (e) {
+                        console.error('Failed to parse JSON:', e);
+                        resultContainer.innerHTML = '<p style="color: red;">Failed to parse response.</p>';
+                    }
+                } else {
+                    console.error('Request failed. Status:', xhr.status);
+                    resultContainer.innerHTML = '<p style="color: red;">Request failed. Status: ' + xhr.status + '</p>';
                 }
+            };
+
+            xhr.send('client_name=' + encodeURIComponent(selectedClient));
+        }
+    });
+
+    function adjustEndDate(endDate) {
+        return endDate.clone().endOf('month').add(1, 'month').startOf('month').subtract(1, 'day');
+    }
+
+    function checkViewBounds() {
+        const calendar = $('#calendar').fullCalendar('getCalendar');
+        const view = calendar.view;
+        const viewStart = view.intervalStart;
+        const viewEnd = view.intervalEnd;
+
+        if (viewStart.isBefore(startDate)) {
+            calendar.gotoDate(startDate);
+        }
+        if (viewEnd.isAfter(endDate)) {
+            calendar.gotoDate(endDate);
+        }
+    }
+
+    $('#calendar').fullCalendar({
+        header: {
+            left: 'prev,next today',
+            center: 'title',
+            right: ''
+        },
+        editable: true,
+        eventRender: function(event, element) {
+            console.log('Rendering event:', event); // Debug log for event data
+
+            // Add a clickable button for each event
+            const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm">Write</button>');
+            btn.on('click', function() {
+                // Trigger popup for this event
+                showModal(event);
+                selectedEvent = event.id; // Store the selected event's ID
+                console.log('Selected event ID:', selectedEvent); // Debug log for selected event ID
+            });
+            element.append(btn);
+
+            // Ensure cursor is a pointer and event cells are clickable
+            element.css('cursor', 'pointer');
+            element.find('.fc-title').attr('title', event.title);
+        },
+        dayClick: function(date, jsEvent, view) {
+            console.log('Day clicked:', date.format()); // Debug log for day click
+
+            // Handle click on a day cell
+            const events = $('#calendar').fullCalendar('clientEvents', function(event) {
+                return moment(event.start).isSame(date, 'day');
             });
 
-            function adjustEndDate(endDate) {
-                return endDate.clone().endOf('month').add(1, 'month').startOf('month').subtract(1, 'day');
+            if (events.length > 0) {
+                // If there are events on the clicked day, proceed to show modal
+                showModal(events[0]); // Show the first event of the day
             }
+        },
+        eventClick: function(event, jsEvent, view) {
+            console.log('Event clicked:', event); // Debug log for event click
 
-            function checkViewBounds() {
-                const calendar = $('#calendar').fullCalendar('getCalendar');
-                const view = calendar.view;
-                const viewStart = view.intervalStart;
-                const viewEnd = view.intervalEnd;
-
-                if (viewStart.isBefore(startDate)) {
-                    calendar.gotoDate(startDate);
-                }
-                if (viewEnd.isAfter(endDate)) {
-                    calendar.gotoDate(endDate);
-                }
+            // Handle click on an event
+            selectedEvent = event.id; // Store the selected event's ID
+            const eventDate = moment(event.start).format('MMMM Do, YYYY'); // Format date
+            $('#contentModalLabel').text('Event on ' + eventDate); // Set the modal title
+            $('#modalEventId').text('Event ID: ' + event.id); // Set the event ID in the modal body
+            console.log('Event ID displayed:', event.id); // Debug log for displayed event ID
+            // Optional: Add visual indication of selected event
+            $('#calendar').fullCalendar('renderEvent', {
+                id: event.id,
+                title: event.title,
+                start: event.start,
+                end: event.end,
+                backgroundColor: 'blue' // Change color to indicate selection
+            }, true);
+        },
+        viewRender: function(view) {
+            if (startDate && endDate) {
+                checkViewBounds();
             }
+        }
+    });
 
-            $('#calendar').fullCalendar({
-                header: {
-                    left: 'prev,next today',
-                    center: 'title',
-                    right: ''
-                },
-                editable: true,
-                eventRender: function(event, element) {
-                    console.log('Rendering event:', event); // Debug log for event data
+    document.getElementById('saveButton').addEventListener('click', function () {
+        const form = document.getElementById('contentForm');
+        const formData = new FormData(form);
 
-                    // Add a clickable button for each event
-                    const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm">Write</button>');
-                    btn.on('click', function() {
-                        // Trigger popup for this event
-                        $('#contentModal').modal('show');
-                        selectedEvent = event.id; // Store the selected event's ID
-                        console.log('Selected event ID:', selectedEvent); // Debug log for selected event ID
-                    });
-                    element.append(btn);
+        const data = {
+            title: formData.get('eventTitle'),
+            description: formData.get('eventDescription'),
+            hashtags: formData.get('eventHashtags') // Include hashtags
+        };
 
-                    // Ensure cursor is a pointer and event cells are clickable
-                    element.css('cursor', 'pointer');
-                    element.find('.fc-title').attr('title', event.title);
-                },
-                dayClick: function(date, jsEvent, view) {
-                    console.log('Day clicked:', date.format()); // Debug log for day click
+        saveDataToLocal(selectedClient, formData.get('eventID'), data);
 
-                    // Handle click on a day cell
-                    const events = $('#calendar').fullCalendar('clientEvents', function(event) {
-                        return moment(event.start).isSame(date, 'day');
-                    });
+        $('#contentModal').modal('hide');
+    });
 
-                    if (events.length > 0) {
-                        // If there are events on the clicked day, proceed to show modal
-                        $('#contentModal').modal('show');
-                    }
-                },
-                eventClick: function(event, jsEvent, view) {
-                    console.log('Event clicked:', event); // Debug log for event click
+    document.getElementById('submitButton').addEventListener('click', function () {
+        const form = document.getElementById('contentForm');
+        form.submit(); // Submit the form to content.php
 
-                    // Handle click on an event
-                    selectedEvent = event.id; // Store the selected event's ID
-                    const eventDate = moment(event.start).format('MMMM Do, YYYY'); // Format date
-                    $('#contentModalLabel').text('Event on ' + eventDate); // Set the modal title
-                    $('#modalEventId').text('Event ID: ' + event.id); // Set the event ID in the modal body
-                    console.log('Event ID displayed:', event.id); // Debug log for displayed event ID
-                    // Optional: Add visual indication of selected event
-                    $('#calendar').fullCalendar('renderEvent', {
-                        id: event.id,
-                        title: event.title,
-                        start: event.start,
-                        end: event.end,
-                        backgroundColor: 'blue' // Change color to indicate selection
-                    }, true);
-                },
-                viewRender: function(view) {
-                    if (startDate && endDate) {
-                        checkViewBounds();
-                    }
-                }
-            });
-        });
-    </script>
+        // Use Bootstrap's modal instance to hide the modal
+        const contentModal = new bootstrap.Modal(document.getElementById('contentModal'));
+        contentModal.hide();
+    });
+});</script>
+
 </body>
 </html>
