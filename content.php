@@ -38,18 +38,32 @@ try {
     <!-- FullCalendar CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
     <style>
+        /* General body styling */
+        body {
+            background-color: black; /* Black background */
+            color: green; /* Green text */
+        }
+        /* Calendar container */
         #calendar-container {
             width: 600px; /* Adjust as needed */
             margin: 0 auto;
         }
+        /* Calendar element styling */
         #calendar {
             max-width: 100%;
+            background-color: black; /* Black background for calendar */
+            color: green; /* Green text for calendar */
         }
+        /* Event cell styling */
         .fc-event {
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
+            cursor: pointer; /* Make it look clickable */
+            position: relative;
+            color: white; /* White text for event */
         }
+        /* Title within events */
         .fc-event .fc-title {
             max-width: 120px; /* Adjust as needed */
             height: 20px;     /* Adjust as needed */
@@ -58,8 +72,18 @@ try {
             white-space: nowrap; /* Prevent line breaks */
             text-align: center;
         }
-        .fc-day.fc-day-posting {
-            background-color: rgba(0, 255, 0, 0.3); /* Default green with transparency */
+        /* Purple background for event cells */
+        .fc-day .fc-day-posting {
+            background-color: purple; /* Purple background for event cells */
+        }
+        /* Option background cell styling */
+        #clientSelect {
+            background-color: purple; /* Match event cell color */
+            color: white; /* White text for better readability */
+        }
+        #clientSelect option {
+            background-color: purple; /* Match event cell color */
+            color: white; /* White text for better readability */
         }
         /* Guide styles */
         .guide {
@@ -70,6 +94,35 @@ try {
             width: 20px;
             height: 20px;
             margin-right: 10px;
+        }
+        #floatingButton {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            z-index: 9999; /* Ensure it's on top */
+            padding: 15px 30px; /* Increase padding */
+            font-size: 18px; /* Increase font size */
+            border-radius: 50px; /* Make the button round */
+            background-color: purple; /* Purple button background */
+            color: white; /* White text on button */
+            border: none; /* Remove default border */
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for better visibility */
+        }
+        /* Modal custom styles */
+        .modal-content {
+            background-color: black; /* Black background for modal */
+            color: green; /* Green text for modal */
+        }
+        .modal-header {
+            border-bottom: 1px solid purple; /* Purple border for modal header */
+        }
+        .modal-footer {
+            border-top: 1px solid purple; /* Purple border for modal footer */
+        }
+        .modal-body input, .modal-body textarea {
+            background-color: black; /* Black background for input/textarea */
+            color: green; /* Green text for input/textarea */
+            border: 1px solid purple; /* Purple border for input/textarea */
         }
     </style>
 </head>
@@ -96,10 +149,7 @@ try {
         <div class="guide mt-4">
             <h5>Event Color Guide:</h5>
             <div>
-                <span class="color-box" style="background-color: blue;"></span> Blue: Event 2
-            </div>
-            <div>
-                <span class="color-box" style="background-color: red;"></span> Red: Event 1
+                <span class="color-box" style="background-color: purple;"></span> Purple: Event
             </div>
         </div>
     </div>
@@ -113,12 +163,40 @@ try {
     <!-- Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
+    <!-- Content Modal -->
+    <div class="modal fade" id="contentModal" tabindex="-1" role="dialog" aria-labelledby="contentModalLabel" aria-hidden="true">
+      <div class="modal-dialog" role="document">
+        <div class="modal-content">
+          <div class="modal-header">
+            <h5 class="modal-title" id="contentModalLabel">Write Content</h5>
+            <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+              <span aria-hidden="true">&times;</span>
+            </button>
+          </div>
+          <div class="modal-body">
+            <form id="contentForm">
+              <div class="form-group">
+                <lable></lable>
+                <label for="contentTitle">Title</label>
+                <input type="text" class="form-control" id="contentTitle" placeholder="Enter title">
+              </div>
+              <div class="form-group">
+                <label for="contentBody">Content</label>
+                <textarea class="form-control" id="contentBody" rows="3" placeholder="Enter content"></textarea>
+              </div>
+              <button type="submit" class="btn btn-primary">Submit</button>
+            </form>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <script>
-       document.addEventListener('DOMContentLoaded', function() {
+   document.addEventListener('DOMContentLoaded', function() {
     const clientSelect = document.getElementById('clientSelect');
     const resultContainer = document.getElementById('resultContainer');
-
     let startDate, endDate; // Declare global variables
+    let selectedEvent; // Variable to keep track of selected event
 
     clientSelect.addEventListener('change', function() {
         const clientName = this.value;
@@ -167,23 +245,24 @@ try {
                             const events = [];
                             response.posting_days.forEach(dayString => {
                                 const daysArray = dayString.split(',').map(day => {
-                                    // Capitalize first letter and ensure correct format
                                     return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
                                 });
 
                                 daysArray.forEach(dayOfWeek => {
-                                    const color = 'red'; // Default color if not specified
+                                    const color = 'purple'; // Purple color for events
                                     const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
 
                                     dates.forEach(date => {
                                         if (date.isBetween(startDate, endDate, null, '[]')) {
-
-                                        events.push({
-                                            start: date.format('YYYY-MM-DD'),
-                                            end: date.format('YYYY-MM-DD'),
-                                            rendering: 'background',
-                                            backgroundColor: color
-                                        });}
+                                            events.push({
+                                                id: date.format('YYYY-MM-DD'), // Unique ID for each date
+                                                start: date.format('YYYY-MM-DD'),
+                                                end: date.format('YYYY-MM-DD'),
+                                                rendering: 'background',
+                                                backgroundColor: color,
+                                                title: 'Event on ' + date.format('YYYY-MM-DD') // Add a title for display
+                                            });
+                                        }
                                     });
                                 });
                             });
@@ -208,7 +287,6 @@ try {
     });
 
     function adjustEndDate(endDate) {
-        // Extend endDate to cover the entire month after the original end date
         return endDate.clone().endOf('month').add(1, 'month').startOf('month').subtract(1, 'day');
     }
 
@@ -234,10 +312,44 @@ try {
         },
         editable: true,
         eventRender: function(event, element) {
-            if (event.url) {
-                element.find('.fc-title').html('<a href="' + event.url + '" target="_blank">' + event.title + '</a>');
-            }
+            // Add a clickable button for each event
+            const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm">Write</button>');
+            btn.on('click', function() {
+                // Trigger popup for this event
+                $('#contentModal').modal('show');
+                selectedEvent = event.id; // Store the selected event's ID
+            });
+            element.append(btn);
+
+            // Ensure cursor is a pointer and event cells are clickable
+            element.css('cursor', 'pointer');
             element.find('.fc-title').attr('title', event.title);
+        },
+        dayClick: function(date, jsEvent, view) {
+            // Handle click on a day cell
+            const events = $('#calendar').fullCalendar('clientEvents', function(event) {
+                return moment(event.start).isSame(date, 'day');
+            });
+
+            if (events.length > 0) {
+                // If there are events on the clicked day, proceed to show modal
+                $('#contentModal').modal('show');
+            }
+        },
+        eventClick: function(event, jsEvent, view) {
+            // Handle click on an event
+            selectedEvent = event.id; // Store the selected event's ID
+            const eventDate = moment(event.start).format('MMMM Do, YYYY'); // Format date
+            $('#contentModalLabel').text('Event on ' + eventDate); // Set the modal title
+            $('#modalEventId').text('Event ID: ' + event.id); // Set the event ID in the modal body
+            // Optional: Add visual indication of selected event
+            $('#calendar').fullCalendar('renderEvent', {
+                id: event.id,
+                title: event.title,
+                start: event.start,
+                end: event.end,
+                backgroundColor: 'green' // Change color to indicate selection
+            }, true);
         },
         viewRender: function(view) {
             if (startDate && endDate) {
@@ -246,6 +358,8 @@ try {
         }
     });
 });
+
+
 
     </script>
 </body>
