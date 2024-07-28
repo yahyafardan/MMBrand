@@ -202,40 +202,41 @@ try {
     <!-- Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
-    <!-- Content Modal -->
-  <!-- Modal HTML -->
-  <div class="modal fade" id="contentModal" tabindex="-1" aria-labelledby="contentModalLabel" aria-hidden="true">
-  <div class="modal-dialog">
-    <div class="modal-content">
-      <div class="modal-header">
-        <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
-      </div>
-      <div class="modal-body">
-        <form id="contentForm" action="content_sumbit.php" method="post">
-          <div class="mb-3">
-            <label for="eventTitle" class="form-label">Title</label>
-            <input type="text" class="form-control" id="eventTitle" name="eventTitle" required>
-          </div>
-          <div class="mb-3">
-            <label for="eventDescription" class="form-label">Description</label>
-            <textarea class="form-control" id="eventDescription" name="eventDescription" rows="3" required></textarea>
-          </div>
-          <div class="mb-3">
-            <label for="eventHashtags" class="form-label">Hashtags</label>
-            <input type="text" class="form-control" id="eventHashtags" name="eventHashtags">
-          </div>
-          <input type="hidden" id="eventDate" name="eventDate">
-          <input type="hidden" id="eventID" name="eventID">
-        </form>
-      </div>
-      <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="saveButton">Save</button>
-        <button type="submit" class="btn btn-primary" id="submitButton" form="contentForm">Submit</button>
-      </div>
+<!-- Content Modal -->
+<div class="modal fade" id="contentModal" tabindex="-1" aria-labelledby="contentModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
+                <span id="modalDateID" class="ml-3"></span> <!-- Date ID Display -->
+            </div>
+            <div class="modal-body">
+                <form id="contentForm" action="content_submit.php" method="post">
+                    <div class="mb-3">
+                        <label for="eventTitle" class="form-label">Title</label>
+                        <input type="text" class="form-control" id="eventTitle" name="eventTitle" required>
+                    </div>
+                    <div class="mb-3">
+                        <label for="eventDescription" class="form-label">Description</label>
+                        <textarea class="form-control" id="eventDescription" name="eventDescription" rows="3" required></textarea>
+                    </div>
+                    <div class="mb-3">
+                        <label for="eventHashtags" class="form-label">Hashtags</label>
+                        <input type="text" class="form-control" id="eventHashtags" name="eventHashtags">
+                    </div>
+                    <input type="hidden" id="eventDate" name="eventDate">
+                    <input type="hidden" id="eventID" name="eventID">
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="saveButton">Save</button>
+                <button type="submit" class="btn btn-primary" id="submitButton" form="contentForm">Submit</button>
+            </div>
+        </div>
     </div>
-  </div>
 </div>
+
 
 
 <script>
@@ -273,6 +274,11 @@ try {
         document.getElementById('eventHashtags').value = eventData.hashtags ||globalHashtags || ''; // Set hashtags
         document.getElementById('eventDate').value = event.start;
         document.getElementById('eventID').value = event.id; // Set event ID
+        const eventDate = moment(event.start).format('MMMM Do, YYYY'); // Format date
+    document.getElementById('contentModalLabel').textContent = 'Event on ' + eventDate;
+    document.getElementById('modalDateID').textContent = 'Date ID: ' + event.id; // Set dateID
+
+        
 
         $('#contentModal').modal('show');
     }
