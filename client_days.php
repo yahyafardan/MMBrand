@@ -30,36 +30,31 @@ if (!isset($_REQUEST['client_name'])) {
     exit;
 }
 
-$client_name = $_POST['client_name'];
+$client_name = //"yahya"; 
+ $_POST['client_name'];
 
 try {
-    // Fetch client dates
-    $sql = "SELECT start_date, end_date FROM clients WHERE client_name = :client_name";
+    // Fetch client dates and hashtag
+    $sql = "SELECT start_date, end_date, days_of_posting, hashtags FROM clients WHERE client_name = :client_name";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':client_name', $client_name, PDO::PARAM_STR);
     $stmt->execute();
-    $dates = $stmt->fetch(PDO::FETCH_ASSOC);
+    $client_data = $stmt->fetch(PDO::FETCH_ASSOC);
 
-    if (!$dates) {
+    if (!$client_data) {
         header("HTTP/1.1 404 Not Found");
         echo json_encode(["error" => "Client not found."]);
         exit;
     }
 
-    // Fetch posting days
-    $sql_days = "SELECT days_of_posting FROM clients WHERE client_name = :client_name";
-    $stmt_days = $pdo->prepare($sql_days);
-    $stmt_days->bindParam(':client_name', $client_name, PDO::PARAM_STR);
-    $stmt_days->execute();
-    $posting_days_row = $stmt_days->fetch(PDO::FETCH_ASSOC);
-    
     // Split days_of_posting into an array
-    $days_of_posting = explode('-', $posting_days_row['days_of_posting']);
+    $days_of_posting = explode(',', $client_data['days_of_posting']);
     
     // Return data as JSON
     echo json_encode([
-        "start_date" => $dates['start_date'],
-        "end_date" => $dates['end_date'],
+        "start_date" => $client_data['start_date'],
+        "end_date" => $client_data['end_date'],
+        "hashtags" => $client_data['hashtags'], // Corrected field name
         "posting_days" => $days_of_posting
     ]);
 
