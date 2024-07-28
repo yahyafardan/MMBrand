@@ -43,6 +43,44 @@ try {
             background-color: black; /* Black background */
             color: green; /* Green text */
         }
+        /* Calendar container background */
+#calendar {
+    background-color: #ADD8E6; /* Light Blue background */
+    color: #2F4F4F; /* Dark Slate Gray text */
+}
+
+/* Event cells color */
+.fc-event {
+    background-color: #90EE90; /* Light Green for events */
+    border-color: #90EE90; /* Match the border with the event color */
+}
+
+/* Event title color */
+.fc-event .fc-title {
+    color: #2F4F4F; /* Dark Slate Gray text for better readability */
+}
+
+/* Button styling */
+.fc-custom-btn {
+    background-color: #87CEFA; /* Light Sky Blue */
+    color: #2F4F4F; /* Dark Slate Gray text */
+}
+
+/* Modal styling */
+.modal-content {
+    background-color: #FFFFFF; /* White background for the modal */
+    border: 1px solid #E0E0E0; /* Light gray border for subtle contrast */
+}
+
+/* Modal header and footer buttons */
+.modal-header .close {
+    color: #2F4F4F; /* Dark Slate Gray close button */
+}
+.modal-footer .btn-primary {
+    background-color: #87CEFA; /* Light Sky Blue button */
+    border-color: #87CEFA; /* Match the border with the button color */
+}
+
         /* Calendar container */
         #calendar-container {
             width: 80%;
@@ -171,7 +209,6 @@ try {
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
         <form id="contentForm" action="content_sumbit.php" method="post">
@@ -192,7 +229,7 @@ try {
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id= "CloseButton">Close</button>
+      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
         <button type="button" class="btn btn-primary" id="saveButton">Save</button>
         <button type="submit" class="btn btn-primary" id="submitButton" form="contentForm">Submit</button>
       </div>
