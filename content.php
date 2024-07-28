@@ -174,15 +174,16 @@ try {
                                 daysArray.forEach(dayOfWeek => {
                                     const color = 'red'; // Default color if not specified
                                     const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
-                                    console.log('Dates for', dayOfWeek, ':', dates); // Print dates for debugging
 
                                     dates.forEach(date => {
+                                        if (date.isBetween(startDate, endDate, null, '[]')) {
+
                                         events.push({
                                             start: date.format('YYYY-MM-DD'),
                                             end: date.format('YYYY-MM-DD'),
                                             rendering: 'background',
                                             backgroundColor: color
-                                        });
+                                        });}
                                     });
                                 });
                             });
