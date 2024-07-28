@@ -171,9 +171,10 @@ try {
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
-        </div>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
       <div class="modal-body">
-        <form id="contentForm" action="content.php" method="post">
+        <form id="contentForm" action="content_sumbit.php" method="post">
           <div class="mb-3">
             <label for="eventTitle" class="form-label">Title</label>
             <input type="text" class="form-control" id="eventTitle" name="eventTitle" required>
@@ -191,8 +192,8 @@ try {
         </form>
       </div>
       <div class="modal-footer">
-      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-      <button type="button" class="btn btn-primary" id="saveButton">Save</button>
+        <button type="button" class="btn btn-secondary" id= "CloseButton">Close</button>
+        <button type="button" class="btn btn-primary" id="saveButton">Save</button>
         <button type="submit" class="btn btn-primary" id="submitButton" form="contentForm">Submit</button>
       </div>
     </div>
@@ -207,6 +208,8 @@ try {
     let startDate, endDate; // Declare global variables
     let selectedEvent; // Variable to keep track of selected event
     let selectedClient; // Variable to keep track of selected client
+    let globalHashtags = ''; // Global variable to store hashtags
+
 
     // Local Storage Key
     const localStorageKey = 'modalSavedData';
@@ -230,7 +233,7 @@ try {
 
         document.getElementById('eventTitle').value = eventData.title || '';
         document.getElementById('eventDescription').value = eventData.description || '';
-        document.getElementById('eventHashtags').value = eventData.hashtags || ''; // Set hashtags
+        document.getElementById('eventHashtags').value = eventData.hashtags ||globalHashtags || ''; // Set hashtags
         document.getElementById('eventDate').value = event.start;
         document.getElementById('eventID').value = event.id; // Set event ID
 
@@ -255,6 +258,8 @@ try {
                         } else {
                             startDate = moment(response.start_date);
                             endDate = adjustEndDate(moment(response.end_date));
+                            globalHashtags = response.hashtags || ''; // Store the hashtags globally
+
 
                             function getDatesForDayOfWeek(dayOfWeek, start, end) {
                                 const days = {
@@ -428,7 +433,6 @@ try {
        
     });
 });
-
 
 
 
