@@ -171,8 +171,7 @@ try {
     <div class="modal-content">
       <div class="modal-header">
         <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
-        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-      </div>
+        </div>
       <div class="modal-body">
         <form id="contentForm" action="content.php" method="post">
           <div class="mb-3">
@@ -192,8 +191,8 @@ try {
         </form>
       </div>
       <div class="modal-footer">
-        <button type="button" class="btn btn-secondary" id= "CloseButton"data-bs-dismiss="modal">Close</button>
-        <button type="button" class="btn btn-primary" id="saveButton">Save</button>
+      <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+      <button type="button" class="btn btn-primary" id="saveButton">Save</button>
         <button type="submit" class="btn btn-primary" id="submitButton" form="contentForm">Submit</button>
       </div>
     </div>
@@ -370,7 +369,6 @@ try {
             element.find('.fc-title').attr('title', event.title);
         },
         dayClick: function(date, jsEvent, view) {
-            console.log('Day clicked:', date.format()); // Debug log for day click
 
             // Handle click on a day cell
             const events = $('#calendar').fullCalendar('clientEvents', function(event) {
@@ -426,11 +424,16 @@ try {
         const form = document.getElementById('contentForm');
         form.submit(); // Submit the form to content.php
 
-        // Use Bootstrap's modal instance to hide the modal
-        const contentModal = new bootstrap.Modal(document.getElementById('contentModal'));
-        contentModal.hide();
+        
+       
     });
-});</script>
+});
+
+
+
+
+
+</script>
 
 </body>
 </html>
