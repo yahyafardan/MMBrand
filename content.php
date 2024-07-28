@@ -188,7 +188,13 @@ try {
         <div class="guide mt-4">
             <h5>Event Color Guide:</h5>
             <div>
-                <span class="color-box" style="background-color: purple;"></span> Purple: Event
+                <span class="color-box" style="background-color: purple;"></span> Purple: Task
+        </br>
+                <span class="color-box" style="background-color: purple;"></span> Purple: Saved
+                </br>
+
+                <span class="color-box" style="background-color: purple;"></span> Purple: Completed 
+
             </div>
         </div>
     </div>
@@ -209,7 +215,7 @@ try {
             <div class="modal-header">
                 <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
                 <span id="modalDateID" class="ml-3"></span> <!-- Date ID Display -->
-            </div>
+                </div>
             <div class="modal-body">
                 <form id="contentForm" action="content_submit.php" method="post">
                     <div class="mb-3">
@@ -240,14 +246,13 @@ try {
 
 
 <script>
-   document.addEventListener('DOMContentLoaded', function() {
+  document.addEventListener('DOMContentLoaded', function() {
     const clientSelect = document.getElementById('clientSelect');
     const resultContainer = document.getElementById('resultContainer');
     let startDate, endDate; // Declare global variables
     let selectedEvent; // Variable to keep track of selected event
     let selectedClient; // Variable to keep track of selected client
     let globalHashtags = ''; // Global variable to store hashtags
-
 
     // Local Storage Key
     const localStorageKey = 'modalSavedData';
@@ -271,15 +276,13 @@ try {
 
         document.getElementById('eventTitle').value = eventData.title || '';
         document.getElementById('eventDescription').value = eventData.description || '';
-        document.getElementById('eventHashtags').value = eventData.hashtags ||globalHashtags || ''; // Set hashtags
+        document.getElementById('eventHashtags').value = eventData.hashtags || globalHashtags || ''; // Set hashtags
         document.getElementById('eventDate').value = event.start;
         document.getElementById('eventID').value = event.id; // Set event ID
-        const eventDate = moment(event.start).format('MMMM Do, YYYY'); // Format date
-    document.getElementById('contentModalLabel').textContent = 'Event on ' + eventDate;
-    document.getElementById('modalDateID').textContent = 'Date ID: ' + event.id; // Set dateID
-
+        const formattedDate = moment(event.start).format('MMMM Do, YYYY');
+        document.getElementById('modalDateID').textContent = `Task Date: ${formattedDate}`;
         
-
+        
         $('#contentModal').modal('show');
     }
 
@@ -302,7 +305,6 @@ try {
                             startDate = moment(response.start_date);
                             endDate = adjustEndDate(moment(response.end_date));
                             globalHashtags = response.hashtags || ''; // Store the hashtags globally
-
 
                             function getDatesForDayOfWeek(dayOfWeek, start, end) {
                                 const days = {
@@ -400,7 +402,6 @@ try {
         },
         editable: true,
         eventRender: function(event, element) {
-            console.log('Rendering event:', event); // Debug log for event data
 
             // Add a clickable button for each event
             const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm">Write</button>');
@@ -436,15 +437,14 @@ try {
             const eventDate = moment(event.start).format('MMMM Do, YYYY'); // Format date
             $('#contentModalLabel').text('Event on ' + eventDate); // Set the modal title
             $('#modalEventId').text('Event ID: ' + event.id); // Set the event ID in the modal body
-            console.log('Event ID displayed:', event.id); // Debug log for displayed event ID
-            // Optional: Add visual indication of selected event
-            $('#calendar').fullCalendar('renderEvent', {
-                id: event.id,
-                title: event.title,
-                start: event.start,
-                end: event.end,
-                backgroundColor: 'blue' // Change color to indicate selection
-            }, true);
+
+            // Change event color to blue
+            $('#calendar').fullCalendar('clientEvents', function(e) {
+                if (e.id === event.id) {
+                    e.setProp('backgroundColor', 'blue');
+                    e.setProp('borderColor', 'blue');
+                }
+            });
         },
         viewRender: function(view) {
             if (startDate && endDate) {
@@ -466,17 +466,21 @@ try {
         saveDataToLocal(selectedClient, formData.get('eventID'), data);
 
         $('#contentModal').modal('hide');
+
+        // Change the color of the saved event to blue
+        $('#calendar').fullCalendar('clientEvents', function(event) {
+            if (event.id === formData.get('eventID')) {
+                event.setProp('backgroundColor', 'blue');
+                event.setProp('borderColor', 'blue');
+            }
+        });
     });
 
     document.getElementById('submitButton').addEventListener('click', function () {
         const form = document.getElementById('contentForm');
         form.submit(); // Submit the form to content.php
-
-        
-       
     });
 });
-
 
 
 
