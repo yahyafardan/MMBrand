@@ -445,11 +445,19 @@ function applySavedEventColors() {
                                         }
                                     });
                                 });
-                            });
-
-                            $('#calendar').fullCalendar('removeEvents');
+                            });document.getElementById('monthSelect').addEventListener('change', function() {
+  var selectedMonth = this.value;
+  
+  if (selectedMonth) {
+    console.log("Month selected:", selectedMonth);
+    // You can add additional logic here based on the selected month
+    $('#calendar').fullCalendar('removeEvents');
                             $('#calendar').fullCalendar('addEventSource', events);
 
+  } 
+});
+
+                           
                             checkViewBounds();
                             applySavedEventColors(); // Apply saved event colors after loading events
                         }
