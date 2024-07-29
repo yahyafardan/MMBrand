@@ -305,6 +305,16 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedEvent;
     let selectedClient;
     let globalHashtags = '';
+    let nOfPosts, nOfVideos, languages; // Added new variables
+    console.log('Start Date:', startDate.format());
+console.log('End Date:', endDate.format());
+console.log('Global Hashtags:', globalHashtags);
+console.log('Number of Posts:', nOfPosts);
+console.log('Number of Videos:', nOfVideos);
+console.log('Languages:', languages);
+
+    
+
 
     // Function to update event color
     function updateEventColor(eventId, color) {
