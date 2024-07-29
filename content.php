@@ -406,6 +406,8 @@ try {
                                     console.log("Months selected:", selectedMonths);
                                     $('#calendar').fullCalendar('removeEvents');
                                     $('#calendar').fullCalendar('addEventSource', events);
+                                    $('#calendar').fullCalendar('gotoDate', startDate.toDate()); // Go to start date
+
                                 }
                             });
 
@@ -493,10 +495,29 @@ try {
             $('#eventHashtags').val(event.hashtags || '');
         },
         viewRender: function(view) {
-            if (startDate && endDate) {
-                // Handle view bounds
+    try {
+        // Ensure monthSelect and its value exist
+        if (monthSelect && monthSelect.value) {
+            const [monthStr, yearStr] = monthSelect.value.split(',');
+            const month = parseInt(monthStr, 10) - 1; // Convert month to zero-indexed
+            const year = parseInt(yearStr, 10);
+
+            if (!isNaN(month) && !isNaN(year)) {
+                const viewStart = moment(view.intervalStart);
+                const viewEnd = moment(view.intervalEnd).subtract(1, 'day');
+
+                // Check if the current view is not the selected month
+                if (viewStart.month() !== month || viewStart.year() !== year) {
+                    // Move the calendar view to the start of the selected month
+                    $('#calendar').fullCalendar('gotoDate', new Date(year, month, 1));
+                }
             }
         }
+    } catch (e) {
+        console.error('Error in viewRender:', e);
+    }
+}
+
     });
 
     document.getElementById('saveButton').addEventListener('click', function () {
