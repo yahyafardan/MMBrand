@@ -32,7 +32,6 @@ if (!isset($_REQUEST['client_name'])) {
 
 $client_name = //"yahya"; 
  $_POST['client_name'];
-
 try {
     // Fetch client dates and hashtag
     $sql = "SELECT start_date, end_date, days_of_posting, hashtags FROM clients WHERE client_name = :client_name";
@@ -49,13 +48,27 @@ try {
 
     // Split days_of_posting into an array
     $days_of_posting = explode(',', $client_data['days_of_posting']);
-    
+
+    // Process start_date and end_date to get a list of months in MM,YYYY format
+    $start_date = new DateTime($client_data['start_date']);
+    $end_date = new DateTime($client_data['end_date']);
+    $months = [];
+
+    // Adjust end_date to the end of the month
+    $end_date->modify('last day of this month');
+
+    while ($start_date <= $end_date) {
+        $months[] = $start_date->format('m,Y'); // Format as 'MM,YYYY'
+        $start_date->modify('first day of next month');
+    }
+
     // Return data as JSON
     echo json_encode([
         "start_date" => $client_data['start_date'],
         "end_date" => $client_data['end_date'],
-        "hashtags" => $client_data['hashtags'], // Corrected field name
-        "posting_days" => $days_of_posting
+        "hashtags" => $client_data['hashtags'],
+        "posting_days" => $days_of_posting,
+        "months" => $months // Updated format
     ]);
 
 } catch (PDOException $e) {
@@ -63,4 +76,3 @@ try {
     header("HTTP/1.1 500 Internal Server Error");
     echo json_encode(["error" => "Query failed: " . $e->getMessage()]);
 }
-?>

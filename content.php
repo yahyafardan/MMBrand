@@ -17,6 +17,7 @@ if (!isset($pdo)) {
     die("Database connection failed.");
 }
 
+
 try {
     $sql = "SELECT client_name FROM clients";
     $stmt = $pdo->prepare($sql);
@@ -213,6 +214,8 @@ try {
                 echo "<option value=''>No clients found</option>";
             }
             ?>
+        </select> <h2>Select a Month:</h2>
+        <select id="monthSelect">
         </select>
         <div id='resultContainer'></div>
         <div id="calendar-container">
@@ -278,9 +281,7 @@ try {
 
 
 <script>
-  document.addEventListener('DOMContentLoaded', function() {
-
-    // Add this function at the top of your script
+document.addEventListener('DOMContentLoaded', function() {
     function updateEventColor(eventId, color) {
         const events = $('#calendar').fullCalendar('clientEvents', function(event) {
             return event.id === eventId;
@@ -294,24 +295,55 @@ try {
         }
     }
 
-    const clientSelect = document.getElementById('clientSelect');
-    const resultContainer = document.getElementById('resultContainer');
-    let startDate, endDate; // Declare global variables
-    let selectedEvent; // Variable to keep track of selected event
-    let selectedClient; // Variable to keep track of selected client
-    let globalHashtags = ''; // Global variable to store hashtags
+    function applySavedEventColors() {
+        const savedData = getSavedData();
+        for (const key in savedData) {
+            if (savedData.hasOwnProperty(key)) {
+                const data = savedData[key];
+                updateEventColor(data.eventId, data.color);
+            }
+        }
+    }
+    function updateEventColor(eventId, color) {
+    const events = $('#calendar').fullCalendar('clientEvents', function(event) {
+        return event.id === eventId;
+    });
 
-    // Local Storage Key
-    const localStorageKey = 'modalSavedData';
+    if (events.length > 0) {
+        const event = events[0];
+        event.backgroundColor = color;
+        event.borderColor = color; // Update border color if needed
+        $('#calendar').fullCalendar('updateEvent', event);
+    }
+}
+
+function applySavedEventColors() {
+    const savedData = getSavedData();
+    for (const key in savedData) {
+        if (savedData.hasOwnProperty(key)) {
+            const data = savedData[key];
+            updateEventColor(data.eventId, data.color);
+        }
+    }
+}
 
     function getSavedData() {
         const data = localStorage.getItem(localStorageKey);
         return data ? JSON.parse(data) : {};
     }
 
+    const clientSelect = document.getElementById('clientSelect');
+    const resultContainer = document.getElementById('resultContainer');
+    let startDate, endDate;
+    let selectedEvent;
+    let selectedClient;
+    let globalHashtags = '';
+
+    const localStorageKey = 'modalSavedData';
+
     function saveDataToLocal(clientName, eventId, data) {
         const savedData = getSavedData();
-        const key = `${clientName}_${eventId}`; // Composite key
+        const key = `${clientName}_${eventId}`;
         data.color = 'blue'; // Set the event color to blue
         savedData[key] = data;
         localStorage.setItem(localStorageKey, JSON.stringify(savedData));
@@ -319,14 +351,14 @@ try {
 
     function showModal(event) {
         const savedData = getSavedData();
-        const key = `${selectedClient}_${event.id}`; // Composite key
+        const key = `${selectedClient}_${event.id}`;
         const eventData = savedData[key] || {};
 
         document.getElementById('eventTitle').value = eventData.title || '';
         document.getElementById('eventDescription').value = eventData.description || '';
-        document.getElementById('eventHashtags').value = eventData.hashtags || globalHashtags || ''; // Set hashtags
+        document.getElementById('eventHashtags').value = eventData.hashtags || globalHashtags || '';
         document.getElementById('eventDate').value = event.start;
-        document.getElementById('eventID').value = event.id; // Set event ID
+        document.getElementById('eventID').value = event.id;
         const formattedDate = moment(event.start).format('MMMM Do, YYYY');
         document.getElementById('modalDateID').textContent = `Task Date: ${formattedDate}`;
         
@@ -351,7 +383,18 @@ try {
                         } else {
                             startDate = moment(response.start_date);
                             endDate = adjustEndDate(moment(response.end_date));
-                            globalHashtags = response.hashtags || ''; // Store the hashtags globally
+                            globalHashtags = response.hashtags || '';
+                                 // Populate months dropdown
+                        const monthSelect = document.getElementById('monthSelect');
+                        monthSelect.innerHTML = ''; // Clear existing options
+
+                        response.months.forEach(month => {
+                            const option = document.createElement('option');
+                            option.value = month;
+                            option.textContent = month;
+                            monthSelect.appendChild(option);
+                        });
+                            
 
                             function getDatesForDayOfWeek(dayOfWeek, start, end) {
                                 const days = {
@@ -385,19 +428,19 @@ try {
                                 });
 
                                 daysArray.forEach(dayOfWeek => {
-                                    const color = 'purple'; // Purple color for events
+                                    const color = 'purple';
                                     const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
 
                                     dates.forEach(date => {
                                         if (date.isBetween(startDate, endDate, null, '[]')) {
                                             events.push({
-                                                id: date.format('YYYY-MM-DD'), // Unique ID for each date
+                                                id: date.format('YYYY-MM-DD'),
                                                 start: date.format('YYYY-MM-DD'),
                                                 end: date.format('YYYY-MM-DD'),
                                                 rendering: 'background',
                                                 backgroundColor: color,
-                                                title: 'Event on ' + date.format('YYYY-MM-DD'), // Add a title for display
-                                                hashtags: response.hashtags || [] // Add hashtags from response
+                                                title: 'Event on ' + date.format('YYYY-MM-DD'),
+                                                hashtags: response.hashtags || []
                                             });
                                         }
                                     });
@@ -407,7 +450,8 @@ try {
                             $('#calendar').fullCalendar('removeEvents');
                             $('#calendar').fullCalendar('addEventSource', events);
 
-                            checkViewBounds(); // Check and adjust view bounds
+                            checkViewBounds();
+                            applySavedEventColors(); // Apply saved event colors after loading events
                         }
                     } catch (e) {
                         console.error('Failed to parse JSON:', e);
@@ -449,43 +493,36 @@ try {
         },
         editable: true,
         eventRender: function(event, element) {
-            element.css('background-color', event.backgroundColor || 'purple'); // Default to purple if no color is specified
+            element.css('background-color', event.backgroundColor || 'purple');
 
-            // Add a clickable button for each event
             const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm">Write</button>');
             btn.on('click', function() {
-                // Trigger popup for this event
                 showModal(event);
-                selectedEvent = event.id; // Store the selected event's ID
-                console.log('Selected event ID:', selectedEvent); // Debug log for selected event ID
+                selectedEvent = event.id;
+                console.log('Selected event ID:', selectedEvent);
             });
             element.append(btn);
 
-            // Ensure cursor is a pointer and event cells are clickable
             element.css('cursor', 'pointer');
             element.find('.fc-title').attr('title', event.title);
         },
         dayClick: function(date, jsEvent, view) {
-
-            // Handle click on a day cell
             const events = $('#calendar').fullCalendar('clientEvents', function(event) {
                 return moment(event.start).isSame(date, 'day');
             });
 
             if (events.length > 0) {
-                // If there are events on the clicked day, proceed to show modal
-                showModal(events[0]); // Show the first event of the day
+                showModal(events[0]);
             }
         },
         eventClick: function(event, jsEvent, view) {
-            console.log('Event clicked:', event); // Debug log for event click
+            console.log('Event clicked:', event);
 
-            // Handle click on an event
-            selectedEvent = event.id; // Store the selected event's ID
-            const eventDate = moment(event.start).format('MMMM Do, YYYY'); // Format date
-            $('#contentModalLabel').text('Event on ' + eventDate); // Set the modal title
-            $('#modalEventId').text('Event ID: ' + event.id); // Set the event ID in the modal body
-            $('#eventHashtags').val(event.hashtags || ''); // Set hashtags if needed
+            selectedEvent = event.id;
+            const eventDate = moment(event.start).format('MMMM Do, YYYY');
+            $('#contentModalLabel').text('Event on ' + eventDate);
+            $('#modalEventId').text('Event ID: ' + event.id);
+            $('#eventHashtags').val(event.hashtags || '');
         },
         viewRender: function(view) {
             if (startDate && endDate) {
@@ -501,26 +538,25 @@ try {
         const data = {
             title: formData.get('eventTitle'),
             description: formData.get('eventDescription'),
-            hashtags: formData.get('eventHashtags'), // Include hashtags
-            state: 'saved', // Set the state to 'saved'
-            color: 'blue' // Set the color to blue
+            hashtags: formData.get('eventHashtags'),
+            state: 'saved',
+            color: 'blue'
         };
 
         saveDataToLocal(selectedClient, formData.get('eventID'), data);
 
-        // Update event color on the calendar
         updateEventColor(formData.get('eventID'), 'blue');
 
         $('#contentModal').modal('hide');
 
-        // Refresh the calendar
         $('#calendar').fullCalendar('refetchEvents');
     });
 
     document.getElementById('submitButton').addEventListener('click', function () {
         // Handle the submit button functionality if needed
     });
-  });
+});
+
 </script>
 
 
