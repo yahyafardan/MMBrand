@@ -39,6 +39,23 @@ try {
     <!-- FullCalendar CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
     <style>
+        /* Style the select element */
+#monthSelect {
+    background-color: #ADD8E6; /* Light Blue background */
+    color: #2F4F4F; /* Dark Slate Gray text */
+    border: 1px solid #2F4F4F; /* Dark Slate Gray border */
+    padding: 5px 10px; /* Padding inside the dropdown */
+    border-radius: 4px; /* Rounded corners */
+    font-size: 16px; /* Font size */
+}
+
+/* Style the options */
+#monthSelect option {
+    background-color: #ADD8E6; /* Light Blue background */
+    color: #2F4F4F; /* Dark Slate Gray text */
+    padding: 10px; /* Padding inside options */
+}
+
         /* General body styling */
         body {
             background-color: black; /* Black background */
@@ -363,15 +380,25 @@ try {
                             endDate = adjustEndDate(moment(response.end_date));
                             globalHashtags = response.hashtags || '';
 
-                            // Populate months dropdown
-                            monthSelect.innerHTML = ''; // Clear existing options
+                             // Populate months dropdown
+                        monthSelect.innerHTML = ''; // Clear existing options
 
-                            response.months.forEach(month => {
-                                const option = document.createElement('option');
-                                option.value = month;
-                                option.textContent = month;
-                                monthSelect.appendChild(option);
-                            });
+// Add default option
+const defaultOption = document.createElement('option');
+defaultOption.value = '';
+defaultOption.textContent = 'Select a month';
+defaultOption.disabled = true;
+defaultOption.selected = true;
+monthSelect.appendChild(defaultOption);
+
+// Add dynamic month options
+response.months.forEach(month => {
+    const option = document.createElement('option');
+    option.value = month;
+    option.textContent = month;
+    monthSelect.appendChild(option);
+});
+
 
                             const events = [];
                             response.posting_days.forEach(dayString => {
@@ -393,6 +420,7 @@ try {
                                                 backgroundColor: color,
                                                 title: 'Event on ' + date.format('YYYY-MM-DD'),
                                                 hashtags: response.hashtags || []
+                                                
                                             });
                                         }
                                     });
@@ -533,6 +561,7 @@ try {
     },
     viewRender: function(view) {
     try {
+        debugger;
         if (monthSelect && monthSelect.value) {
             const [monthStr, yearStr] = monthSelect.value.split(',');
             const month = parseInt(monthStr, 10) - 1; // Convert month to zero-indexed
