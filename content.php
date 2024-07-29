@@ -137,17 +137,22 @@ try {
     border: 1px solid #ddd; /* Add border to make color boxes more visible */
 }
 
-.guide .color-box.task {
-    background-color: purple; /* Purple for tasks */
+/* Event colors for different statuses */
+.fc-event.task {
+    background-color: purple !important; /* Purple for tasks */
+    border-color: purple !important; /* Border color for tasks */
 }
 
-.guide .color-box.saved {
-    background-color: blue; /* Blue for saved events */
+.fc-event.saved {
+    background-color: blue !important; /* Blue for saved events */
+    border-color: blue !important; /* Border color for saved events */
 }
 
-.guide .color-box.done {
-    background-color: green; /* Green for completed events */
+.fc-event.done {
+    background-color: green !important; /* Green for completed events */
+    border-color: green !important; /* Border color for completed events */
 }
+
 
         #floatingButton {
             position: fixed;
@@ -265,7 +270,6 @@ try {
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
                 <button type="button" class="btn btn-primary" id="saveButton">Save</button>
-                <button type="submit" class="btn btn-primary" id="submitButton" form="contentForm">Submit</button>
             </div>
         </div>
     </div>
@@ -275,6 +279,21 @@ try {
 
 <script>
   document.addEventListener('DOMContentLoaded', function() {
+
+    // Add this function at the top of your script
+    function updateEventColor(eventId, color) {
+        const events = $('#calendar').fullCalendar('clientEvents', function(event) {
+            return event.id === eventId;
+        });
+
+        if (events.length > 0) {
+            const event = events[0];
+            event.backgroundColor = color;
+            event.borderColor = color; // Update border color if needed
+            $('#calendar').fullCalendar('updateEvent', event);
+        }
+    }
+
     const clientSelect = document.getElementById('clientSelect');
     const resultContainer = document.getElementById('resultContainer');
     let startDate, endDate; // Declare global variables
@@ -293,6 +312,7 @@ try {
     function saveDataToLocal(clientName, eventId, data) {
         const savedData = getSavedData();
         const key = `${clientName}_${eventId}`; // Composite key
+        data.color = 'blue'; // Set the event color to blue
         savedData[key] = data;
         localStorage.setItem(localStorageKey, JSON.stringify(savedData));
     }
@@ -309,7 +329,6 @@ try {
         document.getElementById('eventID').value = event.id; // Set event ID
         const formattedDate = moment(event.start).format('MMMM Do, YYYY');
         document.getElementById('modalDateID').textContent = `Task Date: ${formattedDate}`;
-        
         
         $('#contentModal').modal('show');
     }
@@ -430,6 +449,7 @@ try {
         },
         editable: true,
         eventRender: function(event, element) {
+            element.css('background-color', event.backgroundColor || 'purple'); // Default to purple if no color is specified
 
             // Add a clickable button for each event
             const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm">Write</button>');
@@ -465,14 +485,7 @@ try {
             const eventDate = moment(event.start).format('MMMM Do, YYYY'); // Format date
             $('#contentModalLabel').text('Event on ' + eventDate); // Set the modal title
             $('#modalEventId').text('Event ID: ' + event.id); // Set the event ID in the modal body
-
-            // Change event color to blue
-            $('#calendar').fullCalendar('clientEvents', function(e) {
-                if (e.id === event.id) {
-                    e.setProp('backgroundColor', 'blue');
-                    e.setProp('borderColor', 'blue');
-                }
-            });
+            $('#eventHashtags').val(event.hashtags || ''); // Set hashtags if needed
         },
         viewRender: function(view) {
             if (startDate && endDate) {
@@ -488,31 +501,28 @@ try {
         const data = {
             title: formData.get('eventTitle'),
             description: formData.get('eventDescription'),
-            hashtags: formData.get('eventHashtags') // Include hashtags
+            hashtags: formData.get('eventHashtags'), // Include hashtags
+            state: 'saved', // Set the state to 'saved'
+            color: 'blue' // Set the color to blue
         };
 
         saveDataToLocal(selectedClient, formData.get('eventID'), data);
 
+        // Update event color on the calendar
+        updateEventColor(formData.get('eventID'), 'blue');
+
         $('#contentModal').modal('hide');
 
-        // Change the color of the saved event to blue
-        $('#calendar').fullCalendar('clientEvents', function(event) {
-            if (event.id === formData.get('eventID')) {
-                event.setProp('backgroundColor', 'blue');
-                event.setProp('borderColor', 'blue');
-            }
-        });
+        // Refresh the calendar
+        $('#calendar').fullCalendar('refetchEvents');
     });
 
     document.getElementById('submitButton').addEventListener('click', function () {
-        const form = document.getElementById('contentForm');
-        form.submit(); // Submit the form to content.php
+        // Handle the submit button functionality if needed
     });
-});
-
-
-
+  });
 </script>
+
 
 </body>
 </html>
