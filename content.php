@@ -304,28 +304,6 @@ document.addEventListener('DOMContentLoaded', function() {
             }
         }
     }
-    function updateEventColor(eventId, color) {
-    const events = $('#calendar').fullCalendar('clientEvents', function(event) {
-        return event.id === eventId;
-    });
-
-    if (events.length > 0) {
-        const event = events[0];
-        event.backgroundColor = color;
-        event.borderColor = color; // Update border color if needed
-        $('#calendar').fullCalendar('updateEvent', event);
-    }
-}
-
-function applySavedEventColors() {
-    const savedData = getSavedData();
-    for (const key in savedData) {
-        if (savedData.hasOwnProperty(key)) {
-            const data = savedData[key];
-            updateEventColor(data.eventId, data.color);
-        }
-    }
-}
 
     function getSavedData() {
         const data = localStorage.getItem(localStorageKey);
@@ -384,17 +362,17 @@ function applySavedEventColors() {
                             startDate = moment(response.start_date);
                             endDate = adjustEndDate(moment(response.end_date));
                             globalHashtags = response.hashtags || '';
-                                 // Populate months dropdown
-                        const monthSelect = document.getElementById('monthSelect');
-                        monthSelect.innerHTML = ''; // Clear existing options
 
-                        response.months.forEach(month => {
-                            const option = document.createElement('option');
-                            option.value = month;
-                            option.textContent = month;
-                            monthSelect.appendChild(option);
-                        });
-                            
+                            // Populate months dropdown
+                            const monthSelect = document.getElementById('monthSelect');
+                            monthSelect.innerHTML = ''; // Clear existing options
+
+                            response.months.forEach(month => {
+                                const option = document.createElement('option');
+                                option.value = month;
+                                option.textContent = month;
+                                monthSelect.appendChild(option);
+                            });
 
                             function getDatesForDayOfWeek(dayOfWeek, start, end) {
                                 const days = {
@@ -445,19 +423,19 @@ function applySavedEventColors() {
                                         }
                                     });
                                 });
-                            });document.getElementById('monthSelect').addEventListener('change', function() {
-  var selectedMonth = this.value;
-  
-  if (selectedMonth) {
-    console.log("Month selected:", selectedMonth);
-    // You can add additional logic here based on the selected month
-    $('#calendar').fullCalendar('removeEvents');
-                            $('#calendar').fullCalendar('addEventSource', events);
+                            });
 
-  } 
-});
+                            document.getElementById('monthSelect').addEventListener('change', function() {
+                                var selectedMonth = this.value;
 
-                           
+                                if (selectedMonth) {
+                                    console.log("Month selected:", selectedMonth);
+                                    // You can add additional logic here based on the selected month
+                                    $('#calendar').fullCalendar('removeEvents');
+                                    $('#calendar').fullCalendar('addEventSource', events);
+                                } 
+                            });
+
                             checkViewBounds();
                             applySavedEventColors(); // Apply saved event colors after loading events
                         }
@@ -479,17 +457,23 @@ function applySavedEventColors() {
         return endDate.clone().endOf('month').add(1, 'month').startOf('month').subtract(1, 'day');
     }
 
-    function checkViewBounds() {
+    function checkViewBounds(selectedMonth) {
+        // Convert selectedMonth ID to a date (assuming selectedMonth is in 'MM/YYYY' format)
+        const [monthStr, yearStr] = selectedMonth.split(',');
+        const month = monthStr;
+        const year = yearStr;
+
+        const selectedDate = new Date(year, month, 1); // 1st day of the selected month
+
         const calendar = $('#calendar').fullCalendar('getCalendar');
         const view = calendar.view;
-        const viewStart = view.intervalStart;
-        const viewEnd = view.intervalEnd;
 
-        if (viewStart.isBefore(startDate)) {
-            calendar.gotoDate(startDate);
-        }
-        if (viewEnd.isAfter(endDate)) {
-            calendar.gotoDate(endDate);
+        // Navigate to the selected month view
+        calendar.gotoDate(selectedDate);
+
+        // Set the calendar view to show the entire month
+        if (view.type !== 'month') {
+            calendar.changeView('month');
         }
     }
 
@@ -552,11 +536,9 @@ function applySavedEventColors() {
         };
 
         saveDataToLocal(selectedClient, formData.get('eventID'), data);
-
         updateEventColor(formData.get('eventID'), 'blue');
 
         $('#contentModal').modal('hide');
-
         $('#calendar').fullCalendar('refetchEvents');
     });
 
