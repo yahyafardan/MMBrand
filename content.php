@@ -126,14 +126,29 @@ try {
         }
         /* Guide styles */
         .guide {
-            margin-top: 20px;
-        }
-        .guide .color-box {
-            display: inline-block;
-            width: 20px;
-            height: 20px;
-            margin-right: 10px;
-        }
+    margin-top: 20px;
+}
+
+.guide .color-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 10px;
+    border: 1px solid #ddd; /* Add border to make color boxes more visible */
+}
+
+.guide .color-box.task {
+    background-color: purple; /* Purple for tasks */
+}
+
+.guide .color-box.saved {
+    background-color: blue; /* Blue for saved events */
+}
+
+.guide .color-box.done {
+    background-color: green; /* Green for completed events */
+}
+
         #floatingButton {
             position: fixed;
             bottom: 20px;
@@ -163,6 +178,19 @@ try {
             color: green; /* Green text for input/textarea */
             border: 1px solid purple; /* Purple border for input/textarea */
         }
+        /* Updated Guide styles */
+.guide .color-box.task {
+    background-color: purple; /* Purple for tasks */
+}
+
+.guide .color-box.saved {
+    background-color: blue; /* Blue for saved events */
+}
+
+.guide .color-box.done {
+    background-color: green; /* Green for completed events */
+}
+
     </style>
 </head>
 <body>
@@ -186,16 +214,16 @@ try {
             <div id="calendar"></div>
         </div>
         <div class="guide mt-4">
-            <h5>Event Color Guide:</h5>
-            <div>
-                <span class="color-box" style="background-color: purple;"></span> Purple: Task
+    <h5>Event Color Guide:</h5>
+    <div>
+        <span class="color-box task"></span> Purple: Task
         </br>
-                <span class="color-box" style="background-color: purple;"></span> Purple: Saved
-                </br>
+        <span class="color-box saved"></span> Blue: Saved
+        </br>
+        <span class="color-box done"></span> Green: Completed
+    </div>
+</div>
 
-                <span class="color-box" style="background-color: purple;"></span> Purple: Completed 
-
-            </div>
         </div>
     </div>
 
