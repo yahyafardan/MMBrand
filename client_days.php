@@ -31,7 +31,7 @@ require 'db.php';
 // }
 
 $client_name = //"yahya"; 
- $_POST['client_name'];
+$_POST['client_name'];
 try {
     // Fetch client dates and hashtag
     $sql = "SELECT start_date, end_date, days_of_posting, hashtags FROM clients WHERE client_name = :client_name";

@@ -280,8 +280,7 @@ try {
 
 
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
+<script>document.addEventListener('DOMContentLoaded', function() {
     function updateEventColor(eventId, color) {
         const events = $('#calendar').fullCalendar('clientEvents', function(event) {
             return event.id === eventId;
@@ -311,6 +310,7 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     const clientSelect = document.getElementById('clientSelect');
+    const monthSelect = document.getElementById('monthSelect');
     const resultContainer = document.getElementById('resultContainer');
     let startDate, endDate;
     let selectedEvent;
@@ -364,7 +364,6 @@ document.addEventListener('DOMContentLoaded', function() {
                             globalHashtags = response.hashtags || '';
 
                             // Populate months dropdown
-                            const monthSelect = document.getElementById('monthSelect');
                             monthSelect.innerHTML = ''; // Clear existing options
 
                             response.months.forEach(month => {
@@ -373,31 +372,6 @@ document.addEventListener('DOMContentLoaded', function() {
                                 option.textContent = month;
                                 monthSelect.appendChild(option);
                             });
-
-                            function getDatesForDayOfWeek(dayOfWeek, start, end) {
-                                const days = {
-                                    'Monday': 1,
-                                    'Tuesday': 2,
-                                    'Wednesday': 3,
-                                    'Thursday': 4,
-                                    'Friday': 5,
-                                    'Saturday': 6,
-                                    'Sunday': 0
-                                };
-                                const dates = [];
-                                let current = start.clone().day(days[dayOfWeek]);
-
-                                if (current.isBefore(start)) {
-                                    current.add(7, 'days');
-                                }
-
-                                while (current.isSameOrBefore(end)) {
-                                    dates.push(current.clone());
-                                    current.add(7, 'days');
-                                }
-
-                                return dates;
-                            }
 
                             const events = [];
                             response.posting_days.forEach(dayString => {
@@ -425,23 +399,21 @@ document.addEventListener('DOMContentLoaded', function() {
                                 });
                             });
 
-                            document.getElementById('monthSelect').addEventListener('change', function() {
-                                var selectedMonth = this.value;
+                            monthSelect.addEventListener('change', function() {
+                                const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
 
-                                if (selectedMonth) {
-                                    console.log("Month selected:", selectedMonth);
-                                    // You can add additional logic here based on the selected month
+                                if (selectedMonths.length > 0) {
+                                    console.log("Months selected:", selectedMonths);
                                     $('#calendar').fullCalendar('removeEvents');
                                     $('#calendar').fullCalendar('addEventSource', events);
-                                } 
+                                }
                             });
 
-                            checkViewBounds();
                             applySavedEventColors(); // Apply saved event colors after loading events
                         }
                     } catch (e) {
-                        console.error('Failed to parse JSON:', e);
-                        resultContainer.innerHTML = '<p style="color: red;">Failed to parse response.</p>';
+                        console.error('Error processing response:', e);
+                        resultContainer.innerHTML = '<p style="color: red;">Error processing response.</p>';
                     }
                 } else {
                     console.error('Request failed. Status:', xhr.status);
@@ -457,24 +429,29 @@ document.addEventListener('DOMContentLoaded', function() {
         return endDate.clone().endOf('month').add(1, 'month').startOf('month').subtract(1, 'day');
     }
 
-    function checkViewBounds(selectedMonth) {
-        // Convert selectedMonth ID to a date (assuming selectedMonth is in 'MM/YYYY' format)
-        const [monthStr, yearStr] = selectedMonth.split(',');
-        const month = monthStr;
-        const year = yearStr;
+    function getDatesForDayOfWeek(dayOfWeek, start, end) {
+        const days = {
+            'Monday': 1,
+            'Tuesday': 2,
+            'Wednesday': 3,
+            'Thursday': 4,
+            'Friday': 5,
+            'Saturday': 6,
+            'Sunday': 0
+        };
+        const dates = [];
+        let current = start.clone().day(days[dayOfWeek]);
 
-        const selectedDate = new Date(year, month, 1); // 1st day of the selected month
-
-        const calendar = $('#calendar').fullCalendar('getCalendar');
-        const view = calendar.view;
-
-        // Navigate to the selected month view
-        calendar.gotoDate(selectedDate);
-
-        // Set the calendar view to show the entire month
-        if (view.type !== 'month') {
-            calendar.changeView('month');
+        if (current.isBefore(start)) {
+            current.add(7, 'days');
         }
+
+        while (current.isSameOrBefore(end)) {
+            dates.push(current.clone());
+            current.add(7, 'days');
+        }
+
+        return dates;
     }
 
     $('#calendar').fullCalendar({
@@ -491,7 +468,6 @@ document.addEventListener('DOMContentLoaded', function() {
             btn.on('click', function() {
                 showModal(event);
                 selectedEvent = event.id;
-                console.log('Selected event ID:', selectedEvent);
             });
             element.append(btn);
 
@@ -518,7 +494,7 @@ document.addEventListener('DOMContentLoaded', function() {
         },
         viewRender: function(view) {
             if (startDate && endDate) {
-                checkViewBounds();
+                // Handle view bounds
             }
         }
     });
@@ -541,11 +517,8 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#contentModal').modal('hide');
         $('#calendar').fullCalendar('refetchEvents');
     });
-
-    document.getElementById('submitButton').addEventListener('click', function () {
-        // Handle the submit button functionality if needed
-    });
 });
+
 
 </script>
 
