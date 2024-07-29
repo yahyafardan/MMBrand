@@ -29,12 +29,13 @@ require 'db.php';
 //     echo json_encode(["error" => "Client name is required."]);
 //     exit;
 // }
-
-$client_name = //"yahya"; 
-$_POST['client_name'];
+$client_name = "yahya"; 
+//$_POST['client_name'];
 try {
-    // Fetch client dates and hashtag
-    $sql = "SELECT start_date, end_date, days_of_posting, hashtags FROM clients WHERE client_name = :client_name";
+    // Fetch client details
+    $sql = "SELECT start_date, end_date, days_of_posting, hashtags, n_of_posts, n_of_videos, language 
+            FROM clients 
+            WHERE client_name = :client_name";
     $stmt = $pdo->prepare($sql);
     $stmt->bindParam(':client_name', $client_name, PDO::PARAM_STR);
     $stmt->execute();
@@ -68,7 +69,10 @@ try {
         "end_date" => $client_data['end_date'],
         "hashtags" => $client_data['hashtags'],
         "posting_days" => $days_of_posting,
-        "months" => $months // Updated format
+        "months" => $months, // Updated format
+        "n_of_posts" => $client_data['n_of_posts'],
+        "n_of_videos" => $client_data['n_of_videos'],
+        "languages" => $client_data['language']
     ]);
 
 } catch (PDOException $e) {
