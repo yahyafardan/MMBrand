@@ -400,16 +400,28 @@ try {
                             });
 
                             monthSelect.addEventListener('change', function() {
-                                const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
+    const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
+    
+    if (selectedMonths.length > 0) {
+        console.log("Months selected:", selectedMonths);
+        $('#calendar').fullCalendar('removeEvents'); // Remove all existing events
+        
+        // Filter and add only the events for the selected months
+        const filteredEvents = events.filter(event => {
+            const eventDate = moment(event.start);
+            return selectedMonths.some(month => {
+                const [monthStr, yearStr] = month.split(',');
+                const monthStart = moment().year(yearStr).month(monthStr - 1).startOf('month');
+                const monthEnd = moment().year(yearStr).month(monthStr - 1).endOf('month');
+                return eventDate.isBetween(monthStart, monthEnd, null, '[]');
+            });
+        });
 
-                                if (selectedMonths.length > 0) {
-                                    console.log("Months selected:", selectedMonths);
-                                    $('#calendar').fullCalendar('removeEvents');
-                                    $('#calendar').fullCalendar('addEventSource', events);
-                                    $('#calendar').fullCalendar('gotoDate', startDate.toDate()); // Go to start date
+        $('#calendar').fullCalendar('addEventSource', filteredEvents);
+        $('#calendar').fullCalendar('gotoDate', moment(selectedMonths[0], 'MM,YYYY').startOf('month')); // Navigate to the first selected month
+    }
+});
 
-                                }
-                            });
 
                             applySavedEventColors(); // Apply saved event colors after loading events
                         }
@@ -457,53 +469,70 @@ try {
     }
 
     $('#calendar').fullCalendar({
-        header: {
-            left: 'prev,next today',
-            center: 'title',
-            right: ''
-        },
-        editable: true,
-        eventRender: function(event, element) {
-            element.css('background-color', event.backgroundColor || 'purple');
+    header: {
+        left: 'prev,next today',
+        center: 'title',
+        right: ''
+    },
+    editable: true,
+    eventRender: function(event, element, view) {
+    // Extract the selected month and year
+    const [monthStr, yearStr] = monthSelect.value.split(',');
+    const selectedMonth = parseInt(monthStr, 10) - 1; // Zero-indexed month
+    const selectedYear = parseInt(yearStr, 10);
 
-            const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm">Write</button>');
-            btn.on('click', function() {
-                showModal(event);
-                selectedEvent = event.id;
-            });
-            element.append(btn);
+    // Determine the start and end of the selected month
+    const selectedMonthStart = moment().year(selectedYear).month(selectedMonth).startOf('month');
+    const selectedMonthEnd = moment().year(selectedYear).month(selectedMonth).endOf('month');
 
-            element.css('cursor', 'pointer');
-            element.find('.fc-title').attr('title', event.title);
-        },
-        dayClick: function(date, jsEvent, view) {
-    const viewStart = moment(view.intervalStart).startOf('month');
-    const viewEnd = moment(view.intervalEnd).subtract(1, 'day').endOf('month');
-
-    // Check if the clicked date is within the visible month
-    if (date.isBetween(viewStart, viewEnd, null, '[]')) {
-        const events = $('#calendar').fullCalendar('clientEvents', function(event) {
-            return moment(event.start).isSame(date, 'day');
-        });
-
-        if (events.length > 0) {
-            showModal(events[0]);
-        }
+    // Check if the event date is within the selected month
+    const eventDate = moment(event.start);
+    if (eventDate.isBetween(selectedMonthStart, selectedMonthEnd, null, '[]')) {
+        element.css('background-color', event.backgroundColor || 'purple');
+    } else {
+        element.css('background-color', ''); // No color for dates outside the month
     }
-}
-,
-        eventClick: function(event, jsEvent, view) {
-            console.log('Event clicked:', event);
 
-            selectedEvent = event.id;
-            const eventDate = moment(event.start).format('MMMM Do, YYYY');
-            $('#contentModalLabel').text('Event on ' + eventDate);
-            $('#modalEventId').text('Event ID: ' + event.id);
-            $('#eventHashtags').val(event.hashtags || '');
-        },
-        viewRender: function(view) {
+    // Add custom button for the event
+    const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm">Write</button>');
+    btn.on('click', function() {
+        showModal(event);
+        selectedEvent = event.id;
+    });
+    element.append(btn);
+
+    // Set cursor and tooltip
+    element.css('cursor', 'pointer');
+    element.find('.fc-title').attr('title', event.title);
+}
+
+,
+    dayClick: function(date, jsEvent, view) {
+        const viewStart = moment(view.intervalStart).startOf('month');
+        const viewEnd = moment(view.intervalEnd).subtract(1, 'day').endOf('month');
+
+        // Check if the clicked date is within the visible month
+        if (date.isBetween(viewStart, viewEnd, null, '[]')) {
+            const events = $('#calendar').fullCalendar('clientEvents', function(event) {
+                return moment(event.start).isSame(date, 'day');
+            });
+
+            if (events.length > 0) {
+                showModal(events[0]);
+            }
+        }
+    },
+    eventClick: function(event, jsEvent, view) {
+        console.log('Event clicked:', event);
+
+        selectedEvent = event.id;
+        const eventDate = moment(event.start).format('MMMM Do, YYYY');
+        $('#contentModalLabel').text('Event on ' + eventDate);
+        $('#modalEventId').text('Event ID: ' + event.id);
+        $('#eventHashtags').val(event.hashtags || '');
+    },
+    viewRender: function(view) {
     try {
-        // Ensure monthSelect and its value exist
         if (monthSelect && monthSelect.value) {
             const [monthStr, yearStr] = monthSelect.value.split(',');
             const month = parseInt(monthStr, 10) - 1; // Convert month to zero-indexed
@@ -513,9 +542,7 @@ try {
                 const viewStart = moment(view.intervalStart);
                 const viewEnd = moment(view.intervalEnd).subtract(1, 'day');
 
-                // Check if the current view is not the selected month
                 if (viewStart.month() !== month || viewStart.year() !== year) {
-                    // Move the calendar view to the start of the selected month
                     $('#calendar').fullCalendar('gotoDate', new Date(year, month, 1));
                 }
             }
@@ -525,7 +552,9 @@ try {
     }
 }
 
-    });
+});
+
+
 
     document.getElementById('saveButton').addEventListener('click', function () {
         const form = document.getElementById('contentForm');
