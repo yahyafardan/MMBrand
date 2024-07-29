@@ -477,14 +477,21 @@ try {
             element.find('.fc-title').attr('title', event.title);
         },
         dayClick: function(date, jsEvent, view) {
-            const events = $('#calendar').fullCalendar('clientEvents', function(event) {
-                return moment(event.start).isSame(date, 'day');
-            });
+    const viewStart = moment(view.intervalStart).startOf('month');
+    const viewEnd = moment(view.intervalEnd).subtract(1, 'day').endOf('month');
 
-            if (events.length > 0) {
-                showModal(events[0]);
-            }
-        },
+    // Check if the clicked date is within the visible month
+    if (date.isBetween(viewStart, viewEnd, null, '[]')) {
+        const events = $('#calendar').fullCalendar('clientEvents', function(event) {
+            return moment(event.start).isSame(date, 'day');
+        });
+
+        if (events.length > 0) {
+            showModal(events[0]);
+        }
+    }
+}
+,
         eventClick: function(event, jsEvent, view) {
             console.log('Event clicked:', event);
 
