@@ -220,6 +220,8 @@ try {
     <div class="container mt-5">
         <h1>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
         <h2>Select a Client:</h2>
+        <div id="eventCount" class="mt-2"></div>
+
         <select name='client' id='clientSelect'>
             <option value='' disabled selected>Select a client</option>
             <?php
@@ -389,25 +391,31 @@ document.addEventListener('DOMContentLoaded', function() {
                             endDate = adjustEndDate(moment(response.end_date));
                             globalHashtags = response.hashtags || '';
 
-                            // Populate months dropdown
-                            const monthSelect = document.getElementById('monthSelect');
-                            monthSelect.innerHTML = ''; // Clear existing options
+                           // Populate months dropdown
+const monthSelect = document.getElementById('monthSelect');
+monthSelect.innerHTML = ''; // Clear existing options
 
-                            // Add default option
-                            const defaultOption = document.createElement('option');
-                            defaultOption.value = '';
-                            defaultOption.textContent = 'Select a month';
-                            defaultOption.disabled = true;
-                            defaultOption.selected = true;
-                            monthSelect.appendChild(defaultOption);
+// Add default option
+const defaultOption = document.createElement('option');
+defaultOption.value = '';
+defaultOption.textContent = 'Select a month';
+defaultOption.disabled = true;
+defaultOption.selected = true;
+monthSelect.appendChild(defaultOption);
 
-                            // Add dynamic month options
-                            response.months.forEach(month => {
-                                const option = document.createElement('option');
-                                option.value = month;
-                                option.textContent = month;
-                                monthSelect.appendChild(option);
-                            });
+// Add dynamic month options
+response.months.forEach(month => {
+    // Convert month format to "MMMM/YYYY"
+    const [monthStr, yearStr] = month.split(',');
+    const formattedMonth = moment().month(parseInt(monthStr, 10) - 1).format('MMMM');
+    const formattedOptionText = `${formattedMonth}/${yearStr}`;
+    
+    const option = document.createElement('option');
+    option.value = month;
+    option.textContent = formattedOptionText;
+    monthSelect.appendChild(option);
+});
+
 
                             const events = [];
                             response.posting_days.forEach(dayString => {
@@ -609,6 +617,23 @@ document.addEventListener('DOMContentLoaded', function() {
         $('#calendar').fullCalendar('refetchEvents');
     });
 });
+function countNonFilteredEvents() {
+    // Get all events currently loaded in FullCalendar
+    const allEvents = $('#calendar').fullCalendar('clientEvents');
+
+    // Get the filtered events (visible in the calendar)
+    const visibleEvents = $('#calendar').fullCalendar('getEvents');
+
+    // Filter out the visible events from the all events
+    const nonFilteredEvents = allEvents.filter(event => 
+        !visibleEvents.some(visibleEvent => visibleEvent.id === event.id)
+    );
+
+    // Log or display the count of non-filtered events
+    console.log('Non-filtered events count:', nonFilteredEvents.length);
+    alert('Non-filtered events count: ' + nonFilteredEvents.length);
+}
+
 window.addEventListener('beforeunload', function (e) {
     // Customize the message to be shown in the alert
     var confirmationMessage = 'Are you sure you want to leave? Changes you made may not be saved.';
@@ -620,6 +645,7 @@ window.addEventListener('beforeunload', function (e) {
     // For some older browsers
     return confirmationMessage;
 });
+
 
 
 
