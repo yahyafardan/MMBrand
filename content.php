@@ -218,7 +218,89 @@ try {
 
 .guide .color-box.done {
     background-color: green; /* Green for completed events */
+}/* Style for the modal checkboxes container */
+.modal-body .social-media-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem; /* Adjust space between checkboxes */
 }
+
+/* Individual checkbox styling */
+.modal-body .form-check {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem; /* Adjust space between items */
+}
+/* Style for the language options container */
+.language-options,
+.sponsor-options,
+.social-media-links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 1rem; /* Adjust this value to control the space between items */
+}
+
+/* Style for individual checkboxes/radio buttons */
+.form-check {
+    display: flex;
+    align-items: center;
+    margin-right: 1rem; /* Adjust spacing between items */
+}
+.form-check-input {
+    margin-right: 0.5rem; /* Adjust spacing between checkbox/radio and label */
+}
+
+/* Optional: If needed to limit width or ensure proper wrapping */
+.language-options,
+.sponsor-options,
+.social-media-links {
+    max-width: 100%;
+    overflow: auto;
+}
+.modal-header-content {
+    width: 100%;
+    text-align: center;
+}
+
+.modal-header-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px; /* Adjust as needed */
+}
+
+.modal-header-info > * {
+    margin: 0 10px; /* Space out the items */
+}
+
+#languageData {
+    font-weight: bold; /* Make language data stand out */
+}
+.modal-header-content {
+    width: 100%;
+    text-align: center;
+}
+
+.modal-header-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px; /* Adjust as needed */
+}
+
+.modal-header-info > * {
+    margin: 0 10px; /* Space out the items */
+}
+
+.language-label {
+    font-weight: bold;
+}
+
+#languageData {
+    font-weight: bold; /* Make language data stand out */
+}
+
+
 
     </style>
 </head>
@@ -271,17 +353,19 @@ try {
 
 
 
-
-<!-- Content Modal -->
- 
+<!-- Content Modal --><!-- Content Modal -->
 <div class="modal fade" id="contentModal" tabindex="-1" aria-labelledby="contentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
                 <div class="modal-header-content">
                     <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
-                    <span id="modalClientName" class="mx-3"></span> <!-- Client Name Display -->
-                    <span id="modalDateID" class="ml-3"></span> <!-- Date ID Display -->
+                    <div class="modal-header-info">
+                        <span id="modalClientName" class="mx-3"></span> <!-- Client Name Display -->
+                        <span id="modalDateID" class="ml-3"></span> <!-- Date ID Display -->
+                        <span class="language-label">Languages:</span> <!-- Label for languages -->
+                        <div id="languageData" class="ml-2"></div> <!-- Field to display AJAX response -->
+                    </div>
                 </div>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
@@ -304,21 +388,65 @@ try {
                     <!-- Sections for static -->
                     <div id="staticSection" class="event-section">
                         <div class="mb-3">
-                            <label for="eventTitle" class="form-label">Title</label>
-                            <input type="text" class="form-control" id="eventTitle" name="eventTitle" required>
+                            <label for="Concept" class="form-label">Concept (theme)</label>
+                            <input type="text" class="form-control" id="Concept" name="Concept" required>
                         </div>
                         <div class="mb-3">
-                            <label for="eventDescription" class="form-label">Description</label>
-                            <textarea class="form-control" id="eventDescription" name="eventDescription" rows="3" required></textarea>
+                            <label for="caption" class="form-label">Caption (Text)</label>
+                            <textarea class="form-control" id="caption" name="caption" rows="3" required></textarea>
                         </div>
+                        <!-- Social Media Links Section in Modal -->
                         <div class="mb-3">
-                            <label for="eventHashtags" class="form-label">Hashtags</label>
-                            <input type="text" class="form-control" id="eventHashtags" name="eventHashtags">
+                            <label class="form-label">Social Media Links</label>
+                            <div class="social-media-links">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="xAccount" name="socialMedia[]" value="x_account_link">
+                                    <label class="form-check-label" for="xAccount">X</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="instagramAccount" name="socialMedia[]" value="instagram_account_link">
+                                    <label class="form-check-label" for="instagramAccount">Instagram</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="linkedinAccount" name="socialMedia[]" value="linkedin_account_link">
+                                    <label class="form-check-label" for="linkedinAccount">LinkedIn</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="facebookAccount" name="socialMedia[]" value="facebook_account_link">
+                                    <label class="form-check-label" for="facebookAccount">Facebook</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="youtubeAccount" name="socialMedia[]" value="youtube_account_link">
+                                    <label class="form-check-label" for="youtubeAccount">YouTube</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="snapchatAccount" name="socialMedia[]" value="snapchat_account_link">
+                                    <label class="form-check-label" for="snapchatAccount">Snapchat</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="tiktokAccount" name="socialMedia[]" value="tiktok_account_link">
+                                    <label class="form-check-label" for="tiktokAccount">TikTok</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Sponsors Section in Modal -->
+                        <div class="mb-3">
+                            <label>Sponsored</label>
+                            <div class="sponsor-options">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="sponsors" id="sponsorYes" value="yes">
+                                    <label class="form-check-label" for="sponsorYes">Yes</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="sponsors" id="sponsorNo" value="no">
+                                    <label class="form-check-label" for="sponsorNo">No</label>
+                                </div>
+                            </div>
                         </div>
                     </div>
                     <!-- Sections for video -->
                     <div id="videoSection" class="event-section d-none">
-                    <label for="eventTitle" class="form-label">Title</label>
+                        <label for="Concept" class="form-label">Title</label>
                     </div>
                     <input type="hidden" id="eventDate" name="eventDate">
                     <input type="hidden" id="eventID" name="eventID">
@@ -331,8 +459,6 @@ try {
         </div>
     </div>
 </div>
-
-
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -412,14 +538,15 @@ function showModal(event) {
     const key = `${selectedClient}_${event.id}`;
     const eventData = savedData[key] || {};
 
-    document.getElementById('eventTitle').value = eventData.title || '';
-    document.getElementById('eventDescription').value = eventData.description || '';
-    document.getElementById('eventHashtags').value = eventData.hashtags || globalHashtags || '';
+    document.getElementById('Concept').value = eventData.title || '';
+    document.getElementById('caption').value = eventData.hashtags || globalHashtags || '';
     document.getElementById('eventDate').value = event.start;
     document.getElementById('eventID').value = event.id;
     const formattedDate = moment(event.start).format('MMMM Do, YYYY');
     document.getElementById('modalDateID').textContent = `Task Date: ${formattedDate}`;
     document.getElementById('modalClientName').textContent = `Client: ${selectedClient}`;
+    document.getElementById('languageData').textContent = languages;
+
 
     // Set initial visibility of sections based on the currently selected radio button
     const selectedType = Array.from(document.getElementsByName('eventType')).find(radio => radio.checked)?.value || 'static';
@@ -463,6 +590,8 @@ $(document).ready(function() {
                             startDate = moment(response.start_date);
                             endDate = adjustEndDate(moment(response.end_date));
                             globalHashtags = response.hashtags || '';
+                            languages=response.languages || '';
+
 
                             // Populate months dropdown
                             const monthSelect = document.getElementById('monthSelect');
@@ -670,8 +799,8 @@ $(document).ready(function() {
         const formData = new FormData(form);
 
         const data = {
-            title: formData.get('eventTitle'),
-            description: formData.get('eventDescription'),
+            title: formData.get('Concept'),
+            description: formData.get('caption'),
             hashtags: formData.get('eventHashtags'),
             state: 'saved',
             color: 'blue'
