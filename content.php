@@ -575,7 +575,7 @@ function showModal(event) {
     const key = `${selectedClient}_${event.id}`;
     const eventData = savedData[key] || {};
 
-    document.getElementById('Concept').value = eventData.title || '';
+    document.getElementById('Concept').value = eventData.Concept || '';
     document.getElementById('caption').value = eventData.hashtags || globalHashtags || '';
     document.getElementById('eventDate').value = event.start;
     document.getElementById('eventID').value = event.id;
@@ -681,7 +681,7 @@ response.posting_days.forEach(dayString => {
                     end: date.format('YYYY-MM-DD'),
                     rendering: 'background',
                     backgroundColor: color,
-                    title: 'Event on ' + date.format('YYYY-MM-DD'),
+                    Concept: 'Event on ' + date.format('YYYY-MM-DD'),
                     hashtags: response.hashtags || []
                 };
                 events.push(event);
@@ -898,7 +898,7 @@ document.getElementById('saveButton').addEventListener('click', function () {
     const formData = new FormData(form);
 
     const data = {
-        title: formData.get('Concept'),
+        Concept: formData.get('Concept'),
         description: formData.get('caption'),
         hashtags: formData.get('eventHashtags'),
         state: 'saved',
