@@ -39,6 +39,12 @@ try {
     <!-- FullCalendar CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
     <style>
+        
+        .event-section {
+            display: none;
+        }
+
+        
         /* Style the select element */
 #monthSelect {
     background-color: #ADD8E6; /* Light Blue background */
@@ -220,8 +226,6 @@ try {
     <div class="container mt-5">
         <h1>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
         <h2>Select a Client:</h2>
-        <div id="eventCount" class="mt-2"></div>
-
         <select name='client' id='clientSelect'>
             <option value='' disabled selected>Select a client</option>
             <?php
@@ -263,27 +267,58 @@ try {
     <!-- Bootstrap JS -->
     <script src="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.bundle.min.js"></script>
 
+
+
+
+
+
 <!-- Content Modal -->
+ 
 <div class="modal fade" id="contentModal" tabindex="-1" aria-labelledby="contentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
-                <span id="modalDateID" class="ml-3"></span> <!-- Date ID Display -->
+                <div class="modal-header-content">
+                    <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
+                    <span id="modalClientName" class="mx-3"></span> <!-- Client Name Display -->
+                    <span id="modalDateID" class="ml-3"></span> <!-- Date ID Display -->
                 </div>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
             <div class="modal-body">
                 <form id="contentForm" action="content_submit.php" method="post">
+                    <!-- Radio buttons for selecting Type -->
                     <div class="mb-3">
-                        <label for="eventTitle" class="form-label">Title</label>
-                        <input type="text" class="form-control" id="eventTitle" name="eventTitle" required>
+                        <label class="form-label">Type</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="eventType" id="staticType" value="static" required>
+                            <label class="form-check-label" for="staticType">Static</label>
+                        </div>
+                        <div class="form-check">
+                            <input class="form-check-input" type="radio" name="eventType" id="videoType" value="video">
+                            <label class="form-check-label" for="videoType">Video</label>
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="eventDescription" class="form-label">Description</label>
-                        <textarea class="form-control" id="eventDescription" name="eventDescription" rows="3" required></textarea>
+                    <!-- Sections for static -->
+                    <div id="staticSection" class="event-section">
+                        <div class="mb-3">
+                            <label for="eventTitle" class="form-label">Title</label>
+                            <input type="text" class="form-control" id="eventTitle" name="eventTitle" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventDescription" class="form-label">Description</label>
+                            <textarea class="form-control" id="eventDescription" name="eventDescription" rows="3" required></textarea>
+                        </div>
+                        <div class="mb-3">
+                            <label for="eventHashtags" class="form-label">Hashtags</label>
+                            <input type="text" class="form-control" id="eventHashtags" name="eventHashtags">
+                        </div>
                     </div>
-                    <div class="mb-3">
-                        <label for="eventHashtags" class="form-label">Hashtags</label>
-                        <input type="text" class="form-control" id="eventHashtags" name="eventHashtags">
+                    <!-- Sections for video -->
+                    <div id="videoSection" class="event-section d-none">
+                    <label for="eventTitle" class="form-label">Title</label>
                     </div>
                     <input type="hidden" id="eventDate" name="eventDate">
                     <input type="hidden" id="eventID" name="eventID">
@@ -291,7 +326,7 @@ try {
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
-                <button type="button" class="btn btn-primary" id="saveButton">Save</button>
+                <button type="button" class="btn btn-primary" data-dismiss="modal" id="saveButton">Save</button>
             </div>
         </div>
     </div>
@@ -351,24 +386,62 @@ document.addEventListener('DOMContentLoaded', function() {
         data.color = 'blue'; // Set the event color to blue
         savedData[key] = data;
         localStorage.setItem(localStorageKey, JSON.stringify(savedData));
+    }// Function to initialize the modal and set up event listeners
+function initializeModal() {
+    const typeRadios = document.getElementsByName('eventType');
+    
+    typeRadios.forEach(radio => {
+        radio.addEventListener('change', function() {
+            const staticSection = document.getElementById('staticSection');
+            const videoSection = document.getElementById('videoSection');
+
+            if (this.value === 'static') {
+                staticSection.style.display = 'block';
+                videoSection.style.display = 'none';
+            } else if (this.value === 'video') {
+                staticSection.style.display = 'none';
+                videoSection.style.display = 'block';
+            }
+        });
+    });
+}
+
+// Function to show the modal and populate its fields
+function showModal(event) {
+    const savedData = getSavedData();
+    const key = `${selectedClient}_${event.id}`;
+    const eventData = savedData[key] || {};
+
+    document.getElementById('eventTitle').value = eventData.title || '';
+    document.getElementById('eventDescription').value = eventData.description || '';
+    document.getElementById('eventHashtags').value = eventData.hashtags || globalHashtags || '';
+    document.getElementById('eventDate').value = event.start;
+    document.getElementById('eventID').value = event.id;
+    const formattedDate = moment(event.start).format('MMMM Do, YYYY');
+    document.getElementById('modalDateID').textContent = `Task Date: ${formattedDate}`;
+    document.getElementById('modalClientName').textContent = `Client: ${selectedClient}`;
+
+    // Set initial visibility of sections based on the currently selected radio button
+    const selectedType = Array.from(document.getElementsByName('eventType')).find(radio => radio.checked)?.value || 'static';
+    const staticSection = document.getElementById('staticSection');
+    const videoSection = document.getElementById('videoSection');
+    
+    if (selectedType === 'static') {
+        staticSection.style.display = 'block';
+        videoSection.style.display = 'none';
+    } else {
+        staticSection.style.display = 'none';
+        videoSection.style.display = 'block';
     }
 
-    // Function to show modal with event details
-    function showModal(event) {
-        const savedData = getSavedData();
-        const key = `${selectedClient}_${event.id}`;
-        const eventData = savedData[key] || {};
+    $('#contentModal').modal('show');
+}
 
-        document.getElementById('eventTitle').value = eventData.title || '';
-        document.getElementById('eventDescription').value = eventData.description || '';
-        document.getElementById('eventHashtags').value = eventData.hashtags || globalHashtags || '';
-        document.getElementById('eventDate').value = event.start;
-        document.getElementById('eventID').value = event.id;
-        const formattedDate = moment(event.start).format('MMMM Do, YYYY');
-        document.getElementById('modalDateID').textContent = `Task Date: ${formattedDate}`;
+// Initialize modal settings when the document is ready
+$(document).ready(function() {
+    initializeModal();
+});
 
-        $('#contentModal').modal('show');
-    }
 
     // Event listener for client selection
     document.getElementById('clientSelect').addEventListener('change', function() {
@@ -391,31 +464,25 @@ document.addEventListener('DOMContentLoaded', function() {
                             endDate = adjustEndDate(moment(response.end_date));
                             globalHashtags = response.hashtags || '';
 
-                           // Populate months dropdown
-const monthSelect = document.getElementById('monthSelect');
-monthSelect.innerHTML = ''; // Clear existing options
+                            // Populate months dropdown
+                            const monthSelect = document.getElementById('monthSelect');
+                            monthSelect.innerHTML = ''; // Clear existing options
 
-// Add default option
-const defaultOption = document.createElement('option');
-defaultOption.value = '';
-defaultOption.textContent = 'Select a month';
-defaultOption.disabled = true;
-defaultOption.selected = true;
-monthSelect.appendChild(defaultOption);
+                            // Add default option
+                            const defaultOption = document.createElement('option');
+                            defaultOption.value = '';
+                            defaultOption.textContent = 'Select a month';
+                            defaultOption.disabled = true;
+                            defaultOption.selected = true;
+                            monthSelect.appendChild(defaultOption);
 
-// Add dynamic month options
-response.months.forEach(month => {
-    // Convert month format to "MMMM/YYYY"
-    const [monthStr, yearStr] = month.split(',');
-    const formattedMonth = moment().month(parseInt(monthStr, 10) - 1).format('MMMM');
-    const formattedOptionText = `${formattedMonth}/${yearStr}`;
-    
-    const option = document.createElement('option');
-    option.value = month;
-    option.textContent = formattedOptionText;
-    monthSelect.appendChild(option);
-});
-
+                            // Add dynamic month options
+                            response.months.forEach(month => {
+                                const option = document.createElement('option');
+                                option.value = month;
+                                option.textContent = month;
+                                monthSelect.appendChild(option);
+                            });
 
                             const events = [];
                             response.posting_days.forEach(dayString => {
@@ -617,23 +684,6 @@ response.months.forEach(month => {
         $('#calendar').fullCalendar('refetchEvents');
     });
 });
-function countNonFilteredEvents() {
-    // Get all events currently loaded in FullCalendar
-    const allEvents = $('#calendar').fullCalendar('clientEvents');
-
-    // Get the filtered events (visible in the calendar)
-    const visibleEvents = $('#calendar').fullCalendar('getEvents');
-
-    // Filter out the visible events from the all events
-    const nonFilteredEvents = allEvents.filter(event => 
-        !visibleEvents.some(visibleEvent => visibleEvent.id === event.id)
-    );
-
-    // Log or display the count of non-filtered events
-    console.log('Non-filtered events count:', nonFilteredEvents.length);
-    alert('Non-filtered events count: ' + nonFilteredEvents.length);
-}
-
 window.addEventListener('beforeunload', function (e) {
     // Customize the message to be shown in the alert
     var confirmationMessage = 'Are you sure you want to leave? Changes you made may not be saved.';
@@ -645,7 +695,6 @@ window.addEventListener('beforeunload', function (e) {
     // For some older browsers
     return confirmationMessage;
 });
-
 
 
 
