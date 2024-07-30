@@ -306,12 +306,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedClient;
     let globalHashtags = '';
     let nOfPosts, nOfVideos, languages; // Added new variables
-    console.log('Start Date:', startDate.format());
-console.log('End Date:', endDate.format());
-console.log('Global Hashtags:', globalHashtags);
-console.log('Number of Posts:', nOfPosts);
-console.log('Number of Videos:', nOfVideos);
-console.log('Languages:', languages);
+    
 
     
 
@@ -614,6 +609,18 @@ console.log('Languages:', languages);
         $('#calendar').fullCalendar('refetchEvents');
     });
 });
+window.addEventListener('beforeunload', function (e) {
+    // Customize the message to be shown in the alert
+    var confirmationMessage = 'Are you sure you want to leave? Changes you made may not be saved.';
+
+    // Standard for most browsers
+    e.preventDefault(); 
+    e.returnValue = confirmationMessage;
+
+    // For some older browsers
+    return confirmationMessage;
+});
+
 
 
 
