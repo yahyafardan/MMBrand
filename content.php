@@ -898,12 +898,9 @@ document.getElementById('saveButton').addEventListener('click', function () {
 
     const data = {
         Concept: formData.get('Concept'),
-                caption: formData.get('caption'),
-                type: getSelectedType(),
-                sponsors: getSelectedSponsor(),
-                platforms: getSelectedPlatforms(),
-                state: 'saved',
-                color: 'blue'
+        caption: formData.get('caption'),
+        state: 'saved',
+        color: 'blue'
     };
 
     saveDataToLocal(selectedClient, formData.get('eventID'), data);
