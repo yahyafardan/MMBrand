@@ -867,7 +867,6 @@ applySavedEventColors(); // Apply saved event colors after loading events
             const eventDate = moment(event.start).format('MMMM Do, YYYY');
             $('#contentModalLabel').text('Event on ' + eventDate);
             $('#modalEventId').text('Event ID: ' + event.id);
-            $('#eventHashtags').val(event.hashtags || '');
         },
         viewRender: function(view) {
             try {
@@ -899,8 +898,7 @@ document.getElementById('saveButton').addEventListener('click', function () {
 
     const data = {
         Concept: formData.get('Concept'),
-        description: formData.get('caption'),
-        hashtags: formData.get('eventHashtags'),
+        caption: formData.get('caption'),
         state: 'saved',
         color: 'blue'
     };
