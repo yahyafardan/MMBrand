@@ -299,12 +299,46 @@ try {
 #languageData {
     font-weight: bold; /* Make language data stand out */
 }
+#submitButton {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000; /* Ensure it stays on top of other content */
+}
+<style>
+    #savedItemsContainer {
+        position: absolute; /* Position it absolutely within its containing element */
+        bottom: 10px; /* Adjust the distance from the bottom */
+        right: 10px; /* Adjust the distance from the right */
+        background-color: #f8f9fa; /* Light background color for visibility */
+        padding: 5px; /* Add some padding */
+        border-radius: 5px; /* Rounded corners */
+        border: 1px solid #ddd; /* Border for visibility */
+    }
+</style>
+
+
 
 
 
     </style>
 </head>
 <body>
+  <!-- HTML element for displaying the saved items count -->
+<div id="savedItemsContainer" class="d-none">
+    <span id="savedItemsCount">Saved Items: 0</span>
+</div>
+
+<!-- HTML element for displaying the visible events count -->
+<div id="visibleEventsContainer" class="d-none">
+    <p id="visibleEventsCount">Visible Events: 0</p>
+</div>
+
+
+
+    <!-- Hidden Submit Button -->
+<button id="submitButton" class="btn btn-primary d-none">Submit Button</button>
+
     <div class="container mt-5">
         <h1>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
         <h2>Select a Client:</h2>
@@ -469,6 +503,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedClient;
     let globalHashtags = '';
     let nOfPosts, nOfVideos, languages; // Added new variables
+    let GsavedItemsCount = savedItemsCount; // This should be updated with the actual saved items count
+    let GvisibleEventsCount = visibleEventsCount; // This should be updated dynamically
     
 
     
@@ -512,7 +548,8 @@ document.addEventListener('DOMContentLoaded', function() {
         data.color = 'blue'; // Set the event color to blue
         savedData[key] = data;
         localStorage.setItem(localStorageKey, JSON.stringify(savedData));
-    }// Function to initialize the modal and set up event listeners
+    }
+    // Function to initialize the modal and set up event listeners
 function initializeModal() {
     const typeRadios = document.getElementsByName('eventType');
     
@@ -623,59 +660,109 @@ response.months.forEach(month => {
     monthSelect.appendChild(option);
 });
 
+const events = [];
+let visibleEvents = [];
 
-                            const events = [];
-                            response.posting_days.forEach(dayString => {
-                                const daysArray = dayString.split(',').map(day => {
-                                    return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
-                                });
+// Example of fetching and parsing events
+response.posting_days.forEach(dayString => {
+    const daysArray = dayString.split(',').map(day => {
+        return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+    });
 
-                                daysArray.forEach(dayOfWeek => {
-                                    const color = 'purple';
-                                    const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
+    daysArray.forEach(dayOfWeek => {
+        const color = 'purple';
+        const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
 
-                                    dates.forEach(date => {
-                                        if (date.isBetween(startDate, endDate, null, '[]')) {
-                                            events.push({
-                                                id: date.format('YYYY-MM-DD'),
-                                                start: date.format('YYYY-MM-DD'),
-                                                end: date.format('YYYY-MM-DD'),
-                                                rendering: 'background',
-                                                backgroundColor: color,
-                                                title: 'Event on ' + date.format('YYYY-MM-DD'),
-                                                hashtags: response.hashtags || []
-                                            });
-                                        }
-                                    });
-                                });
-                            });
+        dates.forEach(date => {
+            if (date.isBetween(startDate, endDate, null, '[]')) {
+                const event = {
+                    id: date.format('YYYY-MM-DD'),
+                    start: date.format('YYYY-MM-DD'),
+                    end: date.format('YYYY-MM-DD'),
+                    rendering: 'background',
+                    backgroundColor: color,
+                    title: 'Event on ' + date.format('YYYY-MM-DD'),
+                    hashtags: response.hashtags || []
+                };
+                events.push(event);
+            }
+        });
+    });
+});
 
-                            monthSelect.addEventListener('change', function() {
-                                const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
+monthSelect.addEventListener('change', function() {
+    const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
 
-                                if (selectedMonths.length > 0) {
-                                    console.log("Months selected:", selectedMonths);
-                                    $('#calendar').fullCalendar('removeEvents'); // Remove all existing events
+    if (selectedMonths.length > 0) {
+        console.log("Months selected:", selectedMonths);
+        $('#calendar').fullCalendar('removeEvents'); // Remove all existing events
+        // Reset counters
+        savedItemsCount = 0;
+        visibleEventsCount = 0; // Reset visible events count
 
-                                    // Filter and add only the events for the selected months
-                                    const filteredEvents = events.filter(event => {
-                                        const eventDate = moment(event.start);
-                                        return selectedMonths.some(month => {
-                                            const [monthStr, yearStr] = month.split(',');
-                                            const monthStart = moment().year(yearStr).month(monthStr - 1).startOf('month');
-                                            const monthEnd = moment().year(yearStr).month(monthStr - 1).endOf('month');
-                                            return eventDate.isBetween(monthStart, monthEnd, null, '[]');
-                                        });
-                                    });
+        // Clear UI counters
+        document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
+        document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
 
-                                    $('#calendar').fullCalendar('addEventSource', filteredEvents);
-                                    $('#calendar').fullCalendar('gotoDate', moment(selectedMonths[0], 'MM,YYYY').startOf('month')); // Navigate to the first selected month
-                                }
-                            });
 
-                            applySavedEventColors(); // Apply saved event colors after loading events
-                        }
-                    } catch (e) {
+        // Filter and add only the events for the selected months
+        const filteredEvents = events.filter(event => {
+            const eventDate = moment(event.start);
+            return selectedMonths.some(month => {
+                const [monthStr, yearStr] = month.split(',');
+                const monthStart = moment().year(yearStr).month(monthStr - 1).startOf('month');
+                const monthEnd = moment().year(yearStr).month(monthStr - 1).endOf('month');
+                return eventDate.isBetween(monthStart, monthEnd, null, '[]');
+            });
+        });
+
+        $('#calendar').fullCalendar('addEventSource', filteredEvents);
+        $('#calendar').fullCalendar('gotoDate', moment(selectedMonths[0], 'MM,YYYY').startOf('month')); // Navigate to the first selected month
+        
+        // Update the visible events
+        visibleEvents = filteredEvents;
+        updateVisibleEventsCounter();
+    }
+});
+
+$('#calendar').fullCalendar({
+    viewRender: function(view, element) {
+        // Function to be called every time the view changes
+        const visibleRange = view.intervalStart.format('YYYY-MM-DD') + '/' + view.intervalEnd.format('YYYY-MM-DD');
+        console.log('Visible range:', visibleRange);
+
+        // Example: Update visible events based on the current view
+        visibleEvents = $('#calendar').fullCalendar('getEvents').filter(event => {
+            const eventDate = moment(event.start);
+            return eventDate.isBetween(view.intervalStart, view.intervalEnd, null, '[]');
+        });
+
+        console.log('Currently visible events:', visibleEvents);
+        updateVisibleEventsCounter();
+    }
+});
+
+// Function to update the visible events counter
+function updateVisibleEventsCounter() {
+    visibleEventsCount = visibleEvents.length;
+    console.log('Visible Events Count Updated:', visibleEventsCount);
+
+    // Update the counter in the HTML
+    document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
+    
+    // Show the visible events container if there are visible events
+    const visibleEventsContainer = document.getElementById('visibleEventsContainer');
+    if (visibleEventsCount > 0) {
+        visibleEventsContainer.classList.remove('d-none');
+    } else {
+        visibleEventsContainer.classList.add('d-none');
+    }
+}
+
+
+applySavedEventColors(); // Apply saved event colors after loading events
+                        }}
+ catch (e) {
                         console.error('Error processing response:', e);
                         document.getElementById('resultContainer').innerHTML = '<p style="color: red;">Error processing response.</p>';
                     }
@@ -805,25 +892,38 @@ response.months.forEach(month => {
     });
 
     // Event listener for save button
-    document.getElementById('saveButton').addEventListener('click', function () {
-        const form = document.getElementById('contentForm');
-        const formData = new FormData(form);
+  // Event listener for save button
+document.getElementById('saveButton').addEventListener('click', function () {
+    const form = document.getElementById('contentForm');
+    const formData = new FormData(form);
 
-        const data = {
-            title: formData.get('Concept'),
-            description: formData.get('caption'),
-            hashtags: formData.get('eventHashtags'),
-            state: 'saved',
-            color: 'blue'
-        };
-        
+    const data = {
+        title: formData.get('Concept'),
+        description: formData.get('caption'),
+        hashtags: formData.get('eventHashtags'),
+        state: 'saved',
+        color: 'blue'
+    };
 
-        saveDataToLocal(selectedClient, formData.get('eventID'), data);
-        updateEventColor(formData.get('eventID'), 'blue');
+    saveDataToLocal(selectedClient, formData.get('eventID'), data);
+    updateEventColor(formData.get('eventID'), 'blue');
 
-        $('#contentModal').modal('hide');
-        $('#calendar').fullCalendar('refetchEvents');
-    });
+    $('#contentModal').modal('hide');
+    $('#calendar').fullCalendar('refetchEvents');
+
+    // Increment the savedItemsCount
+    savedItemsCount++;
+
+    // Show the submit button after saving
+    document.getElementById('submitButton').classList.remove('d-none');
+
+    // Show the saved items count container
+    const savedItemsContainer = document.getElementById('savedItemsContainer');
+    savedItemsContainer.classList.remove('d-none');
+
+    // Update the UI to show the saved items count
+    document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
+});
 });
 window.addEventListener('beforeunload', function (e) {
     // Customize the message to be shown in the alert
@@ -836,6 +936,28 @@ window.addEventListener('beforeunload', function (e) {
     // For some older browsers
     return confirmationMessage;
 });
+
+
+
+document.getElementById('submitButton').addEventListener('click', handleSubmission);
+
+function handleSubmission() {
+    // Log the types and values of the variables
+    console.log('savedItemsCount:', savedItemsCount, 'Type:', typeof savedItemsCount);
+    console.log('visibleEventsCount:', visibleEventsCount, 'Type:', typeof visibleEventsCount);
+
+    // Check if all items are saved
+    if (savedItemsCount >= visibleEventsCount) {
+        // If all items are saved, proceed to redirection
+        console.log('All items are saved. Redirecting...');
+        window.location.href = 'https://www.google.com'; // Replace with your desired URL
+    } else {
+        // Show an alert if not all items are saved
+        console.log('Not all items are saved. Showing alert.');
+        alert('You have to save all items before proceeding.');
+    }
+}
+
 
 
 
