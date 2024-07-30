@@ -38,290 +38,7 @@ try {
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
     <!-- FullCalendar CSS -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/fullcalendar/3.10.2/fullcalendar.min.css">
-    <style>
-        
-        .event-section {
-            display: none;
-        }
-
-        
-        /* Style the select element */
-#monthSelect {
-    background-color: #ADD8E6; /* Light Blue background */
-    color: #2F4F4F; /* Dark Slate Gray text */
-    border: 1px solid #2F4F4F; /* Dark Slate Gray border */
-    padding: 5px 10px; /* Padding inside the dropdown */
-    border-radius: 4px; /* Rounded corners */
-    font-size: 16px; /* Font size */
-}
-
-/* Style the options */
-#monthSelect option {
-    background-color: #ADD8E6; /* Light Blue background */
-    color: #2F4F4F; /* Dark Slate Gray text */
-    padding: 10px; /* Padding inside options */
-}
-
-        /* General body styling */
-        body {
-            background-color: black; /* Black background */
-            color: green; /* Green text */
-        }
-        /* Calendar container background */
-#calendar {
-    background-color: #ADD8E6; /* Light Blue background */
-    color: #2F4F4F; /* Dark Slate Gray text */
-}
-
-/* Event cells color */
-.fc-event {
-    background-color: #90EE90; /* Light Green for events */
-    border-color: #90EE90; /* Match the border with the event color */
-}
-
-/* Event title color */
-.fc-event .fc-title {
-    color: #2F4F4F; /* Dark Slate Gray text for better readability */
-}
-
-/* Button styling */
-.fc-custom-btn {
-    background-color: #87CEFA; /* Light Sky Blue */
-    color: #2F4F4F; /* Dark Slate Gray text */
-}
-
-/* Modal styling */
-.modal-content {
-    background-color: #FFFFFF; /* White background for the modal */
-    border: 1px solid #E0E0E0; /* Light gray border for subtle contrast */
-}
-
-/* Modal header and footer buttons */
-.modal-header .close {
-    color: #2F4F4F; /* Dark Slate Gray close button */
-}
-.modal-footer .btn-primary {
-    background-color: #87CEFA; /* Light Sky Blue button */
-    border-color: #87CEFA; /* Match the border with the button color */
-}
-
-        /* Calendar container */
-        #calendar-container {
-            width: 80%;
-            height: ;: 80%; /* Adjust as needed */
-            margin: 0 auto;
-        }
-        /* Calendar element styling */
-        #calendar {
-            max-width: 100%;
-            background-color: black; /* Black background for calendar */
-            color: green; /* Green text for calendar */
-        }
-        /* Event cell styling */
-        .fc-event {
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            cursor: pointer; /* Make it look clickable */
-            position: relative;
-            color: white; /* White text for event */
-        }
-        /* Title within events */
-        .fc-event .fc-title {
-            max-width: 120px; /* Adjust as needed */
-            height: 20px;     /* Adjust as needed */
-            overflow: hidden; /* Hide overflow text */
-            text-overflow: ellipsis; /* Add ellipsis for overflowed text */
-            white-space: nowrap; /* Prevent line breaks */
-            text-align: center;
-        }
-        /* Purple background for event cells */
-        .fc-day .fc-day-posting {
-            background-color: purple; /* Purple background for event cells */
-        }
-        /* Option background cell styling */
-        #clientSelect {
-            background-color: purple; /* Match event cell color */
-            color: white; /* White text for better readability */
-        }
-        #clientSelect option {
-            background-color: purple; /* Match event cell color */
-            color: white; /* White text for better readability */
-        }
-        /* Guide styles */
-        .guide {
-    margin-top: 20px;
-}
-
-.guide .color-box {
-    display: inline-block;
-    width: 20px;
-    height: 20px;
-    margin-right: 10px;
-    border: 1px solid #ddd; /* Add border to make color boxes more visible */
-}
-
-/* Event colors for different statuses */
-.fc-event.task {
-    background-color: purple !important; /* Purple for tasks */
-    border-color: purple !important; /* Border color for tasks */
-}
-
-.fc-event.saved {
-    background-color: blue !important; /* Blue for saved events */
-    border-color: blue !important; /* Border color for saved events */
-}
-
-.fc-event.done {
-    background-color: green !important; /* Green for completed events */
-    border-color: green !important; /* Border color for completed events */
-}
-
-
-        #floatingButton {
-            position: fixed;
-            bottom: 20px;
-            right: 20px;
-            z-index: 9999; /* Ensure it's on top */
-            padding: 15px 30px; /* Increase padding */
-            font-size: 18px; /* Increase font size */
-            border-radius: 50px; /* Make the button round */
-            background-color: purple; /* Purple button background */
-            color: white; /* White text on button */
-            border: none; /* Remove default border */
-            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2); /* Add shadow for better visibility */
-        }
-        /* Modal custom styles */
-        .modal-content {
-            background-color: black; /* Black background for modal */
-            color: green; /* Green text for modal */
-        }
-        .modal-header {
-            border-bottom: 1px solid purple; /* Purple border for modal header */
-        }
-        .modal-footer {
-            border-top: 1px solid purple; /* Purple border for modal footer */
-        }
-        .modal-body input, .modal-body textarea {
-            background-color: black; /* Black background for input/textarea */
-            color: green; /* Green text for input/textarea */
-            border: 1px solid purple; /* Purple border for input/textarea */
-        }
-        /* Updated Guide styles */
-.guide .color-box.task {
-    background-color: purple; /* Purple for tasks */
-}
-
-.guide .color-box.saved {
-    background-color: blue; /* Blue for saved events */
-}
-
-.guide .color-box.done {
-    background-color: green; /* Green for completed events */
-}/* Style for the modal checkboxes container */
-.modal-body .social-media-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem; /* Adjust space between checkboxes */
-}
-
-/* Individual checkbox styling */
-.modal-body .form-check {
-    display: flex;
-    align-items: center;
-    margin-right: 1rem; /* Adjust space between items */
-}
-/* Style for the language options container */
-.language-options,
-.sponsor-options,
-.social-media-links {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 1rem; /* Adjust this value to control the space between items */
-}
-
-/* Style for individual checkboxes/radio buttons */
-.form-check {
-    display: flex;
-    align-items: center;
-    margin-right: 1rem; /* Adjust spacing between items */
-}
-.form-check-input {
-    margin-right: 0.5rem; /* Adjust spacing between checkbox/radio and label */
-}
-
-/* Optional: If needed to limit width or ensure proper wrapping */
-.language-options,
-.sponsor-options,
-.social-media-links {
-    max-width: 100%;
-    overflow: auto;
-}
-.modal-header-content {
-    width: 100%;
-    text-align: center;
-}
-
-.modal-header-info {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px; /* Adjust as needed */
-}
-
-.modal-header-info > * {
-    margin: 0 10px; /* Space out the items */
-}
-
-#languageData {
-    font-weight: bold; /* Make language data stand out */
-}
-.modal-header-content {
-    width: 100%;
-    text-align: center;
-}
-
-.modal-header-info {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    margin-top: 10px; /* Adjust as needed */
-}
-
-.modal-header-info > * {
-    margin: 0 10px; /* Space out the items */
-}
-
-.language-label {
-    font-weight: bold;
-}
-
-#languageData {
-    font-weight: bold; /* Make language data stand out */
-}
-#submitButton {
-    position: fixed;
-    bottom: 20px;
-    right: 20px;
-    z-index: 1000; /* Ensure it stays on top of other content */
-}
-<style>
-    #savedItemsContainer {
-        position: absolute; /* Position it absolutely within its containing element */
-        bottom: 10px; /* Adjust the distance from the bottom */
-        right: 10px; /* Adjust the distance from the right */
-        background-color: #f8f9fa; /* Light background color for visibility */
-        padding: 5px; /* Add some padding */
-        border-radius: 5px; /* Rounded corners */
-        border: 1px solid #ddd; /* Border for visibility */
-    }
-</style>
-
-
-
-
-
-    </style>
+  
 </head>
 <body>
   <!-- HTML element for displaying the saved items count -->
@@ -363,11 +80,11 @@ try {
         <div class="guide mt-4">
     <h5>Event Color Guide:</h5>
     <div>
-        <span class="color-box task"></span> Purple: Task
+        <span class="color-box task"></span>  Task
         </br>
-        <span class="color-box saved"></span> Blue: Saved
+        <span class="color-box saved"></span>  Saved
         </br>
-        <span class="color-box done"></span> Green: Completed
+        <span class="color-box done"></span>  Completed
     </div>
 </div>
 
@@ -965,3 +682,82 @@ function handleSubmission() {
 
 </body>
 </html>
+<style>
+        #submitButton {
+        position: fixed;
+        bottom: 20px;
+        right: 20px;
+        z-index: 1000; /* Ensure it is above other elements */
+    }
+
+    .color-box {
+        display: inline-block;
+        width: 20px;
+        height: 20px;
+        margin-right: 8px;
+        vertical-align: middle;
+    }
+
+    .color-box.task {
+        background-color: #FF5733; /* Example color for Task */
+    }
+
+    .color-box.saved {
+        background-color: #33FF57; /* Example color for Saved */
+    }
+
+    .color-box.done {
+        background-color: #3357FF; /* Example color for Completed */
+    }
+
+    .guide {
+        margin-top: 20px;
+    }
+    /* Aligning the client and month selection to the left */
+.container {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns items to the start (left) */
+}
+
+/* Adding relaxed colors to the selection elements */
+#clientSelect, #monthSelect {
+    background-color: #E0F7FA; /* Light Cyan */
+    color: #000000; /* Black text */
+    border: 2px solid #00796B; /* Teal border */
+    padding: 10px;
+    border-radius: 5px;
+    margin-bottom: 10px; /* Add space between the elements */
+}
+
+/* Aligning the guide to the left and giving relaxed colors to the color boxes */
+.guide {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start; /* Aligns guide items to the start (left) */
+    margin-top: 20px;
+}
+
+.color-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
+
+.color-box.task {
+    background-color: #B2DFDB; /* Light Teal */
+}
+
+.color-box.saved {
+    background-color: #C8E6C9; /* Light Green */
+}
+
+.color-box.done {
+    background-color: #BBDEFB; /* Light Blue */
+}
+
+
+
+</style>
