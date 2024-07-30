@@ -593,25 +593,36 @@ $(document).ready(function() {
                             languages=response.languages || '';
 
 
-                            // Populate months dropdown
-                            const monthSelect = document.getElementById('monthSelect');
-                            monthSelect.innerHTML = ''; // Clear existing options
+                           // Populate months dropdown
+const monthSelect = document.getElementById('monthSelect');
+monthSelect.innerHTML = ''; // Clear existing options
 
-                            // Add default option
-                            const defaultOption = document.createElement('option');
-                            defaultOption.value = '';
-                            defaultOption.textContent = 'Select a month';
-                            defaultOption.disabled = true;
-                            defaultOption.selected = true;
-                            monthSelect.appendChild(defaultOption);
+// Add default option
+const defaultOption = document.createElement('option');
+defaultOption.value = '';
+defaultOption.textContent = 'Select a month';
+defaultOption.disabled = true;
+defaultOption.selected = true;
+monthSelect.appendChild(defaultOption);
 
-                            // Add dynamic month options
-                            response.months.forEach(month => {
-                                const option = document.createElement('option');
-                                option.value = month;
-                                option.textContent = month;
-                                monthSelect.appendChild(option);
-                            });
+// Add dynamic month options
+response.months.forEach(month => {
+    const option = document.createElement('option');
+
+    // Assuming `month` is in 'MM,YYYY' format
+    const [monthIndex, year] = month.split(','); // Split into month and year
+    const date = new Date(year, parseInt(monthIndex, 10) - 1); // Month is zero-based in JavaScript
+
+    // Format the month as MMMM/YYYY
+    const options = { year: 'numeric', month: 'long' };
+    const formattedMonth = date.toLocaleDateString('en-US', options); // e.g., 'April 2024'
+
+    option.value = month;
+    option.textContent = formattedMonth;
+
+    monthSelect.appendChild(option);
+});
+
 
                             const events = [];
                             response.posting_days.forEach(dayString => {
@@ -805,6 +816,7 @@ $(document).ready(function() {
             state: 'saved',
             color: 'blue'
         };
+        
 
         saveDataToLocal(selectedClient, formData.get('eventID'), data);
         updateEventColor(formData.get('eventID'), 'blue');
