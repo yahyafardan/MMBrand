@@ -318,7 +318,7 @@ function handleSubmission() {
         console.log('All items are saved. Redirecting...');
         postLocalStorageData();
 
-        window.location.href = 'csub.php'; // Replace with your desired URL
+        window.location.href = '1.php'; // Replace with your desired URL
     // } else {
     //     // Show an alert if not all items are saved
     //     console.log('Not all items are saved. Showing alert.');
@@ -326,52 +326,39 @@ function handleSubmission() {
     // }
 }
 
-  // Function to post data to PHP script
 // Function to post data to PHP script
 function postLocalStorageData() {
-    const localStorageKey = 'modalSavedData'; // Key used to store data in local storage
-    const data = localStorage.getItem(localStorageKey); // Retrieve data from local storage
+    fetch('http://localhost/MMBrand/1.php', {
+    method: 'POST',
+    headers: {
+        'Content-Type': 'application/json; charset=UTF-8'
+    },
+    body: JSON.stringify({ message: 'hello' }) // Make sure this is correct
+})
+.then(response => response.json()) // Parse response as JSON
+.then(data => {
+    console.log('Response Data:', data);
+})
+.catch(error => {
+    console.error('Fetch Error:', error);
+});
 
-    console.log('Local Storage Key:', localStorageKey);
-    console.log('Local Storage Data:', data);
-
-    // Ensure data exists before posting
-    if (data) {
-        fetch('csub.php', { // Replace with the path to your PHP script
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ data: data }) // Ensure data is correctly stringified
-        })
-        .then(response => response.json())
-        .then(result => {
-            console.log('Success:', result);
-
-            // Log the formatted data from the PHP response
-            if (result.status === 'success') {
-                displayFormattedData(result.formattedData);
-            } else {
-                console.error('Error:', result.message);
-            }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
-    } else {
-        console.error('No data found in local storage');
-    }
 }
 
 // Function to log the formatted data
 function displayFormattedData(formattedData) {
     // Log the formatted data to the console
-    console.log('Formatted Data:aaaa', formattedData);
+    console.log('Formatted Data:', formattedData);
 }
 
 
-;
+// Function to log the formatted data
+function displayFormattedData(formattedData) {
+    // Log the formatted data to the console
+    console.log('Formatted Data:', formattedData);
+}
 
+;
 
 
 
@@ -599,7 +586,6 @@ monthSelect.addEventListener('change', function() {
     const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
 
     if (selectedMonths.length > 0) {
-        console.log("Months selected:", selectedMonths);
         $('#calendar').fullCalendar('removeEvents'); // Remove all existing events
         // Reset counters
         savedItemsCount = 0;
@@ -634,7 +620,6 @@ $('#calendar').fullCalendar({
     viewRender: function(view, element) {
         // Function to be called every time the view changes
         const visibleRange = view.intervalStart.format('YYYY-MM-DD') + '/' + view.intervalEnd.format('YYYY-MM-DD');
-        console.log('Visible range:', visibleRange);
 
         // Example: Update visible events based on the current view
         visibleEvents = $('#calendar').fullCalendar('getEvents').filter(event => {
@@ -642,7 +627,6 @@ $('#calendar').fullCalendar({
             return eventDate.isBetween(view.intervalStart, view.intervalEnd, null, '[]');
         });
 
-        console.log('Currently visible events:', visibleEvents);
         updateVisibleEventsCounter();
     }
 });
@@ -650,7 +634,6 @@ $('#calendar').fullCalendar({
 // Function to update the visible events counter
 function updateVisibleEventsCounter() {
     visibleEventsCount = visibleEvents.length;
-    console.log('Visible Events Count Updated:', visibleEventsCount);
 
     // Update the counter in the HTML
     document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
@@ -767,7 +750,6 @@ applySavedEventColors(); // Apply saved event colors after loading events
             }
         },
         eventClick: function(event, jsEvent, view) {
-            console.log('Event clicked:', event);
 
             selectedEvent = event.id;
             const eventDate = moment(event.start).format('MMMM Do, YYYY');
@@ -814,7 +796,7 @@ applySavedEventColors(); // Apply saved event colors after loading events
         socialMedia: socialMediaPlatform,
         sponsors: sponsorshipOption, // This can be 'yes', 'no', or undefined
         state: 'saved',
-        color: 'blue'
+        color: 'blue',
     };
 
 
@@ -838,7 +820,6 @@ $('#calendar').fullCalendar('refetchEvents');
 
         // Increment the global saved items count
         savedItemsCount++;
-        console.log('Item saved. Updated savedItemsCount:', savedItemsCount);
 
     }
 }
