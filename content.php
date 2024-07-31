@@ -104,7 +104,10 @@ try {
 
 
 
-<!-- Content Modal --><div class="modal fade" id="contentModal" tabindex="-1" aria-labelledby="contentModalLabel" aria-hidden="true">
+<!-- Content Modal -->
+ 
+
+<div class="modal fade" id="contentModal" tabindex="-1" aria-labelledby="contentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
@@ -149,10 +152,10 @@ try {
                             <label for="caption" class="form-label">Caption (Text)</label>
                             <textarea class="form-control" id="caption" name="caption" rows="3" required></textarea>
                         </div>
-                        <!-- Social Media Links Section in Modal -->
+                        <!-- Social Media Platforms Section in Modal -->
                         <div class="mb-3">
-                            <label class="form-label">Social Media Links</label>
-                            <div class="social-media-links">
+                            <label class="form-label">Social Media Platforms</label>
+                            <div class="social-media-platforms">
                                 <div class="form-check">
                                     <input class="form-check-input" type="checkbox" id="xAccount" name="socialMedia[]" value="x_account_link">
                                     <label class="form-check-label" for="xAccount">X</label>
@@ -299,15 +302,44 @@ function showModal(event) {
     const savedData = getSavedData();
     const key = `${selectedClient}_${event.id}`;
     const eventData = savedData[key] || {};
+// Assuming eventData contains information from your event
+document.getElementById('Concept').value = eventData.Concept || '';
+document.getElementById('caption').value = eventData.hashtags || globalHashtags || '';
+document.getElementById('eventDate').value = event.start;
+document.getElementById('eventID').value = event.id;
 
-    document.getElementById('Concept').value = eventData.Concept || '';
-    document.getElementById('caption').value = eventData.hashtags || globalHashtags || '';
-    document.getElementById('eventDate').value = event.start;
-    document.getElementById('eventID').value = event.id;
-    const formattedDate = moment(event.start).format('MMMM Do, YYYY');
-    document.getElementById('modalDateID').textContent = `Task Date: ${formattedDate}`;
-    document.getElementById('modalClientName').textContent = `Client: ${selectedClient}`;
-    document.getElementById('languageData').textContent = languages;
+// Format the date for display
+const formattedDate = moment(event.start).format('MMMM Do, YYYY');
+document.getElementById('modalDateID').textContent = `Task Date: ${formattedDate}`;
+
+// Set the client name
+document.getElementById('modalClientName').textContent = `Client: ${selectedClient}`;
+
+// Set the language data
+document.getElementById('languageData').textContent = languages;
+
+// Set the selected social media platforms
+const socialMediaPlatforms = eventData.socialMedia || [];
+const socialMediaCheckboxes = document.querySelectorAll('.social-media-platforms .form-check-input');
+socialMediaCheckboxes.forEach(checkbox => {
+    checkbox.checked = socialMediaPlatforms.includes(checkbox.value);
+});
+
+// Set the sponsorship option
+const sponsorshipOption = eventData.sponsors || '';
+const sponsorYes = document.getElementById('sponsorYes');
+const sponsorNo = document.getElementById('sponsorNo');
+ // Clear previous selections
+ sponsorYes.checked = false;
+    sponsorNo.checked = false;
+
+
+if (sponsorshipOption === 'yes') {
+    sponsorYes.checked = true;
+} else if (sponsorshipOption === 'no') {
+    sponsorNo.checked = true;
+}
+
 
 
     // Set initial visibility of sections based on the currently selected radio button
@@ -617,15 +649,25 @@ applySavedEventColors(); // Apply saved event colors after loading events
     });
 
     // Event listener for save button
-  // Event listener for save button
-document.getElementById('saveButton').addEventListener('click', function () {
+    document.getElementById('saveButton').addEventListener('click', function () {
     const form = document.getElementById('contentForm');
-    const formData = new FormData(form);const data = {
-    Concept: formData.get('Concept'),
-    caption: formData.get('caption'),
-    state: 'saved',
-    color: 'blue'
-};
+    const formData = new FormData(form);
+
+    // Extract social media links
+    const socialMediaPlatform = formData.getAll('socialMedia[]');
+
+    // Extract sponsorship option
+    const sponsorshipOption = formData.get('sponsors'); // Will be 'yes', 'no', or undefined
+
+    const data = {
+        Concept: formData.get('Concept'),
+        caption: formData.get('caption'),
+        socialMedia: socialMediaPlatform,
+        sponsors: sponsorshipOption, // This can be 'yes', 'no', or undefined
+        state: 'saved',
+        color: 'blue'
+    };
+
 
 // Save data to local storage
 saveDataToLocal(selectedClient, formData.get('eventID'), data);
@@ -633,7 +675,7 @@ saveDataToLocal(selectedClient, formData.get('eventID'), data);
 // Update event color
 updateEventColor(formData.get('eventID'), 'blue');
 
-// Save the item and update the count
+// Save the item and update the countsa
 saveItem(formData.get('eventID'));
 
 // Hide the modal and refetch events
@@ -649,8 +691,6 @@ $('#calendar').fullCalendar('refetchEvents');
         savedItemsCount++;
         console.log('Item saved. Updated savedItemsCount:', savedItemsCount);
 
-
-        // Optionally, update the UI or perform other actions
     }
 }
 
