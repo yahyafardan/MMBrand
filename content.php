@@ -50,6 +50,21 @@ try {
 <div id="visibleEventsContainer" class="d-none">
     <p id="visibleEventsCount">Visible Events: 0</p>
 </div>
+<!-- Sticky Button -->
+<button id="viewLocalStorageButton" style="
+    position: fixed;
+    top: 20px;
+    right: 20px;
+    padding: 10px 20px;
+    background-color: #007bff;
+    color: #fff;
+    border: none;
+    border-radius: 5px;
+    cursor: pointer;
+    z-index: 1000;
+">
+    View Local Storage
+</button>
 
 
 
@@ -220,6 +235,63 @@ try {
 
 
 <script>
+    // Function to clear local storage
+function clearLocalStorage() {
+    localStorage.clear();
+    console.log('Local storage has been cleared.');
+}
+
+// Function to display local storage data in the console
+function displayLocalStorageData() {
+    const allKeys = Object.keys(localStorage);
+
+    console.group('--- Local Storage Contents ---');
+
+    if (allKeys.length === 0) {
+        console.log('Local storage is empty.');
+    } else {
+        allKeys.forEach(key => {
+            const value = localStorage.getItem(key);
+            console.group(`Key: ${key}`);
+            console.log('Value:', value);
+            console.groupEnd();
+        });
+    }
+
+    console.groupEnd();
+}
+
+// Clear local storage on page load
+window.addEventListener('load', function() {
+    clearLocalStorage();
+
+    // Add event listener for the view local storage button
+    document.getElementById('viewLocalStorageButton').addEventListener('click', displayLocalStorageData);
+});
+
+    // Function to display local storage data in the console
+function displayLocalStorageData() {
+    const allKeys = Object.keys(localStorage);
+
+    console.group('--- Local Storage Contents ---');
+
+    if (allKeys.length === 0) {
+        console.log('Local storage is empty.');
+    } else {
+        allKeys.forEach(key => {
+            const value = localStorage.getItem(key);
+            console.group(`Key: ${key}`);
+            console.log('Value:', value);
+            console.groupEnd();
+        });
+    }
+
+    console.groupEnd();
+}
+
+// Event listener for the view local storage button
+document.getElementById('viewLocalStorageButton').addEventListener('click', displayLocalStorageData);
+
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize variables
     const localStorageKey = 'modalSavedData';
