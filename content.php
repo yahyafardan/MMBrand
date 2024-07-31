@@ -280,6 +280,7 @@ document.addEventListener('DOMContentLoaded', function() {
    
 // Function to show the modal and populate its fields
 function showModal(event) {
+    
     const savedData = getSavedData();
     const key = `${selectedClient}_${event.id}`;
     const eventData = savedData[key] || {};
@@ -307,6 +308,8 @@ socialMediaCheckboxes.forEach(checkbox => {
     checkbox.checked = socialMediaPlatforms.includes(checkbox.value);
 });
 
+
+
 // Set the sponsorship option
 const sponsorshipOption = eventData.sponsors || '';
 const sponsorYes = document.getElementById('sponsorYes');
@@ -321,6 +324,35 @@ if (sponsorshipOption === 'yes') {
 } else if (sponsorshipOption === 'no') {
     sponsorNo.checked = true;
 }
+ // Debugging: Check eventID and event.type
+ console.log('eventData.eventID:', eventData.eventID);
+    console.log('event.id:', event.id);
+    console.log('eventData.type:', eventData.type);
+// Reset the radio buttons for content type
+const typestatic = document.getElementById('staticType');
+    const typevideo = document.getElementById('videoType');
+    typestatic.checked = false;
+    typevideo.checked = false;
+
+    // Set the type based on eventData.type only if eventID matches
+    if (eventData.eventID === event.id) {
+        const eventType = eventData.type || '';
+        if (eventType === 'static') {
+            typestatic.checked = true;
+            document.getElementById('staticSection').classList.remove('d-none');
+            document.getElementById('videoSection').classList.add('d-none');
+        } else if (eventType === 'video') {
+            typevideo.checked = true;
+            document.getElementById('videoSection').classList.remove('d-none');
+            document.getElementById('staticSection').classList.add('d-none');
+        }
+    } else {
+        // If the eventID doesn't match, ensure sections are hidden
+        document.getElementById('staticSection').classList.add('d-none');
+        document.getElementById('videoSection').classList.add('d-none');
+    }
+
+
 
 
 
@@ -329,10 +361,6 @@ if (sponsorshipOption === 'yes') {
     $('#contentModal').modal('show');
 }
 
-// Initialize modal settings when the document is ready
-$(document).ready(function() {
-    initializeModal();
-});
 
 
     // Event listener for client selection
@@ -631,6 +659,7 @@ applySavedEventColors(); // Apply saved event colors after loading events
     const sponsorshipOption = formData.get('sponsors'); // Will be 'yes', 'no', or undefined
 
     const data = {
+        type: formData.get('eventType'), // 'static' or 'video'
         Concept: formData.get('Concept'),
         caption: formData.get('caption'),
         socialMedia: socialMediaPlatform,
@@ -734,9 +763,6 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize sections based on the current state of the radio buttons
     toggleSections();
 });
-
-
-
 
 
 </script>
