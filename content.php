@@ -104,18 +104,21 @@ try {
 
 
 
-<!-- Content Modal --><!-- Content Modal -->
-<div class="modal fade" id="contentModal" tabindex="-1" aria-labelledby="contentModalLabel" aria-hidden="true">
+<!-- Content Modal --><div class="modal fade" id="contentModal" tabindex="-1" aria-labelledby="contentModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-header-content">
-                    <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
-                    <div class="modal-header-info">
-                        <span id="modalClientName" class="mx-3"></span> <!-- Client Name Display -->
-                        <span id="modalDateID" class="ml-3"></span> <!-- Date ID Display -->
+                <h5 class="modal-title" id="contentModalLabel">Event Details</h5>
+                <div class="modal-header-info">
+                    <div class="info-item client-name">
+                        <span id="modalClientName"></span> <!-- Client Name Display -->
+                    </div>
+                    <div class="info-item task-date">
+                        <span id="modalDateID"></span> <!-- Date ID Display -->
+                    </div>
+                    <div class="info-item language-data">
                         <span class="language-label">Languages:</span> <!-- Label for languages -->
-                        <div id="languageData" class="ml-2"></div> <!-- Field to display AJAX response -->
+                        <div id="languageData"></div> <!-- Field to display AJAX response -->
                     </div>
                 </div>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
@@ -210,6 +213,8 @@ try {
         </div>
     </div>
 </div>
+
+
 
 <script>
 document.addEventListener('DOMContentLoaded', function() {
@@ -704,37 +709,147 @@ function handleSubmission() {
 </body>
 </html>
 <style>
-        #submitButton {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 1000; /* Ensure it is above other elements */
-    }
+    /* Fixed submit button */
+#submitButton {
+    position: fixed;
+    bottom: 20px;
+    right: 20px;
+    z-index: 1000; /* Ensure it is above other elements */
+}
 
-    .color-box {
-        display: inline-block;
-        width: 20px;
-        height: 20px;
-        margin-right: 8px;
-        vertical-align: middle;
-    }
+/* Color boxes */
+.color-box {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+    margin-right: 8px;
+    vertical-align: middle;
+}
 
-    .color-box.task {
-        background-color: #FF5733; /* Example color for Task */
-    }
+/* Color box specific styles */
+.color-box.task {
+    background-color: #B2DFDB; /* Light Teal */
+}
 
-    .color-box.saved {
-        background-color: #33FF57; /* Example color for Saved */
-    }
+.color-box.saved {
+    background-color: #C8E6C9; /* Light Green */
+}
 
-    .color-box.done {
-        background-color: #3357FF; /* Example color for Completed */
-    }
+.color-box.done {
+    background-color: #BBDEFB; /* Light Blue */
+}
 
-    .guide {
-        margin-top: 20px;
-    }
-    /* Aligning the client and month selection to the left */
+/* General styling for the form */
+#contentForm {
+    background-color: #F9FBE7; /* Light beige background for the form */
+    border-radius: 8px;
+    padding: 20px;
+    border: 1px solid #E0E0E0; /* Light gray border */
+}
+
+/* Modal header layout */
+.modal-header {
+    display: flex;
+    flex-direction: column;
+    align-items: center; /* Center the title and info */
+    text-align: center; /* Center text */
+    padding: 15px;
+}
+
+/* Styling for the event details */
+.modal-header-content {
+    width: 100%;
+    text-align: center; /* Center the title and info */
+}
+
+.modal-title {
+    margin-bottom: 10px; /* Space below the title */
+}
+
+.modal-header-info {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+    flex-wrap: wrap; /* Wrap items if needed */
+}
+
+.modal-header-info .info-item {
+    margin: 0 10px; /* Space between elements */
+    display: flex;
+    align-items: center;
+}
+
+.modal-header-info .info-item span {
+    margin-left: 5px; /* Space between label and content */
+}
+
+/* Sections for static and video types */
+.event-section {
+    margin-bottom: 1.5rem;
+}
+
+/* Styling for section headers */
+.modal-body .mb-3 {
+    margin-bottom: 1.5rem;
+}
+
+.form-label {
+    color: #333; /* Darker text color for labels */
+    font-weight: bold;
+}
+
+/* Horizontal alignment and spacing for checkboxes and radio buttons */
+.social-media-links, .sponsor-options {
+    display: flex;
+    flex-wrap: wrap; /* Allow wrapping of items */
+    gap: 15px; /* Space between items */
+    margin-bottom: 1rem;
+}
+
+/* Styling for individual checkboxes and radio buttons */
+.form-check {
+    display: flex;
+    align-items: center;
+    gap: 8px; /* Space between checkbox and label */
+}
+
+/* Styling for the checkbox and radio button labels */
+.form-check-label {
+    font-size: 1rem; /* Adjust font size */
+    color: #555; /* Slightly lighter text color */
+}
+
+/* Color for selected radio buttons and checkboxes */
+.form-check-input:checked {
+    background-color: #009688; /* Teal background for checked state */
+    border-color: #00796B; /* Darker teal border */
+}
+
+/* Styling for the save and close buttons */
+.modal-footer .btn {
+    border-radius: 5px;
+}
+
+.btn-secondary {
+    background-color: #607D8B; /* Slate gray background */
+    color: white; /* White text */
+}
+
+.btn-secondary:hover {
+    background-color: #455A64; /* Darker slate gray on hover */
+}
+
+.btn-primary {
+    background-color: #0288D1; /* Bright blue background */
+    color: white; /* White text */
+}
+
+.btn-primary:hover {
+    background-color: #0277BD; /* Darker blue on hover */
+}
+
+/* Adjusting the container alignment */
 .container {
     display: flex;
     flex-direction: column;
@@ -759,26 +874,17 @@ function handleSubmission() {
     margin-top: 20px;
 }
 
-.color-box {
+/* Styling for the languages label */
+.language-label {
+    font-weight: normal;
+    margin-right: 5px; /* Space between label and content */
+}
+
+/* Styling for the language data container */
+#languageData {
     display: inline-block;
-    width: 20px;
-    height: 20px;
-    margin-right: 8px;
-    vertical-align: middle;
+    font-weight: normal; /* Regular font weight for the content */
+    color: #333; /* Color for the content */
 }
-
-.color-box.task {
-    background-color: #B2DFDB; /* Light Teal */
-}
-
-.color-box.saved {
-    background-color: #C8E6C9; /* Light Green */
-}
-
-.color-box.done {
-    background-color: #BBDEFB; /* Light Blue */
-}
-
-
 
 </style>
