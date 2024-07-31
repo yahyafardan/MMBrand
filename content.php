@@ -222,6 +222,9 @@ document.addEventListener('DOMContentLoaded', function() {
     let nOfPosts, nOfVideos, languages; // Added new variables
     let GsavedItemsCount = savedItemsCount; // This should be updated with the actual saved items count
     let GvisibleEventsCount = visibleEventsCount; // This should be updated dynamically
+    let savedItemsSet = new Set(); // Initialize the Setlet savedItemsCount = 0;   
+
+
     
 
     
@@ -466,8 +469,8 @@ function updateVisibleEventsCounter() {
 
     // Update the counter in the HTML
     document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
-    
-    // Show the visible events container if there are visible events
+
+    // Show or hide the visible events container based on the count
     const visibleEventsContainer = document.getElementById('visibleEventsContainer');
     if (visibleEventsCount > 0) {
         visibleEventsContainer.classList.remove('d-none');
@@ -475,6 +478,7 @@ function updateVisibleEventsCounter() {
         visibleEventsContainer.classList.add('d-none');
     }
 }
+
 
 
 applySavedEventColors(); // Apply saved event colors after loading events
@@ -611,23 +615,40 @@ applySavedEventColors(); // Apply saved event colors after loading events
   // Event listener for save button
 document.getElementById('saveButton').addEventListener('click', function () {
     const form = document.getElementById('contentForm');
-    const formData = new FormData(form);
+    const formData = new FormData(form);const data = {
+    Concept: formData.get('Concept'),
+    caption: formData.get('caption'),
+    state: 'saved',
+    color: 'blue'
+};
 
-    const data = {
-        Concept: formData.get('Concept'),
-        caption: formData.get('caption'),
-        state: 'saved',
-        color: 'blue'
-    };
+// Save data to local storage
+saveDataToLocal(selectedClient, formData.get('eventID'), data);
 
-    saveDataToLocal(selectedClient, formData.get('eventID'), data);
-    updateEventColor(formData.get('eventID'), 'blue');
+// Update event color
+updateEventColor(formData.get('eventID'), 'blue');
 
-    $('#contentModal').modal('hide');
-    $('#calendar').fullCalendar('refetchEvents');
+// Save the item and update the count
+saveItem(formData.get('eventID'));
 
-    // Increment the savedItemsCount
-    savedItemsCount++;
+// Hide the modal and refetch events
+$('#contentModal').modal('hide');
+$('#calendar').fullCalendar('refetchEvents');
+    function saveItem(eventID) {
+    // Check if the item has already been saved
+    if (!savedItemsSet.has(eventID)) {
+        // Add the item ID to the Set
+        savedItemsSet.add(eventID);
+
+        // Increment the global saved items count
+        savedItemsCount++;
+        console.log('Item saved. Updated savedItemsCount:', savedItemsCount);
+
+
+        // Optionally, update the UI or perform other actions
+    }
+}
+
 
     // Show the submit button after saving
     document.getElementById('submitButton').classList.remove('d-none');
