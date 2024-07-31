@@ -335,7 +335,7 @@ const typestatic = document.getElementById('staticType');
     typevideo.checked = false;
 
     // Set the type based on eventData.type only if eventID matches
-    if (eventData.eventID === event.id) {
+    if (savedData.hasOwnProperty(key)) {
         const eventType = eventData.type || '';
         if (eventType === 'static') {
             typestatic.checked = true;
