@@ -476,10 +476,7 @@ if (sponsorshipOption === 'yes') {
 } else if (sponsorshipOption === 'no') {
     sponsorNo.checked = true;
 }
- // Debugging: Check eventID and event.type
- console.log('eventData.eventID:', eventData.eventID);
-    console.log('event.id:', event.id);
-    console.log('eventData.type:', eventData.type);
+
 // Reset the radio buttons for content type
 const typestatic = document.getElementById('staticType');
     const typevideo = document.getElementById('videoType');
