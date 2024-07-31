@@ -143,7 +143,7 @@ try {
                         </div>
                     </div>
                     <!-- Sections for static -->
-                    <div id="staticSection" class="event-section">
+                    <div id="staticSection" class="event-section d-none">
                         <div class="mb-3">
                             <label for="Concept" class="form-label">Concept (theme)</label>
                             <input type="text" class="form-control" id="Concept" name="Concept" required>
@@ -283,6 +283,7 @@ function showModal(event) {
     const savedData = getSavedData();
     const key = `${selectedClient}_${event.id}`;
     const eventData = savedData[key] || {};
+    
 // Assuming eventData contains information from your event
 document.getElementById('Concept').value = eventData.Concept || '';
 document.getElementById('caption').value = eventData.hashtags || globalHashtags || '';
@@ -708,6 +709,31 @@ function handleSubmission() {
         alert('You have to save all items before proceeding.');
     }
 }
+document.addEventListener('DOMContentLoaded', function() {
+    // Get the radio buttons and sections
+    const staticTypeRadio = document.getElementById('staticType');
+    const videoTypeRadio = document.getElementById('videoType');
+    const staticSection = document.getElementById('staticSection');
+    const videoSection = document.getElementById('videoSection');
+
+    // Function to toggle sections based on selected radio button
+    function toggleSections() {
+        if (staticTypeRadio.checked) {
+            staticSection.classList.remove('d-none');
+            videoSection.classList.add('d-none');
+        } else if (videoTypeRadio.checked) {
+            staticSection.classList.add('d-none');
+            videoSection.classList.remove('d-none');
+        }
+    }
+
+    // Add event listeners to radio buttons
+    staticTypeRadio.addEventListener('change', toggleSections);
+    videoTypeRadio.addEventListener('change', toggleSections);
+
+    // Initialize sections based on the current state of the radio buttons
+    toggleSections();
+});
 
 
 
