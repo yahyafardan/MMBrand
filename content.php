@@ -132,7 +132,7 @@ try {
                 <form id="contentForm" action="content_submit.php" method="post">
                     <!-- Radio buttons for selecting Type -->
                     <div class="mb-3">
-                        <label class="form-label">Type</label>
+                        <label class="form-label">Content Type</label>
                         <div class="form-check">
                             <input class="form-check-input" type="radio" name="eventType" id="staticType" value="static" required>
                             <label class="form-check-label" for="staticType">Static</label>
@@ -277,26 +277,7 @@ document.addEventListener('DOMContentLoaded', function() {
         savedData[key] = data;
         localStorage.setItem(localStorageKey, JSON.stringify(savedData));
     }
-    // Function to initialize the modal and set up event listeners
-function initializeModal() {
-    const typeRadios = document.getElementsByName('eventType');
-    
-    typeRadios.forEach(radio => {
-        radio.addEventListener('change', function() {
-            const staticSection = document.getElementById('staticSection');
-            const videoSection = document.getElementById('videoSection');
-
-            if (this.value === 'static') {
-                staticSection.style.display = 'block';
-                videoSection.style.display = 'none';
-            } else if (this.value === 'video') {
-                staticSection.style.display = 'none';
-                videoSection.style.display = 'block';
-            }
-        });
-    });
-}
-
+   
 // Function to show the modal and populate its fields
 function showModal(event) {
     const savedData = getSavedData();
@@ -342,18 +323,7 @@ if (sponsorshipOption === 'yes') {
 
 
 
-    // Set initial visibility of sections based on the currently selected radio button
-    const selectedType = Array.from(document.getElementsByName('eventType')).find(radio => radio.checked)?.value || 'static';
-    const staticSection = document.getElementById('staticSection');
-    const videoSection = document.getElementById('videoSection');
     
-    if (selectedType === 'static') {
-        staticSection.style.display = 'block';
-        videoSection.style.display = 'none';
-    } else {
-        staticSection.style.display = 'none';
-        videoSection.style.display = 'block';
-    }
 
     $('#contentModal').modal('show');
 }
@@ -840,7 +810,7 @@ function handleSubmission() {
 }
 
 /* Horizontal alignment and spacing for checkboxes and radio buttons */
-.social-media-links, .sponsor-options {
+.social-media-platforms, .sponsor-options {
     display: flex;
     flex-wrap: wrap; /* Allow wrapping of items */
     gap: 15px; /* Space between items */
