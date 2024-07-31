@@ -305,6 +305,86 @@ document.addEventListener('DOMContentLoaded', function() {
     let savedItemsSet = new Set(); // Initialize the Setlet savedItemsCount = 0;   
 
 
+    document.getElementById('submitButton').addEventListener('click', handleSubmission);
+
+function handleSubmission() {
+    // Log the types and values of the variables
+    console.log('savedItemsCount:', savedItemsCount, 'Type:', typeof savedItemsCount);
+    console.log('visibleEventsCount:', visibleEventsCount, 'Type:', typeof visibleEventsCount);
+
+    // Check if all items are saved
+    // if (savedItemsCount >= visibleEventsCount) {
+        // If all items are saved, proceed to redirection
+        console.log('All items are saved. Redirecting...');
+        postLocalStorageData();
+
+        window.location.href = 'csub.php'; // Replace with your desired URL
+    // } else {
+    //     // Show an alert if not all items are saved
+    //     console.log('Not all items are saved. Showing alert.');
+    //     alert('You have to save all items before proceeding.');
+    // }
+}
+
+  // Function to post data to PHP script
+// Function to post data to PHP script
+function postLocalStorageData() {
+    const localStorageKey = 'modalSavedData'; // Key used to store data in local storage
+    const data = localStorage.getItem(localStorageKey); // Retrieve data from local storage
+
+    console.log('Local Storage Key:', localStorageKey);
+    console.log('Local Storage Data:', data);
+
+    // Ensure data exists before posting
+    if (data) {
+        fetch('csub.php', { // Replace with the path to your PHP script
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ data: data }) // Ensure data is correctly stringified
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Success:', result);
+
+            // Log the formatted data from the PHP response
+            if (result.status === 'success') {
+                displayFormattedData(result.formattedData);
+            } else {
+                console.error('Error:', result.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    } else {
+        console.error('No data found in local storage');
+    }
+}
+
+// Function to log the formatted data
+function displayFormattedData(formattedData) {
+    // Log the formatted data to the console
+    console.log('Formatted Data:aaaa', formattedData);
+}
+
+
+;
+
+
+
+
+
+
+
+// Function to get saved data from local storage
+function getSavedData() {
+    const data = localStorage.getItem(localStorageKey);
+    return data ? JSON.parse(data) : {};
+}
+
+
     
 
     
@@ -792,24 +872,7 @@ window.addEventListener('beforeunload', function (e) {
 
 
 
-document.getElementById('submitButton').addEventListener('click', handleSubmission);
 
-function handleSubmission() {
-    // Log the types and values of the variables
-    console.log('savedItemsCount:', savedItemsCount, 'Type:', typeof savedItemsCount);
-    console.log('visibleEventsCount:', visibleEventsCount, 'Type:', typeof visibleEventsCount);
-
-    // Check if all items are saved
-    if (savedItemsCount >= visibleEventsCount) {
-        // If all items are saved, proceed to redirection
-        console.log('All items are saved. Redirecting...');
-        window.location.href = 'https://www.google.com'; // Replace with your desired URL
-    } else {
-        // Show an alert if not all items are saved
-        console.log('Not all items are saved. Showing alert.');
-        alert('You have to save all items before proceeding.');
-    }
-}
 document.addEventListener('DOMContentLoaded', function() {
     // Get the radio buttons and sections
     const staticTypeRadio = document.getElementById('staticType');
