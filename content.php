@@ -227,7 +227,62 @@ class="" style="
                     </div>
                     <!-- Sections for video -->
                     <div id="videoSection" class="event-section d-none">
-                        <label for="Concept" class="form-label">Title</label>
+                        <div class="mb-3">
+                            <label for="VideoConcept" class="form-label">Concept (theme)</label>
+                            <input type="text" class="form-control" id="VideoConcept" name="VideoConcept" required>
+                        </div>
+                        <div class="mb-3">
+                            <label for="VideoCaption" class="form-label">Caption (Text)</label>
+                            <textarea class="form-control" id="VideoCaption" name="VideoCaption" rows="3" required></textarea>
+                        </div>
+                        <!-- Social Media Platforms Section in Modal -->
+                        <div class="mb-3">
+                            <label class="form-label">Social Media Platforms</label>
+                            <div class="social-media-platforms">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="VideoXAccount" name="videoSocialMedia[]" value="x_account_link">
+                                    <label class="form-check-label" for="VideoXAccount">X</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="VideoInstagramAccount" name="videoSocialMedia[]" value="instagram_account_link">
+                                    <label class="form-check-label" for="VideoInstagramAccount">Instagram</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="VideoLinkedinAccount" name="videoSocialMedia[]" value="linkedin_account_link">
+                                    <label class="form-check-label" for="VideoLinkedinAccount">LinkedIn</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="VideoFacebookAccount" name="videoSocialMedia[]" value="facebook_account_link">
+                                    <label class="form-check-label" for="VideoFacebookAccount">Facebook</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="VideoYoutubeAccount" name="videoSocialMedia[]" value="youtube_account_link">
+                                    <label class="form-check-label" for="VideoYoutubeAccount">YouTube</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="VideoSnapchatAccount" name="videoSocialMedia[]" value="snapchat_account_link">
+                                    <label class="form-check-label" for="VideoSnapchatAccount">Snapchat</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="checkbox" id="VideoTiktokAccount" name="videoSocialMedia[]" value="tiktok_account_link">
+                                    <label class="form-check-label" for="VideoTiktokAccount">TikTok</label>
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Sponsors Section in Modal -->
+                        <div class="mb-3">
+                            <label>Sponsored</label>
+                            <div class="sponsor-options">
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="videoSponsors" id="VideoSponsorYes" value="yes">
+                                    <label class="form-check-label" for="VideoSponsorYes">Yes</label>
+                                </div>
+                                <div class="form-check">
+                                    <input class="form-check-input" type="radio" name="videoSponsors" id="VideoSponsorNo" value="no">
+                                    <label class="form-check-label" for="VideoSponsorNo">No</label>
+                                </div>
+                            </div>
+                        </div>
                     </div>
                     <input type="hidden" id="eventDate" name="eventDate">
                     <input type="hidden" id="eventID" name="eventID">
@@ -240,6 +295,7 @@ class="" style="
         </div>
     </div>
 </div>
+
 
 
 
@@ -550,6 +606,17 @@ const typestatic = document.getElementById('staticType');
         document.getElementById('staticSection').classList.add('d-none');
         document.getElementById('videoSection').classList.add('d-none');
     }
+    // Example function to show the modal with custom options
+function showModal() {
+    $('#contentModal').modal({
+        backdrop: 'static',  // Prevent closing when clicking outside
+        keyboard: false     // Prevent closing when pressing ESC
+    });
+}
+
+// Call this function when needed
+showModal();
+
 
 
 
@@ -557,7 +624,7 @@ const typestatic = document.getElementById('staticType');
 
     
 
-    $('#contentModal').modal('show');
+showModal() 
 }
 
 
@@ -851,6 +918,13 @@ applySavedEventColors(); // Apply saved event colors after loading events
     document.getElementById('saveButton').addEventListener('click', function () {
     const form = document.getElementById('contentForm');
     const formData = new FormData(form);
+    if (!validateForm()) {
+        event.stopPropagation(); // Prevent modal from closing
+
+            event.preventDefault(); // Prevent form submission if validation fails
+            alert('Please fill in all required fields.');
+        }else{
+
 
     // Extract social media links
     const socialMediaPlatform = formData.getAll('socialMedia[]');
@@ -905,7 +979,7 @@ $('#calendar').fullCalendar('refetchEvents');
 
     // Update the UI to show the saved items count
     document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
-});
+}});
 });
 window.addEventListener('beforeunload', function (e) {
     // Customize the message to be shown in the alert
@@ -947,6 +1021,40 @@ document.addEventListener('DOMContentLoaded', function() {
     // Initialize sections based on the current state of the radio buttons
     toggleSections();
 });
+function validateForm() {
+        let isValid = true;
+        const staticSection = document.getElementById('staticSection');
+        const videoSection = document.getElementById('videoSection');
+        
+        // Check if static section is visible and validate its fields
+        if (!staticSection.classList.contains('d-none')) {
+            const staticFields = staticSection.querySelectorAll('input[required], textarea[required]');
+            staticFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid'); // Add Bootstrap invalid class for styling
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+        }
+        
+        // Check if video section is visible and validate its fields
+        if (!videoSection.classList.contains('d-none')) {
+            const videoFields = videoSection.querySelectorAll('input[required], textarea[required]');
+            videoFields.forEach(field => {
+                if (!field.value.trim()) {
+                    isValid = false;
+                    field.classList.add('is-invalid'); // Add Bootstrap invalid class for styling
+                } else {
+                    field.classList.remove('is-invalid');
+                }
+            });
+        }
+
+        return isValid;
+    }
+    
 
 
 </script>
