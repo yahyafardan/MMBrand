@@ -29,10 +29,10 @@ $formattedData = [];
 // Check if JSON decoding is successful
 if (json_last_error() === JSON_ERROR_NONE) {
     // Loop through each key in the decoded data
-    foreach ($data as $key => $values) {
-        // Extract client name and event date from the key if applicable
+    foreach ($data as $key => $value) {
+        // Extract client name and event date from the key
         list($client_name, $event_date) = explode('_', $key, 2);
-        
+
         // Convert the event_date to a DateTime object
         $dateTime = DateTime::createFromFormat('Y-m-d', $event_date);
 
@@ -43,47 +43,44 @@ if (json_last_error() === JSON_ERROR_NONE) {
             // Extract month in MMMM format
             $month_name = $dateTime->format('F');
 
-            // Loop through each value in the array associated with the key
-            foreach ($values as $value) {
-                // Initialize default values for variables
-                $type = isset($value['type']) ? $value['type'] : '';
-                $concept = isset($value['Concept']) ? $value['Concept'] : '';
-                $caption = isset($value['caption']) ? $value['caption'] : '';
-                $language = ''; // Assume an empty string for language if not provided
-                $social_media_platforms = isset($value['socialMedia']) && is_array($value['socialMedia']) ? implode(', ', $value['socialMedia']) : '';
-                $can_be_sponsored = isset($value['sponsors']) ? $value['sponsors'] : '';
-                $status = isset($value['state']) ? $value['state'] : '';
+            // Extract and format the necessary values
+            $type = isset($value['type']) ? $value['type'] : '';
+            $concept = isset($value['Concept']) ? $value['Concept'] : '';
+            $caption = isset($value['caption']) ? $value['caption'] : '';
+            $language = ''; // Assume an empty string for language if not provided
+            $social_media_platforms = isset($value['socialMedia']) && is_array($value['socialMedia']) ? implode(', ', $value['socialMedia']) : '';
+            $can_be_sponsored = isset($value['sponsors']) ? $value['sponsors'] : '';
+            $status = isset($value['state']) ? $value['state'] : '';
 
-                // Check if status is 'saved' and update it
-                if ($status === 'saved') {
-                    // Update the status to 'approvalIn'
-                    $updateStmt->execute([
-                        ':client_name' => $client_name,
-                        ':post_date' => $formatted_date
-                    ]);
-                }
-
-                // Execute the insert statement
-                $insertStmt->execute([
-                    ':type' => $type,
-                    ':concept' => $concept,
-                    ':caption' => $caption,
-                    ':language' => $language,
-                    ':post_date' => $formatted_date,
-                    ':month' => $month_name,
-                    ':social_media_platforms' => $social_media_platforms,
-                    ':can_be_sponsored' => $can_be_sponsored,
-                    ':status' => $status,
-                    ':client_name' => $client_name
+            // Check if status is 'saved' and update it
+            if ($status === 'saved') {
+                // Update the status to 'approvalIn'
+                $updateStmt->execute([
+                    ':client_name' => $client_name,
+                    ':post_date' => $formatted_date
                 ]);
-
-                // Add data to the formattedData array
-                $formattedData[] = [
-                    'client_name' => $client_name,
-                    'post_date' => $formatted_date,
-                    'status' => $status
-                ];
             }
+
+            // Execute the insert statement
+            $insertStmt->execute([
+                ':type' => $type,
+                ':concept' => $concept,
+                ':caption' => $caption,
+                ':language' => $language,
+                ':post_date' => $formatted_date,
+                ':month' => $month_name,
+                ':social_media_platforms' => $social_media_platforms,
+                ':can_be_sponsored' => $can_be_sponsored,
+                ':status' => $status,
+                ':client_name' => $client_name
+            ]);
+
+            // Add data to the formattedData array
+            $formattedData[] = [
+                'client_name' => $client_name,
+                'post_date' => $formatted_date,
+                'status' => $status
+            ];
         } else {
             // Handle the case where the date could not be parsed
             echo json_encode(['status' => 'error', 'message' => 'Invalid date format']);

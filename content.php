@@ -336,33 +336,63 @@ function postLocalStorageData() {
 
     if (data) {
         // Parse data as JSON
-        const parsedData = JSON.parse(data);
+        try {
+            const parsedData = JSON.parse(data);
 
-        console.log('Parsed Data:', parsedData);
+            console.log('Parsed Data:', parsedData);
 
-        fetch('csub.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify(parsedData) // Directly send parsed data
-        })
-        .then(response => response.json())
-        .then(result => {
-            console.log('Success:', result);
-            if (result.status === 'success') {
-                displayFormattedData(result.formattedData);
+            // Ensure parsedData is an object and not empty
+            if (typeof parsedData === 'object' && parsedData !== null && Object.keys(parsedData).length > 0) {
+                // Clean and prepare data
+                const cleanedData = Object.keys(parsedData).reduce((acc, key) => {
+                    const item = parsedData[key];
+                    // Clean up null or empty values
+                    if (item && item.state === 'saved') {
+                        acc[key] = {
+                            type: item.type || 'unknown', // Default to 'unknown' if null
+                            Concept: item.Concept || '',
+                            caption: item.caption || '',
+                            socialMedia: item.socialMedia || [], // Default to empty array if null
+                            sponsors: item.sponsors || 'no', // Default to 'no' if null
+                            state: item.state || 'unknown', // Default to 'unknown' if null
+                            color: item.color || 'defaultColor' // Default color if null
+                        };
+                    }
+                    return acc;
+                }, {});
+
+                // Proceed with the fetch request
+                fetch('csub.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(cleanedData) // Send cleaned data
+                })
+                .then(response => response.json())
+                .then(result => {
+                    console.log('Success:', result);
+                    if (result.status === 'success') {
+                        displayFormattedData(result.formattedData);
+                        localStorage.removeItem(localStorageKey); // Clear local storage after successful processing
+                    } else {
+                        console.error('Error:', result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
             } else {
-                console.error('Error:', result.message);
+                console.error('Parsed data is not an object or is empty.');
             }
-        })
-        .catch(error => {
-            console.error('Error:', error);
-        });
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+        }
     } else {
         console.error('No data found in local storage');
     }
 }
+
 
 
 
