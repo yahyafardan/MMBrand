@@ -13,8 +13,8 @@ $data = json_decode($jsonData, true);
 
 // Prepare the SQL statements
 $insertStmt = $pdo->prepare("
-    INSERT INTO content (type, concept, caption, language, post_date, month, social_media_platforms, can_be_sponsored, status, client_name)
-    VALUES (:type, :concept, :caption, :language, :post_date, :month, :social_media_platforms, :can_be_sponsored, :status, :client_name)
+    INSERT INTO content (type, concept, caption, language, post_date, month, social_media_platforms, sponsored, status, client_name)
+    VALUES (:type, :concept, :caption, :language, :post_date, :month, :social_media_platforms, :sponsored, :status, :client_name)
 ");
 
 $updateStmt = $pdo->prepare("
@@ -49,8 +49,11 @@ if (json_last_error() === JSON_ERROR_NONE) {
             $caption = isset($value['caption']) ? $value['caption'] : '';
             $language = isset($value['language']) ? $value['language'] : ''; // Added language field
             $social_media_platforms = isset($value['socialMedia']) && is_array($value['socialMedia']) ? implode(', ', $value['socialMedia']) : '';
-            $can_be_sponsored = isset($value['sponsors']) ? $value['sponsors'] : '';
+            $sponsored = isset($value['sponsors']) ? $value['sponsors'] : ''; // Updated to sponsored
             $status = isset($value['state']) ? $value['state'] : '';
+
+            // Debugging: Print extracted values
+            error_log("Debug - Type: $type, Concept: $concept, Caption: $caption, Language: $language, Social Media: $social_media_platforms, Sponsored: $sponsored, Status: $status");
 
             // Check if status is 'saved'
             if ($status === 'saved') {
@@ -73,10 +76,17 @@ if (json_last_error() === JSON_ERROR_NONE) {
                 ':post_date' => $formatted_date,
                 ':month' => $month_name,
                 ':social_media_platforms' => $social_media_platforms,
-                ':can_be_sponsored' => $can_be_sponsored,
+                ':sponsored' => $sponsored, // Updated to sponsored
                 ':status' => $status,
                 ':client_name' => $client_name
             ]);
+
+            // Check for SQL errors
+            if ($insertStmt->errorCode() !== '00000') {
+                error_log("Insert Error: " . implode(' ', $insertStmt->errorInfo()));
+                echo json_encode(['status' => 'error', 'message' => 'Failed to insert data']);
+                exit;
+            }
 
             // Add data to the formattedData array
             $formattedData[] = [

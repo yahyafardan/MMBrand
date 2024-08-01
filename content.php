@@ -44,15 +44,23 @@ try {
   <!-- HTML element for displaying the saved items count -->
 <div id="savedItemsContainer" class="d-none">
     <span id="savedItemsCount">Saved Items: 0</span>
+ 
 </div>
 
 <!-- HTML element for displaying the visible events count -->
 <div id="visibleEventsContainer" class="d-none">
     <p id="visibleEventsCount">Visible Events: 0</p>
 </div>
+<!-- Container for displaying the required number of posts and videos -->
+<div id="itemsRequiredContainer"
+class="d-none">
+    <span id="requiredPostsCount">Required Number of Posts: </span><br>
+    <span id="requiredVideosCount">Required Number of Videos: </span>
+</div>
+
 <!-- Sticky Button -->
 <button id="viewLocalStorageButton"
-class="d-none" style="
+class="" style="
     position: fixed;
     top: 20px;
     right: 20px;
@@ -319,7 +327,7 @@ function handleSubmission() {
         console.log('All items are saved. Redirecting...');
         postLocalStorageData();
 
-        // window.location.href = '1.php'; // Replace with your desired URL
+        window.location.href = 'csub.php'; // Replace with your desired URL
     // } else {
     //     // Show an alert if not all items are saved
     //     console.log('Not all items are saved. Showing alert.');
@@ -336,62 +344,64 @@ function postLocalStorageData() {
     console.log('Local Storage Data:', data);
 
     if (data) {
-        // Parse data as JSON
-        try {
-            const parsedData = JSON.parse(data);
+    // Parse data as JSON
+    try {
+        const parsedData = JSON.parse(data);
 
-            console.log('Parsed Data:', parsedData);
+        console.log('Parsed Data:', parsedData);
 
-            // Ensure parsedData is an object and not empty
-            if (typeof parsedData === 'object' && parsedData !== null && Object.keys(parsedData).length > 0) {
-                // Clean and prepare data
-                const cleanedData = Object.keys(parsedData).reduce((acc, key) => {
-                    const item = parsedData[key];
-                    // Clean up null or empty values
-                    if (item && item.state === 'saved') {
-                        acc[key] = {
-                            type: item.type || 'unknown', // Default to 'unknown' if null
-                            Concept: item.Concept || '',
-                            caption: item.caption || '',
-                            socialMedia: item.socialMedia || [], // Default to empty array if null
-                            sponsors: item.sponsors || 'no', // Default to 'no' if null
-                            state: item.state || 'unknown', // Default to 'unknown' if null
-                            color: item.color || 'defaultColor' // Default color if null
-                        };
-                    }
-                    return acc;
-                }, {});
+        // Ensure parsedData is an object and not empty
+        if (typeof parsedData === 'object' && parsedData !== null && Object.keys(parsedData).length > 0) {
+            // Clean and prepare data
+            const cleanedData = Object.keys(parsedData).reduce((acc, key) => {
+                const item = parsedData[key];
+                // Clean up null or empty values
+                if (item && item.state === 'saved') {
+                    acc[key] = {
+                        type: item.type || 'unknown', // Default to 'unknown' if null
+                        Concept: item.Concept || '',
+                        caption: item.caption || '',
+                        socialMedia: item.socialMedia || [], // Default to empty array if null
+                        sponsors: item.sponsors || 'no', // Default to 'no' if null
+                        state: item.state || 'unknown', // Default to 'unknown' if null
+                        color: item.color || 'defaultColor', // Default color if null
+                        language: item.language || '' // Ensure language is included
+                    };
+                }
+                return acc;
+            }, {});
 
-                // Proceed with the fetch request
-                fetch('csub.php', {
-                    method: 'POST',
-                    headers: {
-                        'Content-Type': 'application/json'
-                    },
-                    body: JSON.stringify(cleanedData) // Send cleaned data
-                })
-                .then(response => response.json())
-                .then(result => {
-                    console.log('Success:', result);
-                    if (result.status === 'success') {
-                        displayFormattedData(result.formattedData);
-                        localStorage.removeItem(localStorageKey); // Clear local storage after successful processing
-                    } else {
-                        console.error('Error:', result.message);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                });
-            } else {
-                console.error('Parsed data is not an object or is empty.');
-            }
-        } catch (error) {
-            console.error('Error parsing JSON:', error);
+            // Proceed with the fetch request
+            fetch('csub.php', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(cleanedData) // Send cleaned data
+            })
+            .then(response => response.json())
+            .then(result => {
+                console.log('Success:', result);
+                if (result.status === 'success') {
+                    displayFormattedData(result.formattedData);
+                    localStorage.removeItem(localStorageKey); // Clear local storage after successful processing
+                } else {
+                    console.error('Error:', result.message);
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+            });
+        } else {
+            console.error('Parsed data is not an object or is empty.');
         }
-    } else {
-        console.error('No data found in local storage');
+    } catch (error) {
+        console.error('Error parsing JSON:', error);
     }
+} else {
+    console.error('No data found in local storage');
+}
+
 }
 
 
@@ -572,6 +582,10 @@ const typestatic = document.getElementById('staticType');
                             endDate = adjustEndDate(moment(response.end_date));
                             globalHashtags = response.hashtags || '';
                             languages=response.languages || '';
+                            document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
+                            document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
+                            document.getElementById('itemsRequiredContainer').classList.remove('d-none');
+
 
 
                            // Populate months dropdown
@@ -646,6 +660,8 @@ monthSelect.addEventListener('change', function() {
         // Clear UI counters
         document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
         document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
+        document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
+        document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
 
 
         // Filter and add only the events for the selected months
