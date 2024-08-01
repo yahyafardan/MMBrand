@@ -79,6 +79,8 @@ class="" style="
 
     <!-- Hidden Submit Button -->
 <button id="submitButton" class="btn btn-primary d-none">Submit Button</button>
+<button id="previewButton" class="btn btn-primary d-none">preview</button>
+
 
     <div class="container mt-5">
         <h1>Welcome, <?php echo htmlspecialchars($_SESSION['username']); ?>!</h1>
@@ -295,6 +297,41 @@ class="" style="
         </div>
     </div>
 </div>
+
+
+
+<!-- Modal for displaying stored form data -->
+<div class="modal fade" id="dataModal" tabindex="-1" aria-labelledby="dataModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="dataModalLabel">Stored Form Data</h5>
+            </div>
+            <div class="modal-body">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Client Name</th>
+                            <th>Date</th>
+                            <th>Language</th>
+                            <th>Concept</th>
+                            <th>Caption</th>
+                            <th>Social Media</th>
+                            <th>Sponsorship</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tableBody">
+                        <!-- Data rows will be dynamically inserted here -->
+                    </tbody>
+                </table>
+            </div>
+            <div class="modal-footer">
+            <button type="button" class="btn btn-secondary" data-dismiss="modal">Close</button>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 
 
@@ -971,6 +1008,8 @@ $('#calendar').fullCalendar('refetchEvents');
 
     // Show the submit button after saving
     document.getElementById('submitButton').classList.remove('d-none');
+    document.getElementById('previewButton').classList.remove('d-none');
+
 
     // Show the saved items count container
     const savedItemsContainer = document.getElementById('savedItemsContainer');
@@ -978,6 +1017,54 @@ $('#calendar').fullCalendar('refetchEvents');
 
     // Update the UI to show the saved items count
     document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
+    function populateTable() {
+    const storedData = localStorage.getItem('modalSavedData');
+    const parsedData = JSON.parse(storedData);
+    console.log('Raw data from local storage:', storedData);
+    console.log('Parsed data:', parsedData);
+
+    const tableBody = document.getElementById('tableBody');
+    tableBody.innerHTML = ''; // Clear existing rows
+
+    if (parsedData) {
+        for (const [id, data] of Object.entries(parsedData)) {
+            const row = document.createElement('tr');
+
+            // Extract client name and event date from ID
+            const [clientName, eventDate] = id.split('_');
+            const formattedDate = new Date(eventDate).toLocaleDateString();
+
+            row.innerHTML = `
+                <td>${clientName}</td>
+                <td>${formattedDate}</td>
+                <td>${data.language}</td>
+                <td>${data.Concept}</td>
+                <td>${data.caption}</td>
+                <td>${data.socialMedia.join(', ')}</td>
+                <td>${data.sponsors}</td>
+            `;
+
+            tableBody.appendChild(row);
+        }
+    } else {
+        console.log('No data found in local storage');
+    }
+}
+
+
+
+
+document.getElementById('previewButton').addEventListener('click', function() {
+    console.log('Preview button clicked');
+
+    populateTable();
+    const dataModal = new bootstrap.Modal(document.getElementById('dataModal'));
+    dataModal.show();
+});
+
+// Trigger the modal and populate table when needed
+
+
 }});
 });
 window.addEventListener('beforeunload', function (e) {
@@ -1126,6 +1213,7 @@ function validateForm() {
 
 
 
+
     
 
 
@@ -1136,12 +1224,21 @@ function validateForm() {
 </html>
 <style>
     /* Fixed submit button */
-#submitButton {
+    #submitButton,
+#previewButton {
     position: fixed;
     bottom: 20px;
-    right: 20px;
     z-index: 1000; /* Ensure it is above other elements */
 }
+
+#submitButton {
+    right: 20px; /* Position the Submit button */
+}
+
+#previewButton {
+    right: 200px; /* Position the Preview button to the left of the Submit button */
+}
+
 
 /* Color boxes */
 .color-box {
