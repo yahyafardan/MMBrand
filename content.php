@@ -318,7 +318,7 @@ function handleSubmission() {
         console.log('All items are saved. Redirecting...');
         postLocalStorageData();
 
-        window.location.href = '1.php'; // Replace with your desired URL
+        // window.location.href = '1.php'; // Replace with your desired URL
     // } else {
     //     // Show an alert if not all items are saved
     //     console.log('Not all items are saved. Showing alert.');
@@ -328,22 +328,43 @@ function handleSubmission() {
 
 // Function to post data to PHP script
 function postLocalStorageData() {
-    fetch('http://localhost/MMBrand/1.php', {
-    method: 'POST',
-    headers: {
-        'Content-Type': 'application/json; charset=UTF-8'
-    },
-    body: JSON.stringify({ message: 'hello' }) // Make sure this is correct
-})
-.then(response => response.json()) // Parse response as JSON
-.then(data => {
-    console.log('Response Data:', data);
-})
-.catch(error => {
-    console.error('Fetch Error:', error);
-});
+    const localStorageKey = 'modalSavedData';
+    const data = localStorage.getItem(localStorageKey);
 
+    console.log('Local Storage Key:', localStorageKey);
+    console.log('Local Storage Data:', data);
+
+    if (data) {
+        // Parse data as JSON
+        const parsedData = JSON.parse(data);
+
+        console.log('Parsed Data:', parsedData);
+
+        fetch('csub.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify(parsedData) // Directly send parsed data
+        })
+        .then(response => response.json())
+        .then(result => {
+            console.log('Success:', result);
+            if (result.status === 'success') {
+                displayFormattedData(result.formattedData);
+            } else {
+                console.error('Error:', result.message);
+            }
+        })
+        .catch(error => {
+            console.error('Error:', error);
+        });
+    } else {
+        console.error('No data found in local storage');
+    }
 }
+
+
 
 // Function to log the formatted data
 function displayFormattedData(formattedData) {
