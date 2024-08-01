@@ -922,7 +922,6 @@ applySavedEventColors(); // Apply saved event colors after loading events
         event.stopPropagation(); // Prevent modal from closing
 
             event.preventDefault(); // Prevent form submission if validation fails
-            alert('Please fill in all required fields.');
         }else{
 
 
@@ -1022,38 +1021,111 @@ document.addEventListener('DOMContentLoaded', function() {
     toggleSections();
 });
 function validateForm() {
-        let isValid = true;
-        const staticSection = document.getElementById('staticSection');
-        const videoSection = document.getElementById('videoSection');
+    let isValid = true;
+    const staticSection = document.getElementById('staticSection');
+    const videoSection = document.getElementById('videoSection');
+
+    // Check if a content type is selected
+    const eventType = document.querySelector('input[name="eventType"]:checked');
+    if (!eventType) {
+        alert('Please select a content type.');
+        isValid = false;
+        return isValid; // Stop further validation
+    }
+
+    // Check if static section is visible and validate its fields
+    if (!staticSection.classList.contains('d-none')) {
+        const staticFields = {
+            Concept: staticSection.querySelector('#Concept'),
+            caption: staticSection.querySelector('#caption'),
+            socialMediaCheckboxes: staticSection.querySelectorAll('input[name="socialMedia[]"]:checked'),
+            sponsorOption: document.querySelector('input[name="sponsors"]:checked')
+        };
         
-        // Check if static section is visible and validate its fields
-        if (!staticSection.classList.contains('d-none')) {
-            const staticFields = staticSection.querySelectorAll('input[required], textarea[required]');
-            staticFields.forEach(field => {
-                if (!field.value.trim()) {
-                    isValid = false;
-                    field.classList.add('is-invalid'); // Add Bootstrap invalid class for styling
-                } else {
-                    field.classList.remove('is-invalid');
-                }
-            });
+        // Check if 'Concept' field is empty
+        if (!staticFields.Concept.value.trim()) {
+            staticFields.Concept.classList.add('is-invalid');
+            isValid = false;
+            alert('Please fill in the Concept (theme) field.');
+            return isValid; // Stop further validation
+        } else {
+            staticFields.Concept.classList.remove('is-invalid');
         }
         
-        // Check if video section is visible and validate its fields
-        if (!videoSection.classList.contains('d-none')) {
-            const videoFields = videoSection.querySelectorAll('input[required], textarea[required]');
-            videoFields.forEach(field => {
-                if (!field.value.trim()) {
-                    isValid = false;
-                    field.classList.add('is-invalid'); // Add Bootstrap invalid class for styling
-                } else {
-                    field.classList.remove('is-invalid');
-                }
-            });
+        // Check if 'caption' field is empty
+        if (!staticFields.caption.value.trim()) {
+            staticFields.caption.classList.add('is-invalid');
+            isValid = false;
+            alert('Please fill in the Caption (Text) field.');
+            return isValid; // Stop further validation
+        } else {
+            staticFields.caption.classList.remove('is-invalid');
+        }
+        
+        // Check if at least one social media checkbox is selected
+        if (staticFields.socialMediaCheckboxes.length === 0) {
+            isValid = false;
+            alert('Please select at least one social media platform.');
+            return isValid; // Stop further validation
         }
 
-        return isValid;
+        // Check if a sponsorship option is selected
+        if (!staticFields.sponsorOption) {
+            isValid = false;
+            alert('Please select if the content is sponsored or not.');
+            return isValid; // Stop further validation
+        }
     }
+    
+    // Check if video section is visible and validate its fields
+    if (!videoSection.classList.contains('d-none')) {
+        const videoFields = {
+            VideoConcept: videoSection.querySelector('#VideoConcept'),
+            VideoCaption: videoSection.querySelector('#VideoCaption'),
+            videoSocialMediaCheckboxes: videoSection.querySelectorAll('input[name="videoSocialMedia[]"]:checked'),
+            videoSponsorOption: document.querySelector('input[name="videoSponsors"]:checked')
+        };
+
+        // Check if 'VideoConcept' field is empty
+        if (!videoFields.VideoConcept.value.trim()) {
+            videoFields.VideoConcept.classList.add('is-invalid');
+            isValid = false;
+            alert('Please fill in the Video Concept (theme) field.');
+            return isValid; // Stop further validation
+        } else {
+            videoFields.VideoConcept.classList.remove('is-invalid');
+        }
+
+        // Check if 'VideoCaption' field is empty
+        if (!videoFields.VideoCaption.value.trim()) {
+            videoFields.VideoCaption.classList.add('is-invalid');
+            isValid = false;
+            alert('Please fill in the Video Caption (Text) field.');
+            return isValid; // Stop further validation
+        } else {
+            videoFields.VideoCaption.classList.remove('is-invalid');
+        }
+
+        // Check if at least one social media checkbox is selected
+        if (videoFields.videoSocialMediaCheckboxes.length === 0) {
+            isValid = false;
+            alert('Please select at least one social media platform for the video.');
+            return isValid; // Stop further validation
+        }
+
+        // Check if a sponsorship option is selected
+        if (!videoFields.videoSponsorOption) {
+            isValid = false;
+            alert('Please select if the video content is sponsored or not.');
+            return isValid; // Stop further validation
+        }
+    }
+
+    return isValid;
+}
+
+
+
     
 
 
