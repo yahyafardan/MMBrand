@@ -322,17 +322,18 @@ function handleSubmission() {
     console.log('visibleEventsCount:', visibleEventsCount, 'Type:', typeof visibleEventsCount);
 
     // Check if all items are saved
-    // if (savedItemsCount >= visibleEventsCount) {
+    if (savedItemsCount >= visibleEventsCount) {
         // If all items are saved, proceed to redirection
         console.log('All items are saved. Redirecting...');
         postLocalStorageData();
 
-        window.location.href = 'csub.php'; // Replace with your desired URL
-    // } else {
-    //     // Show an alert if not all items are saved
-    //     console.log('Not all items are saved. Showing alert.');
-    //     alert('You have to save all items before proceeding.');
-    // }
+// Refresh the current page
+window.location.reload();
+    } else {
+        // Show an alert if not all items are saved
+        console.log('Not all items are saved. Showing alert.');
+        alert('You have to save all items before proceeding.');
+    }
 }
 
 // Function to post data to PHP script
