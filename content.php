@@ -78,7 +78,7 @@ class="" style="
 
 
     <!-- Hidden Submit Button -->
-<button id="submitButton" class="btn btn-primary d-none">Submit Button</button>
+<button id="submitButton" class="btn btn-primary d-none">Submit </button>
 <button id="previewButton" class="btn btn-primary d-none">preview</button>
 
 
@@ -670,161 +670,170 @@ showModal()
     document.getElementById('clientSelect').addEventListener('change', function() {
         selectedClient = this.value;
 
-        if (selectedClient) {
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'client_days.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+if (selectedClient) {
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', 'client_days.php', true);
+    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-            xhr.onload = function() {
-                if (xhr.status === 200) {
-                    try {
-                        const response = JSON.parse(xhr.responseText);
+    xhr.onload = function() {
+        if (xhr.status === 200) {
+            try {
+                const response = JSON.parse(xhr.responseText);
 
-                        if (response.error) {
-                            document.getElementById('resultContainer').innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
-                        } else {
-                            startDate = moment(response.start_date);
-                            endDate = adjustEndDate(moment(response.end_date));
-                            globalHashtags = response.hashtags || '';
-                            languages=response.languages || '';
+                console.log('Response from server:', response);
+
+                if (response.error) {
+                    document.getElementById('resultContainer').innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
+                    console.error('Server Error:', response.error);
+                } else {
+                    startDate = moment(response.start_date);
+                    endDate = adjustEndDate(moment(response.end_date));
+                    globalHashtags = response.hashtags || '';
+                    languages = response.languages || '';
+                    document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
+                    document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
+                    document.getElementById('itemsRequiredContainer').classList.remove('d-none');
+
+                    // Populate months dropdown
+                    const monthSelect = document.getElementById('monthSelect');
+                    monthSelect.innerHTML = ''; // Clear existing options
+
+                    // Add default option
+                    const defaultOption = document.createElement('option');
+                    defaultOption.value = '';
+                    defaultOption.textContent = 'Select a month';
+                    defaultOption.disabled = true;
+                    defaultOption.selected = true;
+                    monthSelect.appendChild(defaultOption);
+
+                    // Add dynamic month options
+                    response.months.forEach(month => {
+                        const option = document.createElement('option');
+
+                        // Assuming `month` is in 'MM,YYYY' format
+                        const [monthIndex, year] = month.split(','); // Split into month and year
+                        const date = new Date(year, parseInt(monthIndex, 10) - 1); // Month is zero-based in JavaScript
+
+                        // Format the month as MMMM/YYYY
+                        const options = { year: 'numeric', month: 'long' };
+                        const formattedMonth = date.toLocaleDateString('en-US', options); // e.g., 'April 2024'
+
+                        option.value = month;
+                        option.textContent = formattedMonth;
+
+                        monthSelect.appendChild(option);
+                    });
+
+                    console.log('Months added to dropdown:', response.months);
+
+                    const events = [];
+                    let visibleEvents = [];
+
+                    // Example of fetching and parsing events
+                    response.posting_days.forEach(dayString => {
+                        const daysArray = dayString.split(',').map(day => {
+                            return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+                        });
+
+                        daysArray.forEach(dayOfWeek => {
+                            const color = 'purple';
+                            const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
+
+                            dates.forEach(date => {
+                                if (date.isBetween(startDate, endDate, null, '[]')) {
+                                    const event = {
+                                        id: date.format('YYYY-MM-DD'),
+                                        start: date.format('YYYY-MM-DD'),
+                                        end: date.format('YYYY-MM-DD'),
+                                        rendering: 'background',
+                                        backgroundColor: color,
+                                        Concept: 'Event on ' + date.format('YYYY-MM-DD'),
+                                        hashtags: response.hashtags || []
+                                    };
+                                    events.push(event);
+                                }
+                            });
+                        });
+                    });
+
+                    console.log('Events created:', events);
+
+                    monthSelect.addEventListener('change', function() {
+                        const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
+
+                        console.log('Selected months:', selectedMonths);
+
+                        if (selectedMonths.length > 0) {
+                            $('#calendar').fullCalendar('removeEvents'); // Remove all existing events
+                            // Reset counters
+                            savedItemsCount = 0;
+                            visibleEventsCount = 0; // Reset visible events count
+
+                            // Clear UI counters
+                            document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
+                            document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
                             document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
                             document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
-                            document.getElementById('itemsRequiredContainer').classList.remove('d-none');
 
+                            // Filter and add only the events for the selected months
+                            const filteredEvents = events.filter(event => {
+                                const eventDate = moment(event.start);
+                                return selectedMonths.some(month => {
+                                    const [monthStr, yearStr] = month.split(',');
+                                    const monthStart = moment().year(yearStr).month(monthStr - 1).startOf('month');
+                                    const monthEnd = moment().year(yearStr).month(monthStr - 1).endOf('month');
+                                    return eventDate.isBetween(monthStart, monthEnd, null, '[]');
+                                });
+                            });
 
+                            console.log('Filtered events:', filteredEvents);
 
-                           // Populate months dropdown
-const monthSelect = document.getElementById('monthSelect');
-monthSelect.innerHTML = ''; // Clear existing options
+                            $('#calendar').fullCalendar('addEventSource', filteredEvents);
+                            $('#calendar').fullCalendar('gotoDate', moment(selectedMonths[0], 'MM,YYYY').startOf('month')); // Navigate to the first selected month
 
-// Add default option
-const defaultOption = document.createElement('option');
-defaultOption.value = '';
-defaultOption.textContent = 'Select a month';
-defaultOption.disabled = true;
-defaultOption.selected = true;
-monthSelect.appendChild(defaultOption);
+                            // Update the visible events
+                            visibleEvents = filteredEvents;
+                            updateVisibleEventsCounter();
+                        }
+                    });
 
-// Add dynamic month options
-response.months.forEach(month => {
-    const option = document.createElement('option');
+                    $('#calendar').fullCalendar({
+                        viewRender: function(view, element) {
+                            // Function to be called every time the view changes
+                            const visibleRange = view.intervalStart.format('YYYY-MM-DD') + '/' + view.intervalEnd.format('YYYY-MM-DD');
+                            console.log('Visible range:', visibleRange);
 
-    // Assuming `month` is in 'MM,YYYY' format
-    const [monthIndex, year] = month.split(','); // Split into month and year
-    const date = new Date(year, parseInt(monthIndex, 10) - 1); // Month is zero-based in JavaScript
+                            // Example: Update visible events based on the current view
+                            visibleEvents = $('#calendar').fullCalendar('getEvents').filter(event => {
+                                const eventDate = moment(event.start);
+                                return eventDate.isBetween(view.intervalStart, view.intervalEnd, null, '[]');
+                            });
 
-    // Format the month as MMMM/YYYY
-    const options = { year: 'numeric', month: 'long' };
-    const formattedMonth = date.toLocaleDateString('en-US', options); // e.g., 'April 2024'
+                            console.log('Visible events:', visibleEvents);
 
-    option.value = month;
-    option.textContent = formattedMonth;
+                            updateVisibleEventsCounter();
+                        }
+                    });
 
-    monthSelect.appendChild(option);
-});
+                    // Function to update the visible events counter
+                    function updateVisibleEventsCounter() {
+                        visibleEventsCount = visibleEvents.length;
 
-const events = [];
-let visibleEvents = [];
+                        // Update the counter in the HTML
+                        document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
 
-// Example of fetching and parsing events
-response.posting_days.forEach(dayString => {
-    const daysArray = dayString.split(',').map(day => {
-        return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
-    });
+                        // Show or hide the visible events container based on the count
+                        const visibleEventsContainer = document.getElementById('visibleEventsContainer');
+                        if (visibleEventsCount > 0) {
+                            visibleEventsContainer.classList.remove('d-none');
+                        } else {
+                            visibleEventsContainer.classList.add('d-none');
+                        }
+                    }
 
-    daysArray.forEach(dayOfWeek => {
-        const color = 'purple';
-        const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
-
-        dates.forEach(date => {
-            if (date.isBetween(startDate, endDate, null, '[]')) {
-                const event = {
-                    id: date.format('YYYY-MM-DD'),
-                    start: date.format('YYYY-MM-DD'),
-                    end: date.format('YYYY-MM-DD'),
-                    rendering: 'background',
-                    backgroundColor: color,
-                    Concept: 'Event on ' + date.format('YYYY-MM-DD'),
-                    hashtags: response.hashtags || []
-                };
-                events.push(event);
-            }
-        });
-    });
-});
-
-monthSelect.addEventListener('change', function() {
-    const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
-
-    if (selectedMonths.length > 0) {
-        $('#calendar').fullCalendar('removeEvents'); // Remove all existing events
-        // Reset counters
-        savedItemsCount = 0;
-        visibleEventsCount = 0; // Reset visible events count
-
-        // Clear UI counters
-        document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
-        document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
-        document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
-        document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
-
-
-        // Filter and add only the events for the selected months
-        const filteredEvents = events.filter(event => {
-            const eventDate = moment(event.start);
-            return selectedMonths.some(month => {
-                const [monthStr, yearStr] = month.split(',');
-                const monthStart = moment().year(yearStr).month(monthStr - 1).startOf('month');
-                const monthEnd = moment().year(yearStr).month(monthStr - 1).endOf('month');
-                return eventDate.isBetween(monthStart, monthEnd, null, '[]');
-            });
-        });
-
-        $('#calendar').fullCalendar('addEventSource', filteredEvents);
-        $('#calendar').fullCalendar('gotoDate', moment(selectedMonths[0], 'MM,YYYY').startOf('month')); // Navigate to the first selected month
-        
-        // Update the visible events
-        visibleEvents = filteredEvents;
-        updateVisibleEventsCounter();
-    }
-});
-
-$('#calendar').fullCalendar({
-    viewRender: function(view, element) {
-        // Function to be called every time the view changes
-        const visibleRange = view.intervalStart.format('YYYY-MM-DD') + '/' + view.intervalEnd.format('YYYY-MM-DD');
-
-        // Example: Update visible events based on the current view
-        visibleEvents = $('#calendar').fullCalendar('getEvents').filter(event => {
-            const eventDate = moment(event.start);
-            return eventDate.isBetween(view.intervalStart, view.intervalEnd, null, '[]');
-        });
-
-        updateVisibleEventsCounter();
-    }
-});
-
-// Function to update the visible events counter
-function updateVisibleEventsCounter() {
-    visibleEventsCount = visibleEvents.length;
-
-    // Update the counter in the HTML
-    document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
-
-    // Show or hide the visible events container based on the count
-    const visibleEventsContainer = document.getElementById('visibleEventsContainer');
-    if (visibleEventsCount > 0) {
-        visibleEventsContainer.classList.remove('d-none');
-    } else {
-        visibleEventsContainer.classList.add('d-none');
-    }
-}
-
-
-
-applySavedEventColors(); // Apply saved event colors after loading events
-                        }}
- catch (e) {
+                    applySavedEventColors(); // Apply saved event colors after loading events
+                }
+            }catch (e) {
                         console.error('Error processing response:', e);
                         document.getElementById('resultContainer').innerHTML = '<p style="color: red;">Error processing response.</p>';
                     }
