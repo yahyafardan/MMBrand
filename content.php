@@ -51,7 +51,8 @@ try {
     <p id="visibleEventsCount">Visible Events: 0</p>
 </div>
 <!-- Sticky Button -->
-<button id="viewLocalStorageButton" style="
+<button id="viewLocalStorageButton"
+class="d-none" style="
     position: fixed;
     top: 20px;
     right: 20px;
@@ -774,7 +775,7 @@ applySavedEventColors(); // Apply saved event colors after loading events
             }
 
             // Add custom button for the event
-            const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm">Write</button>');
+            const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm"></button>');
             btn.on('click', function() {
                 showModal(event);
                 selectedEvent = event.id;
@@ -848,6 +849,8 @@ applySavedEventColors(); // Apply saved event colors after loading events
         sponsors: sponsorshipOption, // This can be 'yes', 'no', or undefined
         state: 'saved',
         color: 'blue',
+        language: languages || '', // Ensure this is included
+
     };
 
 

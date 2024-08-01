@@ -47,18 +47,21 @@ if (json_last_error() === JSON_ERROR_NONE) {
             $type = isset($value['type']) ? $value['type'] : '';
             $concept = isset($value['Concept']) ? $value['Concept'] : '';
             $caption = isset($value['caption']) ? $value['caption'] : '';
-            $language = ''; // Assume an empty string for language if not provided
+            $language = isset($value['language']) ? $value['language'] : ''; // Added language field
             $social_media_platforms = isset($value['socialMedia']) && is_array($value['socialMedia']) ? implode(', ', $value['socialMedia']) : '';
             $can_be_sponsored = isset($value['sponsors']) ? $value['sponsors'] : '';
             $status = isset($value['state']) ? $value['state'] : '';
 
-            // Check if status is 'saved' and update it
+            // Check if status is 'saved'
             if ($status === 'saved') {
                 // Update the status to 'approvalIn'
                 $updateStmt->execute([
                     ':client_name' => $client_name,
                     ':post_date' => $formatted_date
                 ]);
+
+                // Set the status to 'approvalIn' for insertion
+                $status = 'approvalIn';
             }
 
             // Execute the insert statement
@@ -66,7 +69,7 @@ if (json_last_error() === JSON_ERROR_NONE) {
                 ':type' => $type,
                 ':concept' => $concept,
                 ':caption' => $caption,
-                ':language' => $language,
+                ':language' => $language, // Added language field
                 ':post_date' => $formatted_date,
                 ':month' => $month_name,
                 ':social_media_platforms' => $social_media_platforms,
