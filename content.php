@@ -177,7 +177,22 @@ class="" style="
                         <div class="mb-3">
                             <label for="caption" class="form-label">Caption (Text)</label>
                             <textarea class="form-control" id="caption" name="caption" rows="3" required></textarea>
+                            
                         </div>
+  <!-- Additional Static Fields -->
+<div id="additionalFields" class="d-none">
+    <div class="mb-3">
+        <label for="ConceptAdditional" class="form-label">Additional Concept (theme)</label>
+        <input type="text" class="form-control" id="ConceptAdditional" name="ConceptAdditional">
+    </div>
+    <div class="mb-3">
+        <label for="captionAdditional" class="form-label">Additional Caption (Text)</label>
+        <textarea class="form-control" id="captionAdditional" name="captionAdditional" rows="3"></textarea>
+    </div>
+</div>
+
+    
+                        
                         <!-- Social Media Platforms Section in Modal -->
                         <div class="mb-3">
                             <label class="form-label">Social Media Platforms</label>
@@ -337,35 +352,9 @@ class="" style="
 
 
 <script>
-    // Function to clear local storage
-// function clearLocalStorage() {
-//     localStorage.clear();
-//     console.log('Local storage has been cleared.');
-// }
+    // localStorage.clear();
 
-// // Function to display local storage data in the console
-// function displayLocalStorageData() {
-//     const allKeys = Object.keys(localStorage);
-
-//     console.group('--- Local Storage Contents ---');
-
-//     if (allKeys.length === 0) {
-//         console.log('Local storage is empty.');
-//     } else {
-//         allKeys.forEach(key => {
-//             const value = localStorage.getItem(key);
-//             console.group(`Key: ${key}`);
-//             console.log('Value:', value);
-//             console.groupEnd();
-//         });
-//     }
-
-//     console.groupEnd();
-// }
-
-// Clear local storage on page load
-// window.addEventListener('load', function() {
-//     clearLocalStorage();
+    
 
 //     // Add event listener for the view local storage button
     document.getElementById('viewLocalStorageButton').addEventListener('click', displayLocalStorageData);
@@ -612,6 +601,8 @@ function showModal(event) {
     document.getElementById('caption').value = eventData.caption || globalHashtags || '';
     document.getElementById('eventDate').value = event.start;
     document.getElementById('eventID').value = event.id;
+    document.getElementById('ConceptAdditional').value = eventData.ConceptAdditional || '';
+    document.getElementById('captionAdditional').value = eventData.captionAdditional || '';
 
     // Format the date for display
     const formattedDate = moment(event.start).format('MMMM Do, YYYY');
@@ -715,6 +706,13 @@ if (selectedClient) {
                     document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
                     document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
                     document.getElementById('itemsRequiredContainer').classList.remove('d-none');
+                    document.getElementById('additionalFields').classList.add('d-none');
+
+                    if (languages==="both"){
+                        document.getElementById('additionalFields').classList.remove('d-none');
+
+
+                    }
 
                     // Populate months dropdown
                     const monthSelect = document.getElementById('monthSelect');
@@ -1031,6 +1029,8 @@ function saveEvent(eventId) {
         sponsors: sponsorshipOption, // This can be 'yes', 'no', or undefined
         state: 'saved',
         language: languages || '', // Ensure this is included
+        ConceptAdditional: formData.get('ConceptAdditional'),
+        captionAdditional: formData.get('captionAdditional'),
 
     };
 
