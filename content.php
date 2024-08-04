@@ -569,7 +569,6 @@ function getSavedData() {
     function saveDataToLocal(clientName, eventId, data) {
         const savedData = getSavedData();
         const key = `${clientName}_${eventId}`;
-        data.color = 'blue'; // Set the event color to blue
         savedData[key] = data;
         localStorage.setItem(localStorageKey, JSON.stringify(savedData));
     }
@@ -743,11 +742,11 @@ response.posting_days.forEach(dayString => {
         dates.forEach(date => {
             if (date.isBetween(startDate, endDate, null, '[]')) {
                 const eventId = selectedClient + '_' + date.format('YYYY-MM-DD'); // Include client name
-                const isSaved = savedEvents[eventId] !== undefined; // Check if event ID is in saved events
+                const isSaved = savedEvents.hasOwnProperty(eventId); // Check if event ID is in saved events
 
                 // Log both sides of the if statement
-                console.log('Event ID:', eventId);
-                console.log('Saved Events:', savedEvents);
+                console.log('Generated Event ID:', eventId);
+                console.log('Saved Events Keys:', Object.keys(savedEvents));
                 console.log('Key Exists:', isSaved);
 
                 const event = {
@@ -766,6 +765,7 @@ response.posting_days.forEach(dayString => {
 });
 
 console.log('Events created:', events);
+
 
 // Function to save an event ID to local storage
 function saveEvent(eventId) {
@@ -1003,7 +1003,6 @@ function saveEvent(eventId) {
         socialMedia: socialMediaPlatform,
         sponsors: sponsorshipOption, // This can be 'yes', 'no', or undefined
         state: 'saved',
-        color: 'blue',
         language: languages || '', // Ensure this is included
 
     };
@@ -1055,11 +1054,13 @@ $('#calendar').fullCalendar('refetchEvents');
     tableBody.innerHTML = ''; // Clear existing rows
 
     if (parsedData) {
-        for (const [id, data] of Object.entries(parsedData)) {
+    for (const [id, data] of Object.entries(parsedData)) {
+        // Extract client name and event date from ID
+        const [clientName, eventDate] = id.split('_');
+        
+        // Check if the client name matches the selected client
+        if (clientName === selectedClient) {
             const row = document.createElement('tr');
-
-            // Extract client name and event date from ID
-            const [clientName, eventDate] = id.split('_');
             const formattedDate = new Date(eventDate).toLocaleDateString();
 
             row.innerHTML = `
@@ -1074,9 +1075,10 @@ $('#calendar').fullCalendar('refetchEvents');
 
             tableBody.appendChild(row);
         }
-    } else {
-        console.log('No data found in local storage');
     }
+} else {
+    console.log('No data found in local storage');
+}
 }
 
 
