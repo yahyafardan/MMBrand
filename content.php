@@ -59,7 +59,7 @@ class="d-none">
 </div>
 
 <!-- Sticky Button -->
-<!-- <button id="viewLocalStorageButton"
+<button id="viewLocalStorageButton"
 class="" style="
     position: fixed;
     top: 20px;
@@ -73,7 +73,7 @@ class="" style="
     z-index: 1000;
 ">
     View Local Storage
-</button> -->
+</button>
 
 
 
@@ -368,7 +368,7 @@ class="" style="
 //     clearLocalStorage();
 
 //     // Add event listener for the view local storage button
-//     document.getElementById('viewLocalStorageButton').addEventListener('click', displayLocalStorageData);
+    document.getElementById('viewLocalStorageButton').addEventListener('click', displayLocalStorageData);
 // });
 
     // Function to display local storage data in the console
@@ -391,8 +391,7 @@ function displayLocalStorageData() {
     console.groupEnd();
 }
 
-// Event listener for the view local storage button
-// document.getElementById('viewLocalStorageButton').addEventListener('click', displayLocalStorageData);
+
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize variables
@@ -566,12 +565,40 @@ function getSavedData() {
     }
 
     // Function to save data to localStorage
-    function saveDataToLocal(clientName, eventId, data) {
-        const savedData = getSavedData();
-        const key = `${clientName}_${eventId}`;
-        savedData[key] = data;
-        localStorage.setItem(localStorageKey, JSON.stringify(savedData));
-    }
+    // function saveDataToLocal(clientName, eventId, data) {
+    //     const savedData = getSavedData();
+    //     const key = `${clientName}_${eventId}`;
+    //     savedData[key] = data;
+    //     localStorage.setItem(localStorageKey, JSON.stringify(savedData));
+    // }
+    // Function to get saved data from local storage
+// Function to get saved data from local storage
+function getSavedData() {
+    const savedData = localStorage.getItem(localStorageKey);
+    return savedData ? JSON.parse(savedData) : {};
+}
+
+// Function to save data to local storage
+function saveDataToLocal(clientName, eventId, data) {
+    const savedData = getSavedData();
+    
+    // Debugging: Log inputs and key generation
+    console.log('Saving data...');
+    console.log('Client Name:', clientName);
+    console.log('Event ID:', eventId);
+    
+    // Ensure eventId does not include clientName
+    const cleanEventId = eventId.includes(clientName) ? eventId.split('_').slice(1).join('_') : eventId;
+    
+    // Generate the key
+    const key = `${clientName}_${cleanEventId}`;
+    console.log('Generated Key:', key);
+    
+    // Save data
+    savedData[key] = data;
+    localStorage.setItem(localStorageKey, JSON.stringify(savedData));
+}
+
    
 // Function to show the modal and populate its fields
 function showModal(event) {
