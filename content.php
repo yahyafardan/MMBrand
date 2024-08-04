@@ -338,30 +338,30 @@ class="" style="
 
 <script>
     // Function to clear local storage
-function clearLocalStorage() {
-    localStorage.clear();
-    console.log('Local storage has been cleared.');
-}
+// function clearLocalStorage() {
+//     localStorage.clear();
+//     console.log('Local storage has been cleared.');
+// }
 
-// Function to display local storage data in the console
-function displayLocalStorageData() {
-    const allKeys = Object.keys(localStorage);
+// // Function to display local storage data in the console
+// function displayLocalStorageData() {
+//     const allKeys = Object.keys(localStorage);
 
-    console.group('--- Local Storage Contents ---');
+//     console.group('--- Local Storage Contents ---');
 
-    if (allKeys.length === 0) {
-        console.log('Local storage is empty.');
-    } else {
-        allKeys.forEach(key => {
-            const value = localStorage.getItem(key);
-            console.group(`Key: ${key}`);
-            console.log('Value:', value);
-            console.groupEnd();
-        });
-    }
+//     if (allKeys.length === 0) {
+//         console.log('Local storage is empty.');
+//     } else {
+//         allKeys.forEach(key => {
+//             const value = localStorage.getItem(key);
+//             console.group(`Key: ${key}`);
+//             console.log('Value:', value);
+//             console.groupEnd();
+//         });
+//     }
 
-    console.groupEnd();
-}
+//     console.groupEnd();
+// }
 
 // Clear local storage on page load
 // window.addEventListener('load', function() {
@@ -404,7 +404,8 @@ document.addEventListener('DOMContentLoaded', function() {
     let nOfPosts, nOfVideos, languages; // Added new variables
     let GsavedItemsCount = savedItemsCount; // This should be updated with the actual saved items count
     let GvisibleEventsCount = visibleEventsCount; // This should be updated dynamically
-    let savedItemsSet = new Set(); // Initialize the Setlet savedItemsCount = 0;   
+    let savedItemsSet = new Set(); // Initialize the Setlet savedItemsCount = 0; 
+      
 
 
     document.getElementById('submitButton').addEventListener('click', handleSubmission);
@@ -575,53 +576,49 @@ function getSavedData() {
    
 // Function to show the modal and populate its fields
 function showModal(event) {
-    
+    // Get saved data from local storage
     const savedData = getSavedData();
     const key = `${selectedClient}_${event.id}`;
     const eventData = savedData[key] || {};
-    
-// Assuming eventData contains information from your event
-document.getElementById('Concept').value = eventData.Concept || '';
-document.getElementById('caption').value = eventData.caption || globalHashtags || '';
-document.getElementById('eventDate').value = event.start;
-document.getElementById('eventID').value = event.id;
 
-// Format the date for display
-const formattedDate = moment(event.start).format('MMMM Do, YYYY');
-document.getElementById('modalDateID').textContent = `Task Date: ${formattedDate}`;
+    // Populate form fields with data from local storage
+    document.getElementById('Concept').value = eventData.Concept || '';
+    document.getElementById('caption').value = eventData.caption || globalHashtags || '';
+    document.getElementById('eventDate').value = event.start;
+    document.getElementById('eventID').value = event.id;
 
-// Set the client name
-document.getElementById('modalClientName').textContent = `Client: ${selectedClient}`;
+    // Format the date for display
+    const formattedDate = moment(event.start).format('MMMM Do, YYYY');
+    document.getElementById('modalDateID').textContent = `Task Date: ${formattedDate}`;
 
-// Set the language data
-document.getElementById('languageData').textContent = languages;
+    // Set the client name
+    document.getElementById('modalClientName').textContent = `Client: ${selectedClient}`;
 
-// Set the selected social media platforms
-const socialMediaPlatforms = eventData.socialMedia || [];
-const socialMediaCheckboxes = document.querySelectorAll('.social-media-platforms .form-check-input');
-socialMediaCheckboxes.forEach(checkbox => {
-    checkbox.checked = socialMediaPlatforms.includes(checkbox.value);
-});
+    // Set the language data
+    document.getElementById('languageData').textContent = languages;
 
+    // Set the selected social media platforms
+    const socialMediaPlatforms = eventData.socialMedia || [];
+    const socialMediaCheckboxes = document.querySelectorAll('.social-media-platforms .form-check-input');
+    socialMediaCheckboxes.forEach(checkbox => {
+        checkbox.checked = socialMediaPlatforms.includes(checkbox.value);
+    });
 
-
-// Set the sponsorship option
-const sponsorshipOption = eventData.sponsors || '';
-const sponsorYes = document.getElementById('sponsorYes');
-const sponsorNo = document.getElementById('sponsorNo');
- // Clear previous selections
- sponsorYes.checked = false;
+    // Set the sponsorship option
+    const sponsorshipOption = eventData.sponsors || '';
+    const sponsorYes = document.getElementById('sponsorYes');
+    const sponsorNo = document.getElementById('sponsorNo');
+    sponsorYes.checked = false;
     sponsorNo.checked = false;
 
+    if (sponsorshipOption === 'yes') {
+        sponsorYes.checked = true;
+    } else if (sponsorshipOption === 'no') {
+        sponsorNo.checked = true;
+    }
 
-if (sponsorshipOption === 'yes') {
-    sponsorYes.checked = true;
-} else if (sponsorshipOption === 'no') {
-    sponsorNo.checked = true;
-}
-
-// Reset the radio buttons for content type
-const typestatic = document.getElementById('staticType');
+    // Reset the radio buttons for content type
+    const typestatic = document.getElementById('staticType');
     const typevideo = document.getElementById('videoType');
     typestatic.checked = false;
     typevideo.checked = false;
@@ -661,7 +658,6 @@ showModal();
 
     
 
-showModal() 
 }
 
 
@@ -730,33 +726,56 @@ if (selectedClient) {
                     let visibleEvents = [];
 
                     // Example of fetching and parsing events
-                    response.posting_days.forEach(dayString => {
-                        const daysArray = dayString.split(',').map(day => {
-                            return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
-                        });
+// Example of fetching and parsing events
+response.posting_days.forEach(dayString => {
+    const daysArray = dayString.split(',').map(day => {
+        return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+    });
 
-                        daysArray.forEach(dayOfWeek => {
-                            const color = 'purple';
-                            const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
+    // Fetch saved events from local storage
+    const savedEvents = JSON.parse(localStorage.getItem('modalSavedData')) || {}; // Associative array of saved event IDs
+    console.log('Saved Events from localStorage:', savedEvents);
 
-                            dates.forEach(date => {
-                                if (date.isBetween(startDate, endDate, null, '[]')) {
-                                    const event = {
-                                        id: date.format('YYYY-MM-DD'),
-                                        start: date.format('YYYY-MM-DD'),
-                                        end: date.format('YYYY-MM-DD'),
-                                        rendering: 'background',
-                                        backgroundColor: color,
-                                        Concept: 'Event on ' + date.format('YYYY-MM-DD'),
-                                        hashtags: response.hashtags || []
-                                    };
-                                    events.push(event);
-                                }
-                            });
-                        });
-                    });
+    daysArray.forEach(dayOfWeek => {
+        const color = 'red'; // Default color
+        const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
 
-                    console.log('Events created:', events);
+        dates.forEach(date => {
+            if (date.isBetween(startDate, endDate, null, '[]')) {
+                const eventId = selectedClient + '_' + date.format('YYYY-MM-DD'); // Include client name
+                const isSaved = savedEvents[eventId] !== undefined; // Check if event ID is in saved events
+
+                // Log both sides of the if statement
+                console.log('Event ID:', eventId);
+                console.log('Saved Events:', savedEvents);
+                console.log('Key Exists:', isSaved);
+
+                const event = {
+                    id: eventId,
+                    start: date.format('YYYY-MM-DD'),
+                    end: date.format('YYYY-MM-DD'),
+                    rendering: 'background',
+                    backgroundColor: isSaved ? 'blue' : color, // Set color based on saved status
+                    Concept: 'Event on ' + date.format('YYYY-MM-DD'),
+                    hashtags: response.hashtags || []
+                };
+                events.push(event);
+            }
+        });
+    });
+});
+
+console.log('Events created:', events);
+
+// Function to save an event ID to local storage
+function saveEvent(eventId) {
+    let savedEvents = JSON.parse(localStorage.getItem('modalSavedData')) || {};
+    savedEvents[eventId] = true; // Mark event as saved
+    localStorage.setItem('modalSavedData', JSON.stringify(savedEvents));
+}
+
+
+
 
                     monthSelect.addEventListener('change', function() {
                         const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
@@ -897,12 +916,12 @@ if (selectedClient) {
             const selectedMonthEnd = moment().year(selectedYear).month(selectedMonth).endOf('month');
 
             // Check if the event date is within the selected month
-            const eventDate = moment(event.start);
-            if (eventDate.isBetween(selectedMonthStart, selectedMonthEnd, null, '[]')) {
-                element.css('background-color', event.backgroundColor || 'purple');
-            } else {
-                element.css('background-color', ''); // No color for dates outside the month
-            }
+            // const eventDate = moment(event.start);
+            // if (eventDate.isBetween(selectedMonthStart, selectedMonthEnd, null, '[]')) {
+            //     element.css('background-color', event.backgroundColor || 'purple');
+            // } else {
+            //     element.css('background-color', ''); // No color for dates outside the month
+            // }
 
             // Add custom button for the event
             const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm"></button>');
