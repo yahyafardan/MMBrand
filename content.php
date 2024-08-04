@@ -547,11 +547,7 @@ function getSavedData() {
         }
     }
 
-    // Function to get saved data from localStorage
-    function getSavedData() {
-        const data = localStorage.getItem(localStorageKey);
-        return data ? JSON.parse(data) : {};
-    }
+   
 
     // Function to save data to localStorage
     // function saveDataToLocal(clientName, eventId, data) {
@@ -562,12 +558,6 @@ function getSavedData() {
     // }
     // Function to get saved data from local storage
 // Function to get saved data from local storage
-function getSavedData() {
-    const savedData = localStorage.getItem(localStorageKey);
-    return savedData ? JSON.parse(savedData) : {};
-}
-
-// Function to save data to local storage
 function saveDataToLocal(clientName, eventId, data) {
     const savedData = getSavedData();
     
@@ -576,7 +566,7 @@ function saveDataToLocal(clientName, eventId, data) {
     console.log('Client Name:', clientName);
     console.log('Event ID:', eventId);
     
-    // Ensure eventId does not include clientName
+    // Ensure eventId does not include clientName or extra underscores
     const cleanEventId = eventId.includes(clientName) ? eventId.split('_').slice(1).join('_') : eventId;
     
     // Generate the key
@@ -588,13 +578,22 @@ function saveDataToLocal(clientName, eventId, data) {
     localStorage.setItem(localStorageKey, JSON.stringify(savedData));
 }
 
-   
-// Function to show the modal and populate its fields
 function showModal(event) {
     // Get saved data from local storage
     const savedData = getSavedData();
-    const key = `${selectedClient}_${event.id}`;
+    
+    // Log the selected client and event ID
+    console.log('Selected Client:', selectedClient);
+    console.log('Event ID:', event.id);
+    
+    // Create the key without extra underscores
+    const key = event.id;
+    
+    console.log('Key:', key);
+    console.log('Saved Data:', savedData);
+
     const eventData = savedData[key] || {};
+    console.log('Event Data:', eventData);
 
     // Populate form fields with data from local storage
     document.getElementById('Concept').value = eventData.Concept || '';
@@ -625,14 +624,8 @@ function showModal(event) {
     const sponsorshipOption = eventData.sponsors || '';
     const sponsorYes = document.getElementById('sponsorYes');
     const sponsorNo = document.getElementById('sponsorNo');
-    sponsorYes.checked = false;
-    sponsorNo.checked = false;
-
-    if (sponsorshipOption === 'yes') {
-        sponsorYes.checked = true;
-    } else if (sponsorshipOption === 'no') {
-        sponsorNo.checked = true;
-    }
+    sponsorYes.checked = sponsorshipOption === 'yes';
+    sponsorNo.checked = sponsorshipOption === 'no';
 
     // Reset the radio buttons for content type
     const typestatic = document.getElementById('staticType');
@@ -653,29 +646,20 @@ function showModal(event) {
             document.getElementById('staticSection').classList.add('d-none');
         }
     } else {
-        // If the eventID doesn't match, ensure sections are hidden
+        // Ensure sections are hidden if eventID doesn't match
         document.getElementById('staticSection').classList.add('d-none');
         document.getElementById('videoSection').classList.add('d-none');
     }
-    // Example function to show the modal with custom options
-function showModal() {
+
+    // Show the modal with options
     $('#contentModal').modal({
         backdrop: 'static',  // Prevent closing when clicking outside
-        keyboard: false     // Prevent closing when pressing ESC
+        keyboard: false      // Prevent closing when pressing ESC
     });
 }
 
 // Call this function when needed
-showModal();
-
-
-
-
-
-
-    
-
-}
+// showModal(event); // Ensure to pass the event when calling this functionent when calling this function
 
 
 
@@ -805,7 +789,6 @@ function saveEvent(eventId) {
                     monthSelect.addEventListener('change', function() {
                         const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
 
-                        console.log('Selected months:', selectedMonths);
 
                         if (selectedMonths.length > 0) {
                             $('#calendar').fullCalendar('removeEvents'); // Remove all existing events
@@ -830,7 +813,6 @@ function saveEvent(eventId) {
                                 });
                             });
 
-                            console.log('Filtered events:', filteredEvents);
 
                             $('#calendar').fullCalendar('addEventSource', filteredEvents);
                             $('#calendar').fullCalendar('gotoDate', moment(selectedMonths[0], 'MM,YYYY').startOf('month')); // Navigate to the first selected month
