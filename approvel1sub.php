@@ -1,43 +1,29 @@
 <?php
-
-// Include the database connection file
-require 'db.php';
-
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
-    // Get the record ID and action from the POST request
-    $id = isset($_POST['id']) ? intval($_POST['id']) : 0;
-    $action = isset($_POST['action']) ? $_POST['action'] : '';
-    $notes = isset($_POST['notes']) ? trim($_POST['notes']) : '';
-
-    // Validate inputs
-    if ($id <= 0 || !in_array($action, ['approve', 'reject'])) {
-        echo '<p>Invalid request.</p>';
-        exit;
-    }
-
     try {
+        // Connect to the database
+        require 'db.php';
+
+
+        $id = $_POST['id'];
+        $action = $_POST['action'];
+
         if ($action === 'approve') {
-            $sql = "UPDATE content SET status = 'approvalIn2' WHERE id = :id";
-        } elseif ($action === 'reject') {
-            $sql = "UPDATE content SET status = 'rejected', notes = :notes WHERE id = :id";
+            $status = 'design';
+        } else if ($action === 'reject') {
+            $status = 'rejected';
+        } else {
+            echo 'Invalid action';
+            exit;
         }
 
+        $sql = "UPDATE content SET status = :status WHERE id = :id";
         $stmt = $pdo->prepare($sql);
-        $stmt->bindParam(':id', $id, PDO::PARAM_INT);
+        $stmt->execute(['status' => $status, 'id' => $id]);
 
-        if ($action === 'reject') {
-            $stmt->bindParam(':notes', $notes, PDO::PARAM_STR);
-        }
-
-        $stmt->execute();
-
-        echo '<p>Status updated successfully.</p>';
-
+        echo 'success';
     } catch (PDOException $e) {
-        // Log and display database query errors
-        echo '<p>Error updating status: ' . htmlspecialchars($e->getMessage()) . '</p>';
+        echo 'Error: ' . htmlspecialchars($e->getMessage());
     }
-} else {
-    echo '<p>Invalid request method.</p>';
 }
 ?>

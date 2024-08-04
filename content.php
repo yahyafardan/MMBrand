@@ -59,7 +59,7 @@ class="d-none">
 </div>
 
 <!-- Sticky Button -->
-<button id="viewLocalStorageButton"
+<!-- <button id="viewLocalStorageButton"
 class="" style="
     position: fixed;
     top: 20px;
@@ -73,7 +73,7 @@ class="" style="
     z-index: 1000;
 ">
     View Local Storage
-</button>
+</button> -->
 
 
 
@@ -364,12 +364,12 @@ function displayLocalStorageData() {
 }
 
 // Clear local storage on page load
-window.addEventListener('load', function() {
-    clearLocalStorage();
+// window.addEventListener('load', function() {
+//     clearLocalStorage();
 
-    // Add event listener for the view local storage button
-    document.getElementById('viewLocalStorageButton').addEventListener('click', displayLocalStorageData);
-});
+//     // Add event listener for the view local storage button
+//     document.getElementById('viewLocalStorageButton').addEventListener('click', displayLocalStorageData);
+// });
 
     // Function to display local storage data in the console
 function displayLocalStorageData() {
@@ -392,7 +392,7 @@ function displayLocalStorageData() {
 }
 
 // Event listener for the view local storage button
-document.getElementById('viewLocalStorageButton').addEventListener('click', displayLocalStorageData);
+// document.getElementById('viewLocalStorageButton').addEventListener('click', displayLocalStorageData);
 
 document.addEventListener('DOMContentLoaded', function() {
     // Initialize variables
@@ -582,7 +582,7 @@ function showModal(event) {
     
 // Assuming eventData contains information from your event
 document.getElementById('Concept').value = eventData.Concept || '';
-document.getElementById('caption').value = eventData.hashtags || globalHashtags || '';
+document.getElementById('caption').value = eventData.caption || globalHashtags || '';
 document.getElementById('eventDate').value = event.start;
 document.getElementById('eventID').value = event.id;
 

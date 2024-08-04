@@ -1,6 +1,4 @@
 <?php
-
-// Include the database connection file
 require 'db.php';
 
 try {
@@ -35,8 +33,8 @@ try {
         echo '</div>';
 
         echo '<div class="button-container">';
-        echo '<a class="elementor-button elementor-button-link elementor-size-sm approve-btn" href="#">Approved</a>';
-        echo '<a class="elementor-button elementor-button-link elementor-size-sm reject-btn" href="#">Reject</a>';
+        echo '<a class="elementor-button elementor-button-link elementor-size-sm approve-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '">Approved</a>';
+        echo '<a class="elementor-button elementor-button-link elementor-size-sm reject-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '">Reject</a>';
         echo '</div>';
 
         // Hidden note input field
@@ -58,28 +56,64 @@ try {
 ?>
 
 <script>
-// Function to toggle the visibility of the note input field
-document.querySelectorAll('.reject-btn').forEach(button => {
-    button.addEventListener('click', function(event) {
-        event.preventDefault(); // Prevent default action
-        const container = this.closest('.approvalIn-container');
-        const noteContainer = container.querySelector('.note-container');
-        noteContainer.style.display = noteContainer.style.display === 'none' ? 'block' : 'none';
+document.addEventListener('DOMContentLoaded', function() {
+    // Function to toggle the visibility of the note input field
+    document.querySelectorAll('.reject-btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default action
+            const container = this.closest('.approvalIn-container');
+            const noteContainer = container.querySelector('.note-container');
+            noteContainer.style.display = noteContainer.style.display === 'none' ? 'block' : 'none';
+        });
+    });
+
+    // Function to handle approval or rejection
+    document.querySelectorAll('.approve-btn, .reject-btn').forEach(button => {
+        button.addEventListener('click', function(event) {
+            event.preventDefault(); // Prevent default action
+
+            const recordId = this.getAttribute('data-id');
+            const action = this.classList.contains('approve-btn') ? 'approve' : 'reject';
+
+            // AJAX request to update status
+            const xhr = new XMLHttpRequest();
+            xhr.open('POST', 'approval1sub.php', true);
+            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+            xhr.onreadystatechange = function() {
+                if (xhr.readyState === 4 && xhr.status === 200) {
+                    const container = document.getElementById('record-' + recordId);
+                    if (xhr.responseText === 'success') {
+                        container.innerHTML += '<p>Status updated successfully.</p>';
+                        container.classList.add('submitted');
+                        setTimeout(() => {
+                            container.style.display = 'none'; // Hide the container
+                        }, 1000); // Optional: Adjust the timeout as needed
+                    } else {
+                        container.innerHTML += '<p>Failed to update status.</p>';
+                    }
+                }
+            };
+            xhr.send('id=' + encodeURIComponent(recordId) + '&action=' + encodeURIComponent(action));
+        });
     });
 });
 
-// Function to handle saving the note (you can implement AJAX or form submission here)
-function saveNote(recordId) {
-    const noteTextArea = document.getElementById('note-' + recordId);
-    const note = noteTextArea.value;
-
-    // Example: Logging note to console (implement your saving logic here)
-    console.log('Saving note for record ID ' + recordId + ': ' + note);
-
-    // Optionally, hide the note input field after saving
-    noteTextArea.closest('.note-container').style.display = 'none';
+// Function to save note
+function saveNote(id) {
+    const note = document.getElementById('note-' + id).value;
+    // Implement the functionality to save the note (e.g., AJAX request)
 }
 </script>
+
+
+
+
+
+
+
+
+
+
 
 <style>
 /* Ensure the container takes full width and allows wrapping */
@@ -167,5 +201,10 @@ function saveNote(recordId) {
 .note-container .save-note-btn:hover {
     background-color: #0056b3;
 }
+.submitted {
+    opacity: 0.6;
+    pointer-events: none; /* Disables interactions */
+}
+
 
 </style>
