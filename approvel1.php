@@ -47,7 +47,7 @@ try {
             echo '<div class="month-name">' . htmlspecialchars($month) . '</div>';
 
             // Add form for each month to review records
-            echo '<form action="review1.php" method="POST" target="review1.php">';
+            echo '<form action="review1.php" method="post" target="_blank">';
             echo '<input type="hidden" name="client_name" value="' . htmlspecialchars($clientName) . '">';
             echo '<input type="hidden" name="month" value="' . htmlspecialchars($month) . '">';
             echo '<button type="submit" class="review-btn">Review and Approve</button>';
@@ -65,6 +65,16 @@ try {
     echo '<p>Error fetching records: ' . htmlspecialchars($e->getMessage()) . '</p>';
 }
 ?>
+<script>
+document.addEventListener('visibilitychange', function() {
+    if (document.visibilityState === 'visible') {
+        location.reload(); // Refresh the page
+        alert("Page is visible");
+    }
+});
+</script>
+
+
 
 
 <style>

@@ -1,56 +1,122 @@
-<?php
-require 'db.php';
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Records</title>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+</head>
+<body>
+    <?php
+    require 'db.php';
 
-$clientName = isset($_POST['client_name']) ? $_POST['client_name'] : '';
-$month = isset($_POST['month']) ? $_POST['month'] : '';
+    $clientName = isset($_POST['client_name']) ? $_POST['client_name'] : '';
+    $month = isset($_POST['month']) ? $_POST['month'] : '';
 
-if (!$clientName || !$month) {
-    echo '<p>Invalid client or month specified.</p>';
-    exit;
-}
-
-try {
-    // Fetch records for the specific client and month
-    $sql = "SELECT * FROM content WHERE client_name = :client_name AND month = :month";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['client_name' => $clientName, 'month' => $month]);
-    $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
-
-    if (!$records) {
-        echo "<p>No records found for $clientName in $month.</p>";
+    if (!$clientName || !$month) {
+        echo '<p>Invalid client or month specified.</p>';
         exit;
     }
 
-    echo '<div class="clients-container">';
-    echo "<h2>Content for $clientName - $month</h2>";
-    
+    try {
+        // Fetch records for the specific client and month
+        $sql = "SELECT * FROM content WHERE client_name = :client_name AND month = :month";
+        $stmt = $pdo->prepare($sql);
+        $stmt->execute(['client_name' => $clientName, 'month' => $month]);
+        $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
-    // Create a single client container
-    echo '<div class="client-container">';
+        if (!$records) {
+            echo "<p>No records found for $clientName in $month.</p>";
+            exit;
+        }
 
-    // Iterate over the records and generate HTML
-    foreach ($records as $record) {
-        echo '<div class="record-container">';
-        echo '<p><strong>Type:</strong> ' . htmlspecialchars($record['type']) . '</p>';
-        echo '<p><strong>Concept:</strong> ' . htmlspecialchars($record['concept']) . '</p>';
-        echo '<p><strong>Caption:</strong> ' . htmlspecialchars($record['caption']) . '</p>';
-        echo '<p><strong>Language:</strong> ' . htmlspecialchars($record['language']) . '</p>';
-        echo '<p><strong>Last Updated:</strong> ' . htmlspecialchars($record['updated_at']) . '</p>';
-        echo '<p><strong>Status:</strong> ' . htmlspecialchars($record['status']) . '</p>';
-        echo '<div class="button-container">';
-        echo '<a class="approve-btn" href="approve.php?id=' . htmlspecialchars($record['id']) . '">Approve</a>';
-        echo '<a class="reject-btn" href="reject.php?id=' . htmlspecialchars($record['id']) . '">Reject</a>';
-        echo '</div>';
-        echo '</div>';
+        echo '<div class="clients-container">';
+        echo "<h2>Content for $clientName - $month</h2>";
+
+        // Create a single client container
+        echo '<div class="client-container">';
+
+        // Iterate over the records and generate HTML
+        foreach ($records as $record) {
+            echo '<div class="record-container" data-id="' . htmlspecialchars($record['id']) . '">';
+            echo '<p><strong>Type:</strong> ' . htmlspecialchars($record['type']) . '</p>';
+            echo '<p><strong>Concept:</strong> ' . htmlspecialchars($record['concept']) . '</p>';
+            echo '<p><strong>Caption:</strong> ' . htmlspecialchars($record['caption']) . '</p>';
+            echo '<p><strong>Language:</strong> ' . htmlspecialchars($record['language']) . '</p>';
+            echo '<p><strong>Last Updated:</strong> ' . htmlspecialchars($record['updated_at']) . '</p>';
+            echo '<p><strong>Status:</strong> ' . htmlspecialchars($record['status']) . '</p>';
+            echo '<div class="button-container">';
+            echo '<a class="approve-btn" href="approve.php?id=' . htmlspecialchars($record['id']) . '">Approve</a>';
+            echo '<a class="reject-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '">Reject</a>';
+            echo '</div>';
+            echo '</div>';
+        }
+
+        echo '</div>'; // Close client-container
+        echo '</div>'; // Close clients-container
+
+    } catch (PDOException $e) {
+        echo '<p>Error fetching records: ' . htmlspecialchars($e->getMessage()) . '</p>';
     }
+    ?>
 
-    echo '</div>'; // Close client-container
-    echo '</div>'; // Close clients-container
+    <script>
+        $(document).ready(function() {
+            // Function to show the note input and submit button
+            $('.reject-btn').on('click', function(event) {
+                event.preventDefault(); // Prevent the default link behavior
+                
+                var $recordContainer = $(this).closest('.record-container'); // Get the closest record container
+                var recordId = $(this).data('id'); // Get the record ID
+                
+                // Hide the original buttons
+                $recordContainer.find('.button-container').hide();
+                
+                // Show the note input and submit button
+                $recordContainer.append(`
+                    <div class="note-container">
+                        <textarea class="note-input" placeholder="Enter your note here..."></textarea>
+                        <button class="submit-note-btn" data-id="${recordId}">Submit Note</button>
+                    </div>
+                `);
+            });
 
-} catch (PDOException $e) {
-    echo '<p>Error fetching records: ' . htmlspecialchars($e->getMessage()) . '</p>';
-}
-?>
+            // Function to handle note submission
+            $(document).on('click', '.submit-note-btn', function() {
+                var recordId = $(this).data('id'); // Get the record ID
+                var note = $(this).siblings('.note-input').val(); // Get the note input value
+                
+                if (!note.trim()) {
+                    alert('Please enter a note.');
+                    return;
+                }
+                
+                // Send the data via AJAX
+                $.ajax({
+                    url: 'process_rejection.php', // PHP script to handle rejection
+                    type: 'POST',
+                    data: {
+                        id: recordId,
+                        note: note
+                    },
+                    success: function(response) {
+                        response = JSON.parse(response); // Parse JSON response
+                        // Handle success (update the UI, show a message, etc.)
+                        alert(response.message); // Show a success message
+                        if (response.status === 'success') {
+                            $(`.record-container[data-id="${recordId}"]`).addClass('locked'); // Lock the record
+                        }
+                    },
+                    error: function() {
+                        alert('An error occurred.');
+                    }
+                });
+            });
+        });
+    </script>
+</body>
+</html>
+
 <style>.clients-container {
     display: flex;
     flex-direction: column; /* Display clients in a column */

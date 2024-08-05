@@ -16,6 +16,8 @@ require 'db.php';
 if (!isset($pdo)) {
     die("Database connection failed.");
 }
+$sessionRoleName =$_SESSION['username'];
+$sessionUsername =$_SESSION['role_name'];
 
 
 try {
@@ -352,6 +354,12 @@ class="" style="
 
 
 <script>
+        const sessionRoleName = "<?php echo $sessionRoleName; ?>";
+        const sessionUsername = "<?php echo $sessionUsername; ?>";
+        console.log('Session Role Name:', sessionRoleName);
+        console.log('Session Username:', sessionUsername);
+        let savedItemsCount=0;
+
     // localStorage.clear();
 
     
@@ -367,12 +375,12 @@ function displayLocalStorageData() {
     console.group('--- Local Storage Contents ---');
 
     if (allKeys.length === 0) {
-        console.log('Local storage is empty.');
+        //console.log('Local storage is empty.');
     } else {
         allKeys.forEach(key => {
             const value = localStorage.getItem(key);
             console.group(`Key: ${key}`);
-            console.log('Value:', value);
+            //console.log('Value:', value);
             console.groupEnd();
         });
     }
@@ -390,15 +398,13 @@ document.addEventListener('DOMContentLoaded', function() {
     let selectedClient;
     let globalHashtags = '';
     let nOfPosts, nOfVideos, languages; // Added new variables
-    let GsavedItemsCount = savedItemsCount; // This should be updated with the actual saved items count
-    let GvisibleEventsCount = visibleEventsCount; // This should be updated dynamically
-    let savedItemsSet = new Set(); // Initialize the Setlet savedItemsCount = 0; 
       
 
 
     document.getElementById('submitButton').addEventListener('click', handleSubmission);
 
 function handleSubmission() {
+    
     // Log the types and values of the variables
     console.log('savedItemsCount:', savedItemsCount, 'Type:', typeof savedItemsCount);
     console.log('visibleEventsCount:', visibleEventsCount, 'Type:', typeof visibleEventsCount);
@@ -410,28 +416,27 @@ function handleSubmission() {
         postLocalStorageData();
 
 // Refresh the current page
-window.location.reload();
-    } else {
-        // Show an alert if not all items are saved
-        console.log('Not all items are saved. Showing alert.');
-        alert('You have to save all items before proceeding.');
-    }
+window.location.reload();}else{alert("please fill all the events")}
+   
+
 }
 
 // Function to post data to PHP script
 function postLocalStorageData() {
     const localStorageKey = 'modalSavedData';
     const data = localStorage.getItem(localStorageKey);
+    const sessionRoleName = "<?php echo $sessionRoleName; ?>";
+    const sessionUsername = "<?php echo $sessionUsername; ?>";
 
-    console.log('Local Storage Key:', localStorageKey);
-    console.log('Local Storage Data:', data);
+    //console.log('Local Storage Key:', localStorageKey);
+    //console.log('Local Storage Data:', data);
 
     if (data) {
     // Parse data as JSON
     try {
         const parsedData = JSON.parse(data);
 
-        console.log('Parsed Data:', parsedData);
+        //console.log('Parsed Data:', parsedData);
 
         // Ensure parsedData is an object and not empty
         if (typeof parsedData === 'object' && parsedData !== null && Object.keys(parsedData).length > 0) {
@@ -450,6 +455,9 @@ function postLocalStorageData() {
                         color: item.color || 'defaultColor', // Default color if null
                         language: item.language || '' // Ensure language is included
                     };
+                     // Add the session role and username
+        acc[key].role_name = sessionRoleName ;
+        acc[key].username = sessionUsername ;
                 }
                 return acc;
             }, {});
@@ -493,14 +501,14 @@ function postLocalStorageData() {
 // Function to log the formatted data
 function displayFormattedData(formattedData) {
     // Log the formatted data to the console
-    console.log('Formatted Data:', formattedData);
+    //console.log('Formatted Data:', formattedData);
 }
 
 
 // Function to log the formatted data
 function displayFormattedData(formattedData) {
     // Log the formatted data to the console
-    console.log('Formatted Data:', formattedData);
+    //console.log('Formatted Data:', formattedData);
 }
 
 ;
@@ -562,16 +570,16 @@ function saveDataToLocal(clientName, eventId, data) {
     const savedData = getSavedData();
     
     // Debugging: Log inputs and key generation
-    console.log('Saving data...');
-    console.log('Client Name:', clientName);
-    console.log('Event ID:', eventId);
+    //console.log('Saving data...');
+    //console.log('Client Name:', clientName);
+    //console.log('Event ID:', eventId);
     
     // Ensure eventId does not include clientName or extra underscores
     const cleanEventId = eventId.includes(clientName) ? eventId.split('_').slice(1).join('_') : eventId;
     
     // Generate the key
     const key = `${clientName}_${cleanEventId}`;
-    console.log('Generated Key:', key);
+    //console.log('Generated Key:', key);
     
     // Save data
     savedData[key] = data;
@@ -583,17 +591,17 @@ function showModal(event) {
     const savedData = getSavedData();
     
     // Log the selected client and event ID
-    console.log('Selected Client:', selectedClient);
-    console.log('Event ID:', event.id);
+    //console.log('Selected Client:', selectedClient);
+    //console.log('Event ID:', event.id);
     
     // Create the key without extra underscores
     const key = event.id;
     
-    console.log('Key:', key);
-    console.log('Saved Data:', savedData);
+    //console.log('Key:', key);
+    //console.log('Saved Data:', savedData);
 
     const eventData = savedData[key] || {};
-    console.log('Event Data:', eventData);
+    //console.log('Event Data:', eventData);
 
     // Populate form fields with data from local storage
     document.getElementById('Concept').value = eventData.Concept || '';
@@ -677,7 +685,7 @@ if (selectedClient) {
             try {
                 const response = JSON.parse(xhr.responseText);
 
-                console.log('Response from server:', response);
+                //console.log('Response from server:', response);
 
                 if (response.error) {
                     document.getElementById('resultContainer').innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
@@ -728,7 +736,7 @@ if (selectedClient) {
                         monthSelect.appendChild(option);
                     });
 
-                    console.log('Months added to dropdown:', response.months);
+                    //console.log('Months added to dropdown:', response.months);
 
                     const events = [];
                     let visibleEvents = [];
@@ -742,7 +750,7 @@ response.posting_days.forEach(dayString => {
 
     // Fetch saved events from local storage
     const savedEvents = JSON.parse(localStorage.getItem('modalSavedData')) || {}; // Associative array of saved event IDs
-    console.log('Saved Events from localStorage:', savedEvents);
+    //console.log('Saved Events from localStorage:', savedEvents);
 
     daysArray.forEach(dayOfWeek => {
         const color = 'red'; // Default color
@@ -754,9 +762,9 @@ response.posting_days.forEach(dayString => {
                 const isSaved = savedEvents.hasOwnProperty(eventId); // Check if event ID is in saved events
 
                 // Log both sides of the if statement
-                console.log('Generated Event ID:', eventId);
-                console.log('Saved Events Keys:', Object.keys(savedEvents));
-                console.log('Key Exists:', isSaved);
+                //console.log('Generated Event ID:', eventId);
+                //console.log('Saved Events Keys:', Object.keys(savedEvents));
+                //console.log('Key Exists:', isSaved);
 
                 const event = {
                     id: eventId,
@@ -773,7 +781,7 @@ response.posting_days.forEach(dayString => {
     });
 });
 
-console.log('Events created:', events);
+//console.log('Events created:', events);
 
 
 // Function to save an event ID to local storage
@@ -811,17 +819,30 @@ function countSavedItems(clientName, monthYear) {
 
 
                     monthSelect.addEventListener('change', function() {
+
+
+
+                    
+// Initial call to set count based on default selections
+updateSavedItemsCount();
+
+
+
+
+
+
+
+
                         const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
 
 
                         if (selectedMonths.length > 0) {
                             $('#calendar').fullCalendar('removeEvents'); // Remove all existing events
                             // Reset counters
-                            savedItemsCount = 0;
                             visibleEventsCount = 0; // Reset visible events count
 
                             // Clear UI counters
-                            document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
+                            // document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
                             document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
                             document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
                             document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
@@ -850,13 +871,14 @@ function countSavedItems(clientName, monthYear) {
   document.getElementById('savedItemsCount').textContent = savedItemsCount;
 }
 
+
                     });
 
                     $('#calendar').fullCalendar({
                         viewRender: function(view, element) {
                             // Function to be called every time the view changes
                             const visibleRange = view.intervalStart.format('YYYY-MM-DD') + '/' + view.intervalEnd.format('YYYY-MM-DD');
-                            console.log('Visible range:', visibleRange);
+                            //console.log('Visible range:', visibleRange);
 
                             // Example: Update visible events based on the current view
                             visibleEvents = $('#calendar').fullCalendar('getEvents').filter(event => {
@@ -864,7 +886,7 @@ function countSavedItems(clientName, monthYear) {
                                 return eventDate.isBetween(view.intervalStart, view.intervalEnd, null, '[]');
                             });
 
-                            console.log('Visible events:', visibleEvents);
+                            //console.log('Visible events:', visibleEvents);
 
                             updateVisibleEventsCounter();
                         }
@@ -1046,23 +1068,61 @@ saveDataToLocal(selectedClient, formData.get('eventID'), data);
 // Update event color
 updateEventColor(formData.get('eventID'), 'blue');
 
-// Save the item and update the countsa
-saveItem(formData.get('eventID'));
+// Save the item and update the countsa +HERE+
+// saveItem(formData.get('eventID'));
 
 // Hide the modal and refetch events
 $('#contentModal').modal('hide');
-$('#calendar').fullCalendar('refetchEvents');
-    function saveItem(eventID) {
-    // Check if the item has already been saved
-    if (!savedItemsSet.has(eventID)) {
-        // Add the item ID to the Set
-        savedItemsSet.add(eventID);
+// $('#calendar').fullCalendar('refetchEvents');
+// function saveItem(eventID, itemData) {
+//     const localStorageKey = 'modalSavedData';
+    
+//     // Retrieve existing data from local storage
+//     let data = localStorage.getItem(localStorageKey);
+//     let parsedData = {};
 
-        // Increment the global saved items count
-        savedItemsCount++;
+//     if (data) {
+//         try {
+//             parsedData = JSON.parse(data);
+//         } catch (error) {
+//             console.error('Error parsing JSON from local storage:', error);
+//             return;
+//         }
+//     }
 
-    }
-}
+//     // Check if the item already exists in local storage
+//     if (parsedData.hasOwnProperty(eventID)) {
+//         console.log('Item already exists, updating it.');
+
+//         // If the item exists, update it
+//         parsedData[eventID] = itemData;
+//     } else {
+//         console.log('Item does not exist, adding it.');
+
+//         // If the item does not exist, add it
+//         parsedData[eventID] = itemData;
+//     }
+
+//     // Save the updated data back to local storage
+//     localStorage.setItem(localStorageKey, JSON.stringify(parsedData));
+
+//     // Increment the global saved items count and update display
+//     savedItemsCount = Object.keys(parsedData).length;
+//     document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
+    
+//     // Show the container and buttons if needed
+//     const savedItemsContainer = document.getElementById('savedItemsContainer');
+//     if (savedItemsCount > 0) {
+//         savedItemsContainer.classList.remove('d-none'); // Show container
+//         document.getElementById('submitButton').classList.remove('d-none'); // Show submit button
+//         document.getElementById('previewButton').classList.remove('d-none'); // Show preview button
+//     } else {
+//         savedItemsContainer.classList.add('d-none'); // Hide container
+//     }
+    
+//     console.log('Saved Items Count:', savedItemsCount);
+// }
+
 
 
     // Show the submit button after saving
@@ -1079,8 +1139,8 @@ $('#calendar').fullCalendar('refetchEvents');
     function populateTable() {
     const storedData = localStorage.getItem('modalSavedData');
     const parsedData = JSON.parse(storedData);
-    console.log('Raw data from local storage:', storedData);
-    console.log('Parsed data:', parsedData);
+    //console.log('Raw data from local storage:', storedData);
+    //console.log('Parsed data:', parsedData);
 
     const tableBody = document.getElementById('tableBody');
     tableBody.innerHTML = ''; // Clear existing rows
@@ -1109,7 +1169,7 @@ $('#calendar').fullCalendar('refetchEvents');
         }
     }
 } else {
-    console.log('No data found in local storage');
+    //console.log('No data found in local storage');
 }
 }
 
@@ -1117,7 +1177,7 @@ $('#calendar').fullCalendar('refetchEvents');
 
 
 document.getElementById('previewButton').addEventListener('click', function() {
-    console.log('Preview button clicked');
+    //console.log('Preview button clicked');
 
     populateTable();
     const dataModal = new bootstrap.Modal(document.getElementById('dataModal'));
@@ -1125,6 +1185,8 @@ document.getElementById('previewButton').addEventListener('click', function() {
 });
 
 // Trigger the modal and populate table when needed
+updateSavedItemsCount()
+
 
 
 }});
@@ -1272,6 +1334,105 @@ function validateForm() {
 
     return isValid;
 }
+function updateSavedItemsCount() {
+    const monthSelect = document.getElementById('monthSelect');
+    const clientSelect = document.getElementById('clientSelect');
+    const selectedMonth = monthSelect.value; // e.g., "2024 09"
+    const selectedClientName = clientSelect.value;
+    const localStorageKey = 'modalSavedData';
+    const savedItemsCountElement = document.getElementById('savedItemsCount');
+    const savedItemsContainer = document.getElementById('savedItemsContainer');
+
+    console.log('Selected Month:', selectedMonth);
+    console.log('Selected Client Name:', selectedClientName);
+
+    // Retrieve and parse data from local storage
+    const data = localStorage.getItem(localStorageKey);
+    console.log('Local Storage Data:', data);
+
+    if (data) {
+        try {
+            const parsedData = JSON.parse(data);
+            console.log('Parsed Data:', parsedData);
+
+            // Ensure parsedData is an object and not empty
+            if (typeof parsedData === 'object' && parsedData !== null) {
+                console.log('Parsed Data is an object and not null');
+
+                // Initialize count
+                let savedItemsCounter = 0;
+
+                // Iterate through the data
+                for (const key in parsedData) {
+                    if (parsedData.hasOwnProperty(key)) {
+                        const item = parsedData[key];
+
+                        // Extract clientName and date from the key
+                        const [storedClientName, storedDate] = key.split('_');
+                        console.log('Stored Client Name:', storedClientName);
+                        console.log('Stored Date:', storedDate);
+
+                        // Format the stored date
+                        const formattedStoredDate = `${storedDate.slice(5, 7)},${storedDate.slice(0, 4)}`;
+                        console.log('Formatted Stored Date:', formattedStoredDate);
+                        console.log('Selected Month:', selectedMonth);
+
+                        // Check if item matches clientName and if the stored date matches the selected month
+                        if (
+                            storedClientName === selectedClientName && 
+                            formattedStoredDate === selectedMonth
+                        ) {
+                            console.log('Item matches:', {
+                                storedClientName: storedClientName,
+                                selectedClientName: selectedClientName,
+                                formattedStoredDate: formattedStoredDate,
+                                selectedMonth: selectedMonth,
+                                item: item
+                            });
+                            savedItemsCounter++;
+                            savedItemsCount++;
+                        } else {
+                            console.log('Item does not match:', {
+                                storedClientName: storedClientName,
+                                selectedClientName: selectedClientName,
+                                formattedStoredDate: formattedStoredDate,
+                                selectedMonth: selectedMonth,
+                                item: item
+                            });
+                        }
+                    }
+                }
+
+                // Update the saved items count
+                if (savedItemsCounter > 0) {
+                    savedItemsContainer.classList.remove('d-none'); // Show container
+                    document.getElementById('submitButton').classList.remove('d-none'); // Show submit button
+                    document.getElementById('previewButton').classList.remove('d-none'); // Show preview button
+                } else {
+                    savedItemsContainer.classList.add('d-none'); // Hide container if no items
+                }
+
+                // Update the saved items count display
+                savedItemsCountElement.textContent = `Saved Items: ${savedItemsCounter}`;
+
+                // Display the saved items count
+                console.log("TESTTT", savedItemsCountElement.textContent, savedItemsCounter);
+                console.log('Saved Items Count:', savedItemsCounter);
+            } else {
+                console.error('Parsed data is not an object or is empty.');
+                savedItemsContainer.classList.add('d-none'); // Hide container
+            }
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
+            savedItemsContainer.classList.add('d-none'); // Hide container
+        }
+    } else {
+        console.error('No data found in local storage');
+        savedItemsContainer.classList.add('d-none'); // Hide container
+    }
+}
+
+
 
 
 

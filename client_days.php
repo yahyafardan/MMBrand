@@ -11,8 +11,6 @@ require 'db.php';
 
 $client_name = $_POST['client_name'];
 
-//"yahya"; // You may need to fetch this from $_POST or $_GET in a real application
-
 try {
     // Fetch client details
     $sql = "SELECT start_date, end_date, days_of_posting, hashtags, n_of_posts, n_of_videos, language 
@@ -51,10 +49,10 @@ try {
         return $date->format('F'); // 'MMMM'
     }, $months);
 
-    // Fetch months from the content table excluding rejected status
+    // Fetch months from the content table excluding approvalIn status
     $sql_content = "SELECT DISTINCT month
                     FROM content 
-                    WHERE client_name = :client_name AND status != 'rejected'";
+                    WHERE client_name = :client_name AND status != 'approvalIn'";
     $stmt_content = $pdo->prepare($sql_content);
     $stmt_content->bindParam(':client_name', $client_name, PDO::PARAM_STR);
     $stmt_content->execute();
@@ -63,8 +61,20 @@ try {
     // Convert content months to 'MMMM' format for comparison
     $content_month_labels = array_map('ucfirst', $content_months); // Capitalize first letter for consistency
 
-    // Filter months to exclude those with records in the content table
-    $filtered_month_labels = array_diff($month_labels, $content_month_labels);
+    // Fetch months with approvalIn status
+    $sql_approval = "SELECT DISTINCT month
+                     FROM content 
+                     WHERE client_name = :client_name AND status = 'approvalIn'";
+    $stmt_approval = $pdo->prepare($sql_approval);
+    $stmt_approval->bindParam(':client_name', $client_name, PDO::PARAM_STR);
+    $stmt_approval->execute();
+    $approval_months = $stmt_approval->fetchAll(PDO::FETCH_COLUMN);
+
+    // Convert approval months to 'MMMM' format for comparison
+    $approval_month_labels = array_map('ucfirst', $approval_months); // Capitalize first letter for consistency
+
+    // Filter months to exclude those with records in the content table or with approvalIn status
+    $filtered_month_labels = array_diff($month_labels, $content_month_labels, $approval_month_labels);
 
     // Convert filtered months back to 'MM,YYYY' format
     $filtered_months = array_values(array_filter($months, function($month) use ($filtered_month_labels) {

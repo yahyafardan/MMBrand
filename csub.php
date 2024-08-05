@@ -13,8 +13,8 @@ $data = json_decode($jsonData, true);
 
 // Prepare the SQL statements
 $insertStmt = $pdo->prepare("
-    INSERT INTO content (type, concept, caption, language, post_date, month, social_media_platforms, sponsored, status, client_name)
-    VALUES (:type, :concept, :caption, :language, :post_date, :month, :social_media_platforms, :sponsored, :status, :client_name)
+    INSERT INTO content (type, concept, caption, language, post_date, month, social_media_platforms, sponsored, status, client_name, contributors)
+    VALUES (:type, :concept, :caption, :language, :post_date, :month, :social_media_platforms, :sponsored, :status, :client_name, :contributors)
 ");
 
 $updateStmt = $pdo->prepare("
@@ -52,8 +52,15 @@ if (json_last_error() === JSON_ERROR_NONE) {
             $sponsored = isset($value['sponsors']) ? $value['sponsors'] : ''; // Updated to sponsored
             $status = isset($value['state']) ? $value['state'] : '';
 
+            // Extract contributors data from the value array
+            $role_name = isset($value['role_name']) ? $value['role_name'] : 'default_role';
+            $username = isset($value['username']) ? $value['username'] : 'default_username';
+            $contributors = json_encode([
+                $role_name =>  $username
+            ]);
+
             // Debugging: Print extracted values
-            error_log("Debug - Type: $type, Concept: $concept, Caption: $caption, Language: $language, Social Media: $social_media_platforms, Sponsored: $sponsored, Status: $status");
+            error_log("Debug - Type: $type, Concept: $concept, Caption: $caption, Language: $language, Social Media: $social_media_platforms, Sponsored: $sponsored, Status: $status, Contributors: $contributors");
 
             // Check if status is 'saved'
             if ($status === 'saved') {
@@ -78,7 +85,8 @@ if (json_last_error() === JSON_ERROR_NONE) {
                 ':social_media_platforms' => $social_media_platforms,
                 ':sponsored' => $sponsored, // Updated to sponsored
                 ':status' => $status,
-                ':client_name' => $client_name
+                ':client_name' => $client_name,
+                ':contributors' => $contributors // Added contributors field
             ]);
 
             // Check for SQL errors
