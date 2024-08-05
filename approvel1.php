@@ -69,7 +69,7 @@ try {
 document.addEventListener('visibilitychange', function() {
     if (document.visibilityState === 'visible') {
         location.reload(); // Refresh the page
-        alert("Page is visible");
+        // alert("Page is visible");
     }
 });
 </script>

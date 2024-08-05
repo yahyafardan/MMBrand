@@ -1,121 +1,132 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Content Records</title>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-</head>
-<body>
-    <?php
-    require 'db.php';
+<?php
+require 'db.php';
 
-    $clientName = isset($_POST['client_name']) ? $_POST['client_name'] : '';
-    $month = isset($_POST['month']) ? $_POST['month'] : '';
+$clientName = isset($_POST['client_name']) ? $_POST['client_name'] : '';
+$month = isset($_POST['month']) ? $_POST['month'] : '';
 
-    if (!$clientName || !$month) {
-        echo '<p>Invalid client or month specified.</p>';
+if (!$clientName || !$month) {
+    echo '<p>Invalid client or month specified.</p>';
+    exit;
+}
+
+try {
+    // Fetch records for the specific client and month
+    $sql = "SELECT * FROM content WHERE client_name = :client_name AND month = :month";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute(['client_name' => $clientName, 'month' => $month]);
+    $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+
+    if (!$records) {
+        echo "<p>No records found for $clientName in $month.</p>";
         exit;
     }
 
-    try {
-        // Fetch records for the specific client and month
-        $sql = "SELECT * FROM content WHERE client_name = :client_name AND month = :month";
-        $stmt = $pdo->prepare($sql);
-        $stmt->execute(['client_name' => $clientName, 'month' => $month]);
-        $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+    echo '<div class="clients-container">';
+    echo "<h2>Content for $clientName - $month</h2>";
 
-        if (!$records) {
-            echo "<p>No records found for $clientName in $month.</p>";
-            exit;
+    echo '<div class="client-container">';
+
+    foreach ($records as $record) {
+        $contributors = json_decode($record['contributors'], true);
+        if (json_last_error() !== JSON_ERROR_NONE) {
+            echo '<p>Error decoding contributors JSON: ' . htmlspecialchars(json_last_error_msg()) . '</p>';
+            continue;
         }
 
-        echo '<div class="clients-container">';
-        echo "<h2>Content for $clientName - $month</h2>";
+        echo '<div class="record-container" data-id="' . htmlspecialchars($record['id']) . '">';
+        echo '<p><strong>Type:</strong> ' . htmlspecialchars($record['type']) . '</p>';
+        echo '<p><strong>Concept:</strong> ' . htmlspecialchars($record['concept']) . '</p>';
+        echo '<p><strong>Caption:</strong> ' . htmlspecialchars($record['caption']) . '</p>';
+        echo '<p><strong>Language:</strong> ' . htmlspecialchars($record['language']) . '</p>';
+        echo '<p><strong>Last Updated:</strong> ' . htmlspecialchars($record['updated_at']) . '</p>';
+        echo '<p><strong>Status:</strong> ' . htmlspecialchars($record['status']) . '</p>';
 
-        // Create a single client container
-        echo '<div class="client-container">';
-
-        // Iterate over the records and generate HTML
-        foreach ($records as $record) {
-            echo '<div class="record-container" data-id="' . htmlspecialchars($record['id']) . '">';
-            echo '<p><strong>Type:</strong> ' . htmlspecialchars($record['type']) . '</p>';
-            echo '<p><strong>Concept:</strong> ' . htmlspecialchars($record['concept']) . '</p>';
-            echo '<p><strong>Caption:</strong> ' . htmlspecialchars($record['caption']) . '</p>';
-            echo '<p><strong>Language:</strong> ' . htmlspecialchars($record['language']) . '</p>';
-            echo '<p><strong>Last Updated:</strong> ' . htmlspecialchars($record['updated_at']) . '</p>';
-            echo '<p><strong>Status:</strong> ' . htmlspecialchars($record['status']) . '</p>';
-            echo '<div class="button-container">';
-            echo '<a class="approve-btn" href="approve.php?id=' . htmlspecialchars($record['id']) . '">Approve</a>';
-            echo '<a class="reject-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '">Reject</a>';
-            echo '</div>';
-            echo '</div>';
+        if (!empty($contributors)) {
+            echo '<p><strong>Contributors:</strong> ';
+            $contributorItems = [];
+            foreach ($contributors as $contributor => $content) {
+                $contributorItems[] = 'Person: ' . htmlspecialchars($contributor) . ' - Role: ' . htmlspecialchars($content);
+            }
+            echo implode(' | ', $contributorItems);
+            echo '</p>';
         }
 
-        echo '</div>'; // Close client-container
-        echo '</div>'; // Close clients-container
-
-    } catch (PDOException $e) {
-        echo '<p>Error fetching records: ' . htmlspecialchars($e->getMessage()) . '</p>';
+        echo '<div class="button-container">';
+        echo '<a class="approve-btn" href="approve.php?id=' . htmlspecialchars($record['id']) . '">Approve</a>';
+        echo '<a class="reject-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '" onclick="toggleRejectionField(this)">Reject</a>';
+        echo '<div class="rejection-field" style="display:none;">';
+        echo '<textarea placeholder="Reason for rejection" name="rejection_reason" rows="4" style="width: 100%; resize: both;"></textarea>';
+        echo '<button type="button" onclick="submitRejection(' . htmlspecialchars($record['id']) . ')">Submit</button>';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
     }
-    ?>
 
-    <script>
-        $(document).ready(function() {
-            // Function to show the note input and submit button
-            $('.reject-btn').on('click', function(event) {
-                event.preventDefault(); // Prevent the default link behavior
-                
-                var $recordContainer = $(this).closest('.record-container'); // Get the closest record container
-                var recordId = $(this).data('id'); // Get the record ID
-                
-                // Hide the original buttons
-                $recordContainer.find('.button-container').hide();
-                
-                // Show the note input and submit button
-                $recordContainer.append(`
-                    <div class="note-container">
-                        <textarea class="note-input" placeholder="Enter your note here..."></textarea>
-                        <button class="submit-note-btn" data-id="${recordId}">Submit Note</button>
-                    </div>
-                `);
-            });
+    echo '</div>'; // Close client-container
+    echo '</div>'; // Close clients-container
 
-            // Function to handle note submission
-            $(document).on('click', '.submit-note-btn', function() {
-                var recordId = $(this).data('id'); // Get the record ID
-                var note = $(this).siblings('.note-input').val(); // Get the note input value
-                
-                if (!note.trim()) {
-                    alert('Please enter a note.');
-                    return;
-                }
-                
-                // Send the data via AJAX
-                $.ajax({
-                    url: 'process_rejection.php', // PHP script to handle rejection
-                    type: 'POST',
-                    data: {
-                        id: recordId,
-                        note: note
-                    },
-                    success: function(response) {
-                        response = JSON.parse(response); // Parse JSON response
-                        // Handle success (update the UI, show a message, etc.)
-                        alert(response.message); // Show a success message
-                        if (response.status === 'success') {
-                            $(`.record-container[data-id="${recordId}"]`).addClass('locked'); // Lock the record
-                        }
-                    },
-                    error: function() {
-                        alert('An error occurred.');
-                    }
-                });
-            });
-        });
-    </script>
-</body>
-</html>
+} catch (PDOException $e) {
+    echo '<p>Error fetching records: ' . htmlspecialchars($e->getMessage()) . '</p>';
+}
+?>
+
+<script>
+function toggleRejectionField(element) {
+    const buttonContainer = element.closest('.button-container');
+    const approvalButton = buttonContainer.querySelector('.approve-btn');
+    const rejectionField = buttonContainer.querySelector('.rejection-field');
+
+    if (rejectionField.style.display === 'block') {
+        rejectionField.style.display = 'none'; // Hide the rejection field
+        approvalButton.style.display = 'inline-block'; // Show the approval button
+    } else {
+        approvalButton.style.display = 'none'; // Hide the approval button
+        rejectionField.style.display = 'block'; // Show the rejection field
+    }
+}
+
+function submitRejection(recordId) {
+    const rejectionReason = document.querySelector('.rejection-field textarea[name="rejection_reason"]').value;
+    if (!rejectionReason) {
+        alert('Please provide a reason for rejection.');
+        return;
+    }
+    
+    // Submit the rejection reason to the server (AJAX or form submission can be used here)
+    console.log('Record ID:', recordId, 'Rejection Reason:', rejectionReason);
+    // Implement the actual submission logic here.
+}
+</script>
+
+<script>
+function toggleRejectionField(element) {
+    const buttonContainer = element.closest('.button-container');
+    const approvalButton = buttonContainer.querySelector('.approve-btn');
+    const rejectionField = buttonContainer.querySelector('.rejection-field');
+
+    if (rejectionField.style.display === 'block') {
+        rejectionField.style.display = 'none'; // Hide the rejection field
+        approvalButton.style.display = 'inline-block'; // Show the approval button
+    } else {
+        approvalButton.style.display = 'none'; // Hide the approval button
+        rejectionField.style.display = 'block'; // Show the rejection field
+    }
+}
+
+function submitRejection(recordId) {
+    const rejectionReason = document.querySelector('.rejection-field input[name="rejection_reason"]').value;
+    if (!rejectionReason) {
+        alert('Please provide a reason for rejection.');
+        return;
+    }
+    
+    // Submit the rejection reason to the server (AJAX or form submission can be used here)
+    console.log('Record ID:', recordId, 'Rejection Reason:', rejectionReason);
+    // Implement the actual submission logic here.
+}
+</script>
+
+
 
 <style>.clients-container {
     display: flex;
@@ -185,5 +196,177 @@
 .reject-btn:hover {
     background-color: #c82333;
 }
+.record-container ul {
+    list-style-type: none;
+    padding-left: 0;
+    margin: 0;
+}
+
+.record-container li {
+    padding: 5px 0;
+    border-bottom: 1px solid #ddd;
+}
+
+.record-container li:last-child {
+    border-bottom: none;
+}
+.contributors-container {
+    display: flex;
+    flex-wrap: wrap; /* Allow items to wrap if there are too many for one line */
+    gap: 10px; /* Space between contributor items */
+    margin-top: 10px; /* Space above contributors section */
+}
+
+.contributor-item {
+    display: inline-block; /* Display items inline */
+    padding: 5px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f1f1f1;
+}
+/* Optional: Style the list of contributors if needed */
+.record-container p {
+    margin: 5px 0;
+}
+
+.record-container p strong {
+    margin-right: 10px;
+}
+.clients-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.client-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+}
+
+.record-container {
+    flex: 0 0 300px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    margin-bottom: 15px;
+}
+
+.record-container p {
+    margin: 5px 0;
+}
+
+.button-container {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.approve-btn, .reject-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.approve-btn {
+    background-color: #28a745;
+}
+
+.approve-btn:hover {
+    background-color: #218838;
+}
+
+.reject-btn {
+    background-color: #dc3545;
+}
+
+.reject-btn:hover {
+    background-color: #c82333;
+}
+
+.rejection-field {
+    display: none; /* Initially hidden */
+}
+.clients-container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+}
+
+.client-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    margin-bottom: 20px;
+}
+
+.record-container {
+    flex: 0 0 300px;
+    border: 1px solid #ddd;
+    padding: 15px;
+    border-radius: 8px;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    background-color: #f9f9f9;
+    margin-bottom: 15px;
+}
+
+.record-container p {
+    margin: 5px 0;
+}
+
+.button-container {
+    margin-top: 10px;
+    display: flex;
+    gap: 10px;
+}
+
+.approve-btn, .reject-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #fff;
+    border-radius: 5px;
+    text-align: center;
+}
+
+.approve-btn {
+    background-color: #28a745;
+}
+
+.approve-btn:hover {
+    background-color: #218838;
+}
+
+.reject-btn {
+    background-color: #dc3545;
+}
+
+.reject-btn:hover {
+    background-color: #c82333;
+}
+
+.rejection-field {
+    display: none; /* Initially hidden */
+}
 
 </style>
+
+
+
+
