@@ -782,6 +782,30 @@ function saveEvent(eventId) {
     savedEvents[eventId] = true; // Mark event as saved
     localStorage.setItem('modalSavedData', JSON.stringify(savedEvents));
 }
+function countSavedItems(clientName, monthYear) {
+  // Retrieve the saved data from local storage
+  const savedData = JSON.parse(localStorage.getItem('modalSavedData')) || {};
+  
+  // Initialize count
+  let count = 0;
+
+  // Iterate over the keys in savedData
+  for (const key in savedData) {
+    if (savedData.hasOwnProperty(key)) {
+      // Extract client name and date from the key
+      const [storedClientName, date] = key.split('_');
+      const [yearMonth] = date.split('-');
+      
+      // Check if the client name and month match
+      if (storedClientName === clientName && yearMonth === monthYear) {
+        count++;
+      }
+    }
+  }
+
+  return count;
+}
+
 
 
 
@@ -821,6 +845,11 @@ function saveEvent(eventId) {
                             visibleEvents = filteredEvents;
                             updateVisibleEventsCounter();
                         }
+                        function updateCounter(clientName, monthSelect) {
+   savedItemsCount = countSavedItems(clientName, monthSelect);
+  document.getElementById('savedItemsCount').textContent = savedItemsCount;
+}
+
                     });
 
                     $('#calendar').fullCalendar({
@@ -922,13 +951,7 @@ function saveEvent(eventId) {
             const selectedMonthStart = moment().year(selectedYear).month(selectedMonth).startOf('month');
             const selectedMonthEnd = moment().year(selectedYear).month(selectedMonth).endOf('month');
 
-            // Check if the event date is within the selected month
-            // const eventDate = moment(event.start);
-            // if (eventDate.isBetween(selectedMonthStart, selectedMonthEnd, null, '[]')) {
-            //     element.css('background-color', event.backgroundColor || 'purple');
-            // } else {
-            //     element.css('background-color', ''); // No color for dates outside the month
-            // }
+     
 
             // Add custom button for the event
             const btn = $('<button class="fc-custom-btn btn btn-secondary btn-sm"></button>');

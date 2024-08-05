@@ -12,128 +12,123 @@ try {
         exit;
     }
 
-    echo '<div class="container">';
-
-    // Iterate over the records and generate HTML
+    // Organize records by client
+    $clients = [];
     foreach ($records as $record) {
-        echo '<div class="approvalIn-container" id="record-' . htmlspecialchars($record['id']) . '">';
-        
-        // Display the entire record
-        echo '<div class="record-details">';
-        echo '<p><strong>Type:</strong> ' . htmlspecialchars($record['type']) . '</p>';
-        echo '<p><strong>Concept:</strong> ' . htmlspecialchars($record['concept']) . '</p>';
-        echo '<p><strong>Caption:</strong> ' . htmlspecialchars($record['caption']) . '</p>';
-        echo '<p><strong>Language:</strong> ' . htmlspecialchars($record['language']) . '</p>';
-        echo '<p><strong>Post Date:</strong> ' . htmlspecialchars($record['post_date']) . '</p>';
-        echo '<p><strong>Month:</strong> ' . htmlspecialchars($record['month']) . '</p>';
-        echo '<p><strong>Social Media Platforms:</strong> ' . htmlspecialchars($record['social_media_platforms']) . '</p>';
-        echo '<p><strong>Sponsored:</strong> ' . htmlspecialchars($record['sponsored']) . '</p>';
-        echo '<p><strong>Status:</strong> ' . htmlspecialchars($record['status']) . '</p>';
-        echo '<p><strong>Client Name:</strong> ' . htmlspecialchars($record['client_name']) . '</p>';
-        echo '</div>';
+        $clientName = $record['client_name'];
+        $month = $record['month'];
 
-        echo '<div class="button-container">';
-        echo '<a class="elementor-button elementor-button-link elementor-size-sm approve-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '">Approved</a>';
-        echo '<a class="elementor-button elementor-button-link elementor-size-sm reject-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '">Reject</a>';
-        echo '</div>';
+        if (!isset($clients[$clientName])) {
+            $clients[$clientName] = [];
+        }
 
-        // Hidden note input field
-        echo '<div class="note-container" style="display:none;">';
-        echo '<label for="note-' . htmlspecialchars($record['id']) . '">Note:</label>';
-        echo '<textarea id="note-' . htmlspecialchars($record['id']) . '" rows="3" placeholder="Enter your note here..."></textarea>';
-        echo '<button class="save-note-btn" onclick="saveNote(' . htmlspecialchars($record['id']) . ')">Save Note</button>';
-        echo '</div>';
+        if (!isset($clients[$clientName][$month])) {
+            $clients[$clientName][$month] = [];
+        }
 
-        echo '</div>';
+        $clients[$clientName][$month][] = $record;
     }
 
-    echo '</div>';
+    // Sort months for each client
+    foreach ($clients as $clientName => $months) {
+        ksort($months); // Sort months in ascending order
+        $clients[$clientName] = $months;
+    }
+
+    echo '<div class="container">';
+
+    // Iterate over the clients and generate HTML
+    foreach ($clients as $clientName => $months) {
+        echo '<div class="client-container">';
+        echo '<div class="client-name">' . htmlspecialchars($clientName) . '</div>';
+
+        foreach ($months as $month => $records) {
+            echo '<div class="month-container">';
+            echo '<div class="month-name">' . htmlspecialchars($month) . '</div>';
+
+            // Add form for each month to review records
+            echo '<form action="review1.php" method="POST" target="review1.php">';
+            echo '<input type="hidden" name="client_name" value="' . htmlspecialchars($clientName) . '">';
+            echo '<input type="hidden" name="month" value="' . htmlspecialchars($month) . '">';
+            echo '<button type="submit" class="review-btn">Review and Approve</button>';
+            echo '</form>';
+
+            echo '</div>'; // End of month-container
+        }
+
+        echo '</div>'; // End of client-container
+    }
+
+    echo '</div>'; // End of container
 
 } catch (PDOException $e) {
-    // Log and display database query errors
     echo '<p>Error fetching records: ' . htmlspecialchars($e->getMessage()) . '</p>';
 }
 ?>
 
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Function to toggle the visibility of the note input field
-    document.querySelectorAll('.reject-btn').forEach(button => {
-        button.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default action
-            const container = this.closest('.approvalIn-container');
-            const noteContainer = container.querySelector('.note-container');
-            noteContainer.style.display = noteContainer.style.display === 'none' ? 'block' : 'none';
-        });
-    });
-
-    // Function to handle approval or rejection
-    document.querySelectorAll('.approve-btn, .reject-btn').forEach(button => {
-        button.addEventListener('click', function(event) {
-            event.preventDefault(); // Prevent default action
-
-            const recordId = this.getAttribute('data-id');
-            const action = this.classList.contains('approve-btn') ? 'approve' : 'reject';
-
-            // AJAX request to update status
-            const xhr = new XMLHttpRequest();
-            xhr.open('POST', 'approval1sub.php', true);
-            xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
-            xhr.onreadystatechange = function() {
-                if (xhr.readyState === 4 && xhr.status === 200) {
-                    const container = document.getElementById('record-' + recordId);
-                    if (xhr.responseText === 'success') {
-                        container.innerHTML += '<p>Status updated successfully.</p>';
-                        container.classList.add('submitted');
-                        setTimeout(() => {
-                            container.style.display = 'none'; // Hide the container
-                        }, 1000); // Optional: Adjust the timeout as needed
-                    } else {
-                        container.innerHTML += '<p>Failed to update status.</p>';
-                    }
-                }
-            };
-            xhr.send('id=' + encodeURIComponent(recordId) + '&action=' + encodeURIComponent(action));
-        });
-    });
-});
-
-// Function to save note
-function saveNote(id) {
-    const note = document.getElementById('note-' + id).value;
-    // Implement the functionality to save the note (e.g., AJAX request)
-}
-</script>
-
-
-
-
-
-
-
-
-
-
 
 <style>
-/* Ensure the container takes full width and allows wrapping */
+ /* Ensure the container takes full width and allows wrapping */
 .container {
     display: flex;
-    flex-wrap: wrap;
-    gap: 10px; /* Optional: Add space between items */
+    flex-wrap: wrap; /* Allows wrapping to the next line */
+    gap: 20px; /* Space between client containers */
     padding: 20px;
+    justify-content: flex-start; /* Align items to the start */
 }
 
-/* Style for each record container */
-.approvalIn-container {
-    flex: 1 1 auto; /* Allow items to grow and shrink */
-    min-width: 300px; /* Optional: Set a minimum width for each item */
+/* Style for each client container */
+.client-container {
+    flex: 1 1 300px; /* Flex-grow and flex-shrink, with a base width of 300px */
     border: 1px solid #ddd;
     padding: 15px;
     box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
     background-color: #f9f9f9;
-    display: flex;
-    flex-direction: column;
+}
+
+/* Style for client name */
+.client-name {
+    font-size: 1.5em;
+    margin-bottom: 15px;
+}
+
+/* Style for each month container */
+.month-container {
+    border: 1px solid #ddd;
+    padding: 10px;
+    margin-bottom: 15px;
+    background-color: #e9ecef;
+}
+
+/* Style for month name */
+.month-name {
+    font-size: 1.2em;
+    margin-bottom: 10px;
+}
+
+/* Style for review button */
+.review-btn {
+    display: inline-block;
+    padding: 10px 20px;
+    text-decoration: none;
+    color: #fff;
+    background-color: #007bff;
+    border-radius: 5px;
+    text-align: center;
+    margin-top: 10px;
+}
+
+.review-btn:hover {
+    background-color: #0056b3;
+}
+
+
+/* Style for record container */
+.approvalIn-container {
+    border: 1px solid #ddd;
+    padding: 15px;
+    margin-bottom: 10px;
+    background-color: #fff;
 }
 
 /* Style for record details */
@@ -170,6 +165,7 @@ function saveNote(id) {
 .elementor-button-link:hover {
     background-color: #218838;
 }
+
 /* Style for note input field and button */
 .note-container {
     margin-top: 10px;
@@ -201,10 +197,6 @@ function saveNote(id) {
 .note-container .save-note-btn:hover {
     background-color: #0056b3;
 }
-.submitted {
-    opacity: 0.6;
-    pointer-events: none; /* Disables interactions */
-}
-
 
 </style>
+

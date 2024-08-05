@@ -35,7 +35,6 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $passwordVerified = password_verify($password, $user['password_hash']);
     if (!$passwordVerified) {
         echo "Invalid username or password.";
-        echo "h";
         exit;
     }
 
@@ -46,30 +45,32 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $_SESSION['role_name'] = $user['role_name'];
 
     // Step 8: Redirect to the protected page based on the role
-    if ($_SESSION['role_name'] == "admin") {
+    switch ($_SESSION['role_name']) {
+        case "admin":
+            header("Location: admin.php");
+            break;
+        case "content":
+            header("Location: content.php");
+            break;
+        case "design":
+            header("Location: design.php");
+            break;
+        case "social_media":
+            header("Location: social_media.php");
+            break;
+        case "client":
+            header("Location: client.php");
+            break;
+        case "app1":
+            header("Location: app1landing.php");
+            break;
+        default:
+            echo "Invalid role.";
+            exit;
+    }
 
-        header("Location: admin.php");
-
-    } elseif ($_SESSION['role_name']=="content") {
-
-        header("Location: content.php"); // Redirect users to a content page
-
-    } elseif($_SESSION['role_name']=="design"){
-
-        header("Location: design.php"); // Redirect users to a designer page
-
-    } elseif($_SESSION['role_name']=="social_media"){
-
-        header("Location: social_media.php"); // Redirect to users to a social media page
-
-    } elseif($_SESSION['role_name']=="client"){
-
-        header("Location:client.php"); // Redirect to users to a client page
     exit;
-
 } else {
-
     echo "Invalid request method.";
-}
 }
 ?>
