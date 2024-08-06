@@ -1,6 +1,8 @@
 <?php
 
 require 'db.php';
+session_start();
+
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
@@ -69,12 +71,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $checkResult = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
                 if ($checkResult['not_pending'] == 0) {
-                    // If all records are pendingC, update them to design
-                    $updateSql = "UPDATE content SET status = 'design' WHERE client_name = :client_name AND month = :month";
+                    // If all records are pendingC, update them to app2
+                    $updateSql = "UPDATE content SET status = 'app2' WHERE client_name = :client_name AND month = :month";
                     $updateStmt = $pdo->prepare($updateSql);
                     $updateStmt->execute(['client_name' => $clientName, 'month' => $month]);
 
-                    echo 'All records updated to design.';
+                    echo 'All records updated to waiting for approval 2.';
                 }
             }
 
@@ -96,16 +98,16 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($result['not_pending'] > 0) {
-                echo 'Cannot set status to "design" as not all records are pendingC.';
+                echo 'Cannot set status to "app2" as not all records are pendingC.';
                 exit;
             }
 
-            // If all records are pendingC, update to design
-            $updateSql = "UPDATE content SET status = 'design' WHERE client_name = :client_name AND month = :month";
+            // If all records are pendingC, update to app2
+            $updateSql = "UPDATE content SET status = 'app2' WHERE client_name = :client_name AND month = :month";
             $updateStmt = $pdo->prepare($updateSql);
             $updateStmt->execute(['client_name' => $clientName, 'month' => $month]);
 
-            echo 'Status updated to design.';
+            echo 'Status updated to app2.';
 
         } else {
             echo 'Invalid action';

@@ -120,9 +120,9 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
                 <option value="" disabled selected>Select a role</option>
                 <option value="admin">Admin</option>
                 <option value="editor">content</option>
-                <option value="viewer">desing</option>
-                <option value="viewer">app1</option>
-                <option value="viewer">app2</option>
+                <option value="desing">desing</option>
+                <option value="app1">app1</option>
+                <option value="app2">app2</option>
 
             </select>
 

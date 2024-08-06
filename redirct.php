@@ -44,30 +44,34 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
     $_SESSION['username'] = $user['username'];
     $_SESSION['role_name'] = $user['role_name'];
 
-    // Step 8: Redirect to the protected page based on the role
-    switch ($_SESSION['role_name']) {
-        case "admin":
-            header("Location: admin.php");
-            break;
-        case "content":
-            header("Location: content.php");
-            break;
-        case "design":
-            header("Location: design.php");
-            break;
-        case "social_media":
-            header("Location: social_media.php");
-            break;
-        case "client":
-            header("Location: client.php");
-            break;
-        case "app1":
-            header("Location: app1landing.php");
-            break;
-        default:
-            echo "Invalid role.";
-            exit;
-    }
+ // Step 8: Redirect to the protected page based on the role
+switch ($_SESSION['role_name']) {
+    case "admin":
+        header("Location: admin.php");
+        break;
+    case "content":
+        header("Location: content.php");
+        break;
+    case "design":
+        header("Location: design.php");
+        break;
+    case "social_media":
+        header("Location: social_media.php");
+        break;
+    case "client":
+        header("Location: client.php");
+        break;
+    case "app1":
+        header("Location: app1landing.php");
+        break;
+    case "app2":
+        header("Location: app2landing.php");
+        break;
+    default:
+        echo "Invalid role.";
+        exit;
+}
+
 
     exit;
 } else {

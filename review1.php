@@ -1,20 +1,19 @@
 <?php
-// Start the session
+require 'db.php';
 session_start();
-
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
+    header("Location: index.html");
     exit;
 }
 
 // Check if the user is an app1
 if ($_SESSION['role_name'] !== 'app1') {
     echo "Access denied.";
+    header("Location: index.html");
+
     exit;
 }
-
-
 $clientName = isset($_POST['client_name']) ? $_POST['client_name'] : '';
 $month = isset($_POST['month']) ? $_POST['month'] : '';
 
@@ -133,7 +132,9 @@ function submitAction(event, action, recordId, clientName, month) {
         // Hide the specific record container
         const recordContainer = document.querySelector(`.record-container[data-id="${recordId}"]`);
         if (recordContainer) {
-            recordContainer.style.display = 'none'; // Hide the container
+            // recordContainer.style.display = 'none'; // Hide the container
+            location.reload(true); // Bypasses the cache and reloads the page from the server
+
         }
     })
     .catch(error => {
