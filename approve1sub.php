@@ -13,6 +13,8 @@ if (!isset($_SESSION['username'])) {
 // Check if the user is an app1
 if ($_SESSION['role_name'] !== 'app1') {
     echo "Access denied.";
+    header("Location: login.php");
+
     exit;
 }
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -43,7 +45,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $status = 'pendingC';
                 $notes = null; // Clear notes if approving
             } elseif ($action === 'reject') {
-                $status = 'rejected';
+                $status = 'rejectedC';
             } else {
                 echo 'Invalid action';
                 exit;

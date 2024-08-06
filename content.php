@@ -176,6 +176,10 @@ class="" style="
                             <label for="Concept" class="form-label">Concept (theme)</label>
                             <input type="text" class="form-control" id="Concept" name="Concept" required>
                         </div>
+                        <div>
+                        <label for="title" class="form-label">title</label>
+                        <input type="text" class="form-control" id="title" name="title" required>
+                        </div>
                         <div class="mb-3">
                             <label for="caption" class="form-label">Caption (Text)</label>
                             <textarea class="form-control" id="caption" name="caption" rows="3" required></textarea>
@@ -187,6 +191,10 @@ class="" style="
         <label for="ConceptAdditional" class="form-label">Additional Concept (theme)</label>
         <input type="text" class="form-control" id="ConceptAdditional" name="ConceptAdditional">
     </div>
+    <div>
+                        <label for="Additionaltitle" class="form-label">Additionaltitle</label>
+                        <input type="text" class="form-control" id="Additionaltitle" name="title" required>
+                        </div>
     <div class="mb-3">
         <label for="captionAdditional" class="form-label">Additional Caption (Text)</label>
         <textarea class="form-control" id="captionAdditional" name="captionAdditional" rows="3"></textarea>
@@ -610,6 +618,8 @@ function showModal(event) {
     document.getElementById('eventID').value = event.id;
     document.getElementById('ConceptAdditional').value = eventData.ConceptAdditional || '';
     document.getElementById('captionAdditional').value = eventData.captionAdditional || '';
+    document.getElementById('Additionaltitle').value = eventData.additionalTitle || '';
+    document.getElementById('title').value = eventData.title || '';
 
     // Format the date for display
     const formattedDate = moment(event.start).format('MMMM Do, YYYY');
@@ -1033,6 +1043,9 @@ updateSavedItemsCount();
 
     // Event listener for save button
     document.getElementById('saveButton').addEventListener('click', function () {
+         // Get values from input fields
+         const additionalTitle = document.getElementById('Additionaltitle').value;
+        const title = document.getElementById('title').value;
     const form = document.getElementById('contentForm');
     const formData = new FormData(form);
     if (!validateForm()) {
@@ -1058,6 +1071,8 @@ updateSavedItemsCount();
         language: languages || '', // Ensure this is included
         ConceptAdditional: formData.get('ConceptAdditional'),
         captionAdditional: formData.get('captionAdditional'),
+        additionalTitle: additionalTitle,
+        title: title,
 
     };
 
