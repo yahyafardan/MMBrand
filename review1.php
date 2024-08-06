@@ -23,7 +23,7 @@ if (!$clientName || !$month) {
 }
 
 try {
-    $sql = "SELECT * FROM content WHERE client_name = :client_name AND month = :month AND status = 'approvalIn'";
+    $sql = "SELECT * FROM content WHERE client_name = :client_name AND month = :month AND status = 'app1'";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['client_name' => $clientName, 'month' => $month]);
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC);

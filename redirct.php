@@ -50,7 +50,7 @@ switch ($_SESSION['role_name']) {
         header("Location: admin.php");
         break;
     case "content":
-        header("Location: content.php");
+        header("Location: contentlanding.php");
         break;
     case "design":
         header("Location: design.php");

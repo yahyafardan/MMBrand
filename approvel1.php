@@ -3,7 +3,7 @@ require 'db.php';
 
 try {
     // Fetch records with status 'waiting for approval'
-    $sql = "SELECT * FROM content WHERE status = 'approvalIn'";
+    $sql = "SELECT * FROM content WHERE status = 'app1'";
     $stmt = $pdo->query($sql);
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
@@ -134,7 +134,7 @@ document.addEventListener('visibilitychange', function() {
 
 
 /* Style for record container */
-.approvalIn-container {
+.app1-container {
     border: 1px solid #ddd;
     padding: 15px;
     margin-bottom: 10px;
