@@ -10,8 +10,7 @@ if (!$clientName || !$month) {
 }
 
 try {
-    // Fetch records for the specific client and month
-    $sql = "SELECT * FROM content WHERE client_name = :client_name AND month = :month";
+    $sql = "SELECT * FROM content WHERE client_name = :client_name AND month = :month AND status = 'approvalIn'";
     $stmt = $pdo->prepare($sql);
     $stmt->execute(['client_name' => $clientName, 'month' => $month]);
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
@@ -23,7 +22,6 @@ try {
 
     echo '<div class="clients-container">';
     echo "<h2>Content for $clientName - $month</h2>";
-
     echo '<div class="client-container">';
 
     foreach ($records as $record) {
@@ -52,11 +50,11 @@ try {
         }
 
         echo '<div class="button-container">';
-        echo '<a class="approve-btn" href="approve.php?id=' . htmlspecialchars($record['id']) . '">Approve</a>';
+        echo '<a class="approve-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '" onclick="submitAction(event, \'approve\', ' . htmlspecialchars($record['id']) . ', \'' . htmlspecialchars($clientName) . '\', \'' . htmlspecialchars($month) . '\')">Approve</a>';
         echo '<a class="reject-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '" onclick="toggleRejectionField(this)">Reject</a>';
         echo '<div class="rejection-field" style="display:none;">';
         echo '<textarea placeholder="Reason for rejection" name="rejection_reason" rows="4" style="width: 100%; resize: both;"></textarea>';
-        echo '<button type="button" onclick="submitRejection(' . htmlspecialchars($record['id']) . ')">Submit</button>';
+        echo '<button type="button" onclick="submitAction(event, \'reject\', ' . htmlspecialchars($record['id']) . ', \'' . htmlspecialchars($clientName) . '\', \'' . htmlspecialchars($month) . '\')">Submit</button>';
         echo '</div>';
         echo '</div>';
         echo '</div>';
@@ -70,8 +68,8 @@ try {
 }
 ?>
 
-<script>
-function toggleRejectionField(element) {
+
+<script>function toggleRejectionField(element) {
     const buttonContainer = element.closest('.button-container');
     const approvalButton = buttonContainer.querySelector('.approve-btn');
     const rejectionField = buttonContainer.querySelector('.rejection-field');
@@ -85,45 +83,50 @@ function toggleRejectionField(element) {
     }
 }
 
-function submitRejection(recordId) {
-    const rejectionReason = document.querySelector('.rejection-field textarea[name="rejection_reason"]').value;
-    if (!rejectionReason) {
-        alert('Please provide a reason for rejection.');
-        return;
-    }
-    
-    // Submit the rejection reason to the server (AJAX or form submission can be used here)
-    console.log('Record ID:', recordId, 'Rejection Reason:', rejectionReason);
-    // Implement the actual submission logic here.
-}
-</script>
+function submitAction(event, action, recordId, clientName, month) {
+    event.preventDefault();
+    let rejectionReason = '';
 
-<script>
-function toggleRejectionField(element) {
-    const buttonContainer = element.closest('.button-container');
-    const approvalButton = buttonContainer.querySelector('.approve-btn');
-    const rejectionField = buttonContainer.querySelector('.rejection-field');
-
-    if (rejectionField.style.display === 'block') {
-        rejectionField.style.display = 'none'; // Hide the rejection field
-        approvalButton.style.display = 'inline-block'; // Show the approval button
-    } else {
-        approvalButton.style.display = 'none'; // Hide the approval button
-        rejectionField.style.display = 'block'; // Show the rejection field
+    if (action === 'reject') {
+        rejectionReason = document.querySelector(`.record-container[data-id="${recordId}"] .rejection-field textarea`).value;
+        if (!rejectionReason) {
+            alert('Please provide a reason for rejection.');
+            return;
+        }
     }
+
+    const data = {
+        id: recordId,
+        action: action,
+        rejection_reason: rejectionReason,
+        client_name: clientName,
+        month: month
+    };
+
+    console.log('Sending data:', data);
+
+    fetch('approve1sub.php', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json'
+        },
+        body: JSON.stringify(data)
+    })
+    .then(response => response.text())
+    .then(result => {
+        console.log('Server response:', result);
+        alert(result);
+        // Hide the specific record container
+        const recordContainer = document.querySelector(`.record-container[data-id="${recordId}"]`);
+        if (recordContainer) {
+            recordContainer.style.display = 'none'; // Hide the container
+        }
+    })
+    .catch(error => {
+        console.error('Error:', error);
+    });
 }
 
-function submitRejection(recordId) {
-    const rejectionReason = document.querySelector('.rejection-field input[name="rejection_reason"]').value;
-    if (!rejectionReason) {
-        alert('Please provide a reason for rejection.');
-        return;
-    }
-    
-    // Submit the rejection reason to the server (AJAX or form submission can be used here)
-    console.log('Record ID:', recordId, 'Rejection Reason:', rejectionReason);
-    // Implement the actual submission logic here.
-}
 </script>
 
 

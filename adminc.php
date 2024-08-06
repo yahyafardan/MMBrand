@@ -1,3 +1,20 @@
+<?php
+// Start the session
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Check if the user is an admin
+if ($_SESSION['role_name'] !== 'admin') {
+    echo "Access denied.";
+    exit;
+}
+echo "hi";
+?>
 <!DOCTYPE html>
 <html lang="en">
 <head>

@@ -57,7 +57,7 @@
         <div class="option">
             <h2> approve content</h2>
             <p>clicl blow to approve content </p>
-            <a href="approvel1.php" >Click here </a>
+            <a href="approvel2.php" >Click here </a>
         </div>
         
         <div class="option">
