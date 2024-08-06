@@ -419,90 +419,97 @@ function handleSubmission() {
 
     // Check if all items are saved
     if (savedItemsCount >= visibleEventsCount) {
-        // If all items are saved, proceed to redirection
+        If all items are saved, proceed to redirection
         console.log('All items are saved. Redirecting...');
         postLocalStorageData();
 
 // Refresh the current page
-window.location.reload();}else{alert("please fill all the events")}
+window.location.reload();}else{alert("please fill all the events")
+
+}
    
 
 }
 
 // Function to post data to PHP script
 function postLocalStorageData() {
-    const localStorageKey = 'modalSavedData';
     const data = localStorage.getItem(localStorageKey);
-    const sessionRoleName = "<?php echo $sessionRoleName; ?>";
-    const sessionUsername = "<?php echo $sessionUsername; ?>";
+    const sessionRoleName = "c1";
+    const sessionUsername = "content";
 
-    //console.log('Local Storage Key:', localStorageKey);
-    //console.log('Local Storage Data:', data);
+    console.log('Local Storage Key:', localStorageKey);
+    console.log('Local Storage Data:', data);
 
     if (data) {
-    // Parse data as JSON
-    try {
-        const parsedData = JSON.parse(data);
+        // Parse data as JSON
+        try {
+            const parsedData = JSON.parse(data);
+            console.log('Parsed Data:', parsedData);
 
-        //console.log('Parsed Data:', parsedData);
+            // Ensure parsedData is an object and not empty
+            if (typeof parsedData === 'object' && parsedData !== null && Object.keys(parsedData).length > 0) {
+                // Clean and prepare data
+                const cleanedData = Object.keys(parsedData).reduce((acc, key) => {
+                    const item = parsedData[key];
+                    // Clean up null or empty values
+                    if (item && item.state === 'saved') {
+                        acc[key] = {
+                            type: item.type || 'unknown', // Default to 'unknown' if null
+                            title: item.title || '', // Ensure title field is included
+                            Concept: item.Concept || '',
+                            caption: item.caption || '',
+                            socialMedia: Array.isArray(item.socialMedia) ? item.socialMedia : [], // Default to empty array if not an array
+                            sponsors: item.sponsors || 'no', // Default to 'no' if null
+                            state: item.state || 'unknown', // Default to 'unknown' if null
+                            color: item.color || 'defaultColor', // Default color if null
+                            language: item.language || '' // Ensure language is included
+                        };
+                        // Add the session role and username
+                        acc[key].role_name = sessionRoleName;
+                        acc[key].username = sessionUsername;
+                    }
+                    return acc;
+                }, {});
 
-        // Ensure parsedData is an object and not empty
-        if (typeof parsedData === 'object' && parsedData !== null && Object.keys(parsedData).length > 0) {
-            // Clean and prepare data
-            const cleanedData = Object.keys(parsedData).reduce((acc, key) => {
-                const item = parsedData[key];
-                // Clean up null or empty values
-                if (item && item.state === 'saved') {
-                    acc[key] = {
-                        type: item.type || 'unknown', // Default to 'unknown' if null
-                        Concept: item.Concept || '',
-                        caption: item.caption || '',
-                        socialMedia: item.socialMedia || [], // Default to empty array if null
-                        sponsors: item.sponsors || 'no', // Default to 'no' if null
-                        state: item.state || 'unknown', // Default to 'unknown' if null
-                        color: item.color || 'defaultColor', // Default color if null
-                        language: item.language || '' // Ensure language is included
-                    };
-                     // Add the session role and username
-        acc[key].role_name = sessionRoleName ;
-        acc[key].username = sessionUsername ;
-                }
-                return acc;
-            }, {});
+                // Log the cleaned data before sending
+                console.log('Cleaned Data to be sent:', cleanedData);
 
-            // Proceed with the fetch request
-            fetch('csub.php', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(cleanedData) // Send cleaned data
-            })
-            .then(response => response.json())
-            .then(result => {
-                console.log('Success:', result);
-                if (result.status === 'success') {
-                    displayFormattedData(result.formattedData);
-                    localStorage.removeItem(localStorageKey); // Clear local storage after successful processing
-                } else {
-                    console.error('Error:', result.message);
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-            });
-        } else {
-            console.error('Parsed data is not an object or is empty.');
+                // Proceed with the fetch request
+                fetch('csub.php', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify(cleanedData) // Send cleaned data
+                })
+                .then(response => {
+                    if (!response.ok) {
+                        throw new Error('Network response was not ok');
+                    }
+                    return response.json();
+                })
+                .then(result => {
+                    console.log('Success:', result);
+                    if (result.status === 'success') {
+                        displayFormattedData(result.formattedData);
+                        localStorage.removeItem(localStorageKey); // Clear local storage after successful processing
+                    } else {
+                        console.error('Error:', result.message);
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                });
+            } else {
+                console.error('Parsed data is not an object or is empty.');
+            }
+        } catch (error) {
+            console.error('Error parsing JSON:', error);
         }
-    } catch (error) {
-        console.error('Error parsing JSON:', error);
+    } else {
+        console.error('No data found in local storage');
     }
-} else {
-    console.error('No data found in local storage');
 }
-
-}
-
 
 
 

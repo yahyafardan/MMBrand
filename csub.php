@@ -1,7 +1,7 @@
 <?php
 require 'db.php'; // Ensure db.php is correctly configured and includes PDO setup
 
-// Enable error reporting for debugging (remove these lines if you want to disable it)
+// Enable error reporting for debugging
 error_reporting(E_ALL);
 ini_set('display_errors', 1);
 
@@ -13,8 +13,8 @@ $data = json_decode($jsonData, true);
 
 // Prepare the SQL statements
 $insertStmt = $pdo->prepare("
-    INSERT INTO content (type, concept, caption, language, post_date, month, social_media_platforms, sponsored, status, client_name, contributors)
-    VALUES (:type, :concept, :caption, :language, :post_date, :month, :social_media_platforms, :sponsored, :status, :client_name, :contributors)
+    INSERT INTO content (type, concept, title, caption, language, post_date, month, social_media_platforms, sponsored, status, client_name, contributors)
+    VALUES (:type, :concept, :title, :caption, :language, :post_date, :month, :social_media_platforms, :sponsored, :status, :client_name, :contributors)
 ");
 
 $updateStmt = $pdo->prepare("
@@ -44,23 +44,22 @@ if (json_last_error() === JSON_ERROR_NONE) {
             $month_name = $dateTime->format('F');
 
             // Extract and format the necessary values
-            $type = isset($value['type']) ? $value['type'] : '';
-            $concept = isset($value['Concept']) ? $value['Concept'] : '';
-            $caption = isset($value['caption']) ? $value['caption'] : '';
-            $language = isset($value['language']) ? $value['language'] : ''; // Added language field
+            $type = $value['type'] ?? '';
+            $concept = $value['Concept'] ?? '';
+            $title = $value['title'] ?? ''; // Added title extraction
+            $caption = $value['caption'] ?? '';
+            $language = $value['language'] ?? '';
             $social_media_platforms = isset($value['socialMedia']) && is_array($value['socialMedia']) ? implode(', ', $value['socialMedia']) : '';
-            $sponsored = isset($value['sponsors']) ? $value['sponsors'] : ''; // Updated to sponsored
-            $status = isset($value['state']) ? $value['state'] : '';
+            $sponsored = $value['sponsors'] ?? 'no'; // Default to 'no'
+            $status = $value['state'] ?? '';
 
             // Extract contributors data from the value array
-            $role_name = isset($value['role_name']) ? $value['role_name'] : 'default_role';
-            $username = isset($value['username']) ? $value['username'] : 'default_username';
-            $contributors = json_encode([
-                $role_name =>  $username
-            ]);
+            $role_name = $value['role_name'] ?? 'default_role';
+            $username = $value['username'] ?? 'default_username';
+            $contributors = json_encode([$role_name => $username]);
 
             // Debugging: Print extracted values
-            error_log("Debug - Type: $type, Concept: $concept, Caption: $caption, Language: $language, Social Media: $social_media_platforms, Sponsored: $sponsored, Status: $status, Contributors: $contributors");
+            error_log("Debug - Type: $type, Concept: $concept, Title: $title, Caption: $caption, Language: $language, Social Media: $social_media_platforms, Sponsored: $sponsored, Status: $status, Contributors: $contributors");
 
             // Check if status is 'saved'
             if ($status === 'saved') {
@@ -78,15 +77,16 @@ if (json_last_error() === JSON_ERROR_NONE) {
             $insertStmt->execute([
                 ':type' => $type,
                 ':concept' => $concept,
+                ':title' => $title, // Insert title
                 ':caption' => $caption,
-                ':language' => $language, // Added language field
+                ':language' => $language,
                 ':post_date' => $formatted_date,
                 ':month' => $month_name,
                 ':social_media_platforms' => $social_media_platforms,
-                ':sponsored' => $sponsored, // Updated to sponsored
+                ':sponsored' => $sponsored,
                 ':status' => $status,
                 ':client_name' => $client_name,
-                ':contributors' => $contributors // Added contributors field
+                ':contributors' => $contributors
             ]);
 
             // Check for SQL errors
@@ -121,4 +121,3 @@ if (json_last_error() === JSON_ERROR_NONE) {
     $errorMessage = json_last_error_msg(); // Get the JSON error message
     echo json_encode(['status' => 'error', 'message' => 'Failed to decode JSON', 'error_message' => $errorMessage]);
 }
-?>
