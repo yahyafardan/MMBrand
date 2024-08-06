@@ -74,7 +74,7 @@ if ($_SESSION['role_name'] !== 'admin') {
     <div class="options-container">
         <div class="option">
             <h2>add a client </h2>
-            <p>This is a brief description of Option 1. It provides an overview of what this option is about.</p>
+            <!-- <p>This is a brief description of Option 1. It provides an overview of what this option is about.</p> -->
             <a href="adminc.php" >Click here to add a client</a>
         </div>
         
@@ -82,7 +82,7 @@ if ($_SESSION['role_name'] !== 'admin') {
             <h2>add user </h2>
             <p>  By selecting this option, you can add a new user to the system, which might involve filling out forms with personal information, assigning roles, 
                 and setting up permissions. This feature is crucial for managing user accounts and ensuring that only authorized individuals have access to specific areas of the website.            .</p>
-            <a href="adduser.php">Click here for more details</a>
+            <a href="adminadd.php">Click here to add a user </a>
         </div>
         
         <div class="option">
