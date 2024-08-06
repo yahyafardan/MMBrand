@@ -63,14 +63,14 @@ if (json_last_error() === JSON_ERROR_NONE) {
 
             // Check if status is 'saved'
             if ($status === 'saved') {
-                // Update the status to 'approvalIn'
+                // Update the status to 'app1'
                 $updateStmt->execute([
                     ':client_name' => $client_name,
                     ':post_date' => $formatted_date
                 ]);
 
-                // Set the status to 'approvalIn' for insertion
-                $status = 'approvalIn';
+                // Set the status to 'app1' for insertion
+                $status = 'app1';
             }
 
             // Execute the insert statement

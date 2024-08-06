@@ -419,7 +419,7 @@ function handleSubmission() {
 
     // Check if all items are saved
     if (savedItemsCount >= visibleEventsCount) {
-        If all items are saved, proceed to redirection
+        // If all items are saved, proceed to redirection
         console.log('All items are saved. Redirecting...');
         postLocalStorageData();
 

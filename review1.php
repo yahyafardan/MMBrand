@@ -1,109 +1,187 @@
-<?php
-require 'db.php';
-session_start();
+<?php 
+require 'db.php'; 
+session_start(); 
+
 // Check if the user is logged in
-if (!isset($_SESSION['username'])) {
-    header("Location: index.html");
-    exit;
+if (!isset($_SESSION['username'])) { 
+    header("Location: index.html"); 
+    exit; 
 }
 
 // Check if the user is an app1
-if ($_SESSION['role_name'] !== 'app1') {
-    echo "Access denied.";
-    header("Location: index.html");
-
-    exit;
-}
-$clientName = isset($_POST['client_name']) ? $_POST['client_name'] : '';
-$month = isset($_POST['month']) ? $_POST['month'] : '';
-
-if (!$clientName || !$month) {
-    echo '<p>Invalid client or month specified.</p>';
-    exit;
+if ($_SESSION['role_name'] !== 'app1') { 
+    echo "Access denied."; 
+    header("Location: index.html"); 
+    exit; 
 }
 
-try {
-    $sql = "SELECT * FROM content WHERE client_name = :client_name AND month = :month AND status = 'app1'";
-    $stmt = $pdo->prepare($sql);
-    $stmt->execute(['client_name' => $clientName, 'month' => $month]);
-    $records = $stmt->fetchAll(PDO::FETCH_ASSOC);
+$clientName = isset($_POST['client_name']) ? $_POST['client_name'] : ''; 
+$month = isset($_POST['month']) ? $_POST['month'] : ''; 
 
-    if (!$records) {
-        echo "<p>No records found for $clientName in $month.</p>";
-        exit;
+if (!$clientName || !$month) { 
+    echo '<p>Invalid client or month specified.</p>'; 
+    exit; 
+}
+
+try { 
+    $sql = "SELECT * FROM content WHERE client_name = :client_name AND month = :month AND status = 'app1'"; 
+    $stmt = $pdo->prepare($sql); 
+    $stmt->execute(['client_name' => $clientName, 'month' => $month]); 
+    $records = $stmt->fetchAll(PDO::FETCH_ASSOC); 
+    
+    if (!$records) { 
+        echo "<p>No records found for $clientName in $month.</p>"; 
+        exit; 
     }
-
+    
     echo '<div class="clients-container">';
     echo "<h2>Content for $clientName - $month</h2>";
     echo '<div class="client-container">';
-
+    
     foreach ($records as $record) {
         $contributors = json_decode($record['contributors'], true);
-        if (json_last_error() !== JSON_ERROR_NONE) {
-            echo '<p>Error decoding contributors JSON: ' . htmlspecialchars(json_last_error_msg()) . '</p>';
-            continue;
+        
+        if (json_last_error() !== JSON_ERROR_NONE) { 
+            echo '<p>Error decoding contributors JSON: ' . htmlspecialchars(json_last_error_msg()) . '</p>'; 
+            continue; 
         }
-
+        
         echo '<div class="record-container" data-id="' . htmlspecialchars($record['id']) . '">';
         echo '<p><strong>Type:</strong> ' . htmlspecialchars($record['type']) . '</p>';
         echo '<p><strong>Concept:</strong> ' . htmlspecialchars($record['concept']) . '</p>';
         echo '<p><strong>Caption:</strong> ' . htmlspecialchars($record['caption']) . '</p>';
         echo '<p><strong>Language:</strong> ' . htmlspecialchars($record['language']) . '</p>';
         echo '<p><strong>Last Updated:</strong> ' . htmlspecialchars($record['updated_at']) . '</p>';
-        echo '<p><strong>Status:</strong> ' . htmlspecialchars($record['status']) . '</p>';
-
-        if (!empty($contributors)) {
-            echo '<p><strong>Contributors:</strong> ';
-            $contributorItems = [];
-            foreach ($contributors as $contributor => $content) {
-                $contributorItems[] = 'Person: ' . htmlspecialchars($contributor) . ' - Role: ' . htmlspecialchars($content);
-            }
-            echo implode(' | ', $contributorItems);
-            echo '</p>';
+        // echo '<p><strong>Status:</strong> ' . htmlspecialchars($record['status']) . '</p>';
+        
+        if (!empty($contributors)) { 
+            echo '<p><strong>Contributors:</strong> '; 
+            $contributorItems = []; 
+            foreach ($contributors as $contributor => $content) { 
+                $contributorItems[] = 'Person: ' . htmlspecialchars($contributor) . ' - Role: ' . htmlspecialchars($content); 
+            } 
+            echo implode(' | ', $contributorItems); 
+            echo '</p>'; 
         }
-
+        
         echo '<div class="button-container">';
         echo '<a class="approve-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '" onclick="submitAction(event, \'approve\', ' . htmlspecialchars($record['id']) . ', \'' . htmlspecialchars($clientName) . '\', \'' . htmlspecialchars($month) . '\')">Approve</a>';
-        echo '<a class="reject-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '" onclick="toggleRejectionField(this)">Reject</a>';
-        echo '<div class="rejection-field" style="display:none;">';
-        echo '<textarea placeholder="Reason for rejection" name="rejection_reason" rows="4" style="width: 100%; resize: both;"></textarea>';
+        echo '<a class="reject-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '" onclick="toggleRejectionField(event, this)">Reject</a>';
+        echo '<div class="rejection-field">';
+        echo '<p>Select the fields to include in the rejection notes:</p>';
+        echo '<label><input type="checkbox" name="reject_option" value="idea"> Idea</label>';
+        echo '<label><input type="checkbox" name="reject_option" value="title"> Title</label>';
+        echo '<label><input type="checkbox" name="reject_option" value="caption"> Caption</label>';
+        echo '<div class="notes-container"></div>'; // Container for dynamic note areas
         echo '<button type="button" onclick="submitAction(event, \'reject\', ' . htmlspecialchars($record['id']) . ', \'' . htmlspecialchars($clientName) . '\', \'' . htmlspecialchars($month) . '\')">Submit</button>';
         echo '</div>';
         echo '</div>';
         echo '</div>';
     }
-
+    
     echo '</div>'; // Close client-container
     echo '</div>'; // Close clients-container
-
-} catch (PDOException $e) {
-    echo '<p>Error fetching records: ' . htmlspecialchars($e->getMessage()) . '</p>';
+    
+} catch (PDOException $e) { 
+    echo '<p>Error fetching records: ' . htmlspecialchars($e->getMessage()) . '</p>'; 
 }
 ?>
-
-
-<script>function toggleRejectionField(element) {
+<script>
+function toggleRejectionField(event, element) {
+    event.preventDefault();
     const buttonContainer = element.closest('.button-container');
     const approvalButton = buttonContainer.querySelector('.approve-btn');
     const rejectionField = buttonContainer.querySelector('.rejection-field');
-
+    const notesContainer = buttonContainer.querySelector('.notes-container');
+    
     if (rejectionField.style.display === 'block') {
         rejectionField.style.display = 'none'; // Hide the rejection field
         approvalButton.style.display = 'inline-block'; // Show the approval button
+        notesContainer.innerHTML = ''; // Clear notes when hidden
     } else {
         approvalButton.style.display = 'none'; // Hide the approval button
         rejectionField.style.display = 'block'; // Show the rejection field
     }
 }
 
+document.addEventListener('change', function(event) {
+    if (event.target.name === 'reject_option') {
+        const checkbox = event.target;
+        const notesContainer = checkbox.closest('.rejection-field').querySelector('.notes-container');
+        const checkboxValue = checkbox.value;
+        
+        if (checkbox.checked) {
+            // Create a new note area
+            const noteArea = document.createElement('div');
+            noteArea.classList.add('note-area');
+            noteArea.innerHTML = `<label>${checkboxValue} Note:</label><textarea name="${checkboxValue}_note" rows="2" style="width: 100%; resize: both;"></textarea>`;
+            notesContainer.appendChild(noteArea);
+            
+            // Automatically select other checkboxes if 'idea' is selected
+            if (checkboxValue === 'idea') {
+                const otherCheckboxes = ['title', 'caption', 'someOtherOption']; // Replace with actual checkbox values
+                otherCheckboxes.forEach(value => {
+                    const otherCheckbox = checkbox.closest('.rejection-field').querySelector(`input[name="reject_option"][value="${value}"]`);
+                    if (otherCheckbox && !otherCheckbox.checked) {
+                        otherCheckbox.checked = true;
+                        // Create note area if it does not exist
+                        const existingNoteArea = notesContainer.querySelector(`.note-area textarea[name="${value}_note"]`);
+                        if (!existingNoteArea) {
+                            const noteArea = document.createElement('div');
+                            noteArea.classList.add('note-area');
+                            noteArea.innerHTML = `<label>${value} Note:</label><textarea name="${value}_note" rows="2" style="width: 100%; resize: both;"></textarea>`;
+                            notesContainer.appendChild(noteArea);
+                        }
+                    }
+                });
+            }
+        } else {
+            // Remove the corresponding note area
+            const noteArea = notesContainer.querySelector(`.note-area textarea[name="${checkboxValue}_note"]`).parentElement;
+            if (noteArea) {
+                notesContainer.removeChild(noteArea);
+            }
+        }
+    }
+});
+
 function submitAction(event, action, recordId, clientName, month) {
     event.preventDefault();
-    let rejectionReason = '';
+    let rejectionOptions = [];
+    let rejectionNotes = {};
 
     if (action === 'reject') {
-        rejectionReason = document.querySelector(`.record-container[data-id="${recordId}"] .rejection-field textarea`).value;
-        if (!rejectionReason) {
-            alert('Please provide a reason for rejection.');
+        // Collect selected checkboxes
+        const selectedOptions = document.querySelectorAll(`.record-container[data-id="${recordId}"] .rejection-field input[name="reject_option"]:checked`);
+        rejectionOptions = Array.from(selectedOptions).map(option => option.value);
+
+        // Get notes
+        rejectionOptions.forEach(option => {
+            const note = document.querySelector(`.record-container[data-id="${recordId}"] .rejection-field textarea[name="${option}_note"]`).value;
+            if (note) {
+                rejectionNotes[option] = note;
+            }
+        });
+
+        // Validation checks
+        if (rejectionOptions.length === 0) {
+            alert('Please select at least one option for rejection.');
+            return;
+        }
+
+        // Check for missing notes
+        let missingNotes = [];
+        rejectionOptions.forEach(option => {
+            if (option !== 'idea') { // Skip validation for 'idea' checkbox
+                const note = rejectionNotes[option];
+                if (!note || !note.trim()) {
+                    missingNotes.push(option);
+                }
+            }
+        });
+
+        if (missingNotes.length > 0) {
+            alert('Please provide a non-empty note for the following selected rejection options: ' + missingNotes.join(', '));
             return;
         }
     }
@@ -111,7 +189,7 @@ function submitAction(event, action, recordId, clientName, month) {
     const data = {
         id: recordId,
         action: action,
-        rejection_reason: rejectionReason,
+        notes: JSON.stringify(rejectionNotes), // Encoding the notes as an associative array
         client_name: clientName,
         month: month
     };
@@ -120,29 +198,23 @@ function submitAction(event, action, recordId, clientName, month) {
 
     fetch('approve1sub.php', {
         method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(data)
     })
     .then(response => response.text())
     .then(result => {
         console.log('Server response:', result);
         alert(result);
-        // Hide the specific record container
-        const recordContainer = document.querySelector(`.record-container[data-id="${recordId}"]`);
-        if (recordContainer) {
-            // recordContainer.style.display = 'none'; // Hide the container
-            location.reload(true); // Bypasses the cache and reloads the page from the server
-
-        }
+        location.reload(true); // Reload the page to update the records
     })
     .catch(error => {
         console.error('Error:', error);
     });
 }
-
 </script>
+
+
+
 
 
 

@@ -3,7 +3,6 @@
 require 'db.php';
 session_start();
 
-
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
     header("Location: login.php");
@@ -14,13 +13,11 @@ if (!isset($_SESSION['username'])) {
 if ($_SESSION['role_name'] !== 'app1') {
     echo "Access denied.";
     header("Location: login.php");
-
     exit;
 }
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
-        // Connect to the database
-
         // Decode the incoming JSON data
         $input = json_decode(file_get_contents("php://input"), true);
 
@@ -28,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $month = $input['month'] ?? null;
         $action = $input['action'] ?? null;
         $id = $input['id'] ?? null;
-        $notes = $input['rejection_reason'] ?? null;
+        $notes = $input['notes'] ?? null; // This should be a JSON-encoded string
 
         if (!$clientName || !$month || !$action) {
             echo 'Invalid input';
@@ -56,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 'status' => $status,
-                'notes' => $notes,
+                'notes' => $notes, // JSON string is fine here
                 'id' => $id
             ]);
 
