@@ -1,5 +1,19 @@
 <?php
-require 'db.php';
+// Start the session
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Check if the user is an app1
+if ($_SESSION['role_name'] !== 'app1') {
+    echo "Access denied.";
+    exit;
+}
+
 
 $clientName = isset($_POST['client_name']) ? $_POST['client_name'] : '';
 $month = isset($_POST['month']) ? $_POST['month'] : '';

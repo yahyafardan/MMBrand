@@ -13,7 +13,6 @@ if ($_SESSION['role_name'] !== 'admin') {
     echo "Access denied.";
     exit;
 }
-echo "hi";
 ?>
 <!DOCTYPE html>
 <html lang="en">

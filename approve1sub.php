@@ -1,8 +1,21 @@
 <?php
+
+require 'db.php';
+
+// Check if the user is logged in
+if (!isset($_SESSION['username'])) {
+    header("Location: login.php");
+    exit;
+}
+
+// Check if the user is an app1
+if ($_SESSION['role_name'] !== 'app1') {
+    echo "Access denied.";
+    exit;
+}
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         // Connect to the database
-        require 'db.php';
 
         // Decode the incoming JSON data
         $input = json_decode(file_get_contents("php://input"), true);
