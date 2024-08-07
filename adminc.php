@@ -247,6 +247,14 @@ if ($_SESSION['role_name'] !== 'admin') {
                 }
             });
         });
+        // Get the form element
+        const form = document.getElementById('client-posts-form');
+
+        // Add an event listener to the form's submit event
+        form.addEventListener('submit', function() {
+            // Reset the form after submission
+            form.reset();
+        });
     </script>
 </body>
 </html>

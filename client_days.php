@@ -1,20 +1,4 @@
 <?php
-// Start the session
-session_start();
-
-// Check if the user is logged in
-if (!isset($_SESSION['username'])) {
-    include "invaild.html";
-    exit;
-}
-
-// Check if the user is an app1
-if ($_SESSION['role_name'] !== 'content') {
-    include "acessdenied.html";
-    exit;
-}
-session_start();
-
 // Enable error reporting for debugging
 ini_set('display_errors', 1);
 ini_set('display_startup_errors', 1);
@@ -23,7 +7,15 @@ error_reporting(E_ALL);
 // Include the database connection file
 require 'db.php';
 
-$client_name = $_POST['client_name'];
+// Get the client_name from POST data
+$client_name = isset($_POST['client_name']) ? $_POST['client_name'] : '';
+
+// Validate client_name
+if (empty($client_name)) {
+    header("HTTP/1.1 400 Bad Request");
+    echo json_encode(["error" => "Client name is required."]);
+    exit;
+}
 
 try {
     // Fetch client details
@@ -113,3 +105,4 @@ try {
     header("HTTP/1.1 500 Internal Server Error");
     echo json_encode(["error" => "Query failed: " . $e->getMessage()]);
 }
+?>

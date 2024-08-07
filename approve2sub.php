@@ -5,14 +5,13 @@ session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
-    header("Location: login.php");
+    include "invaild.html";
     exit;
 }
 
 // Check if the user is an app2
 if ($_SESSION['role_name'] !== 'app2') {
-    echo "Access denied.";
-    header("Location: login.php");
+    include "acessdenied.html";
     exit;
 }
 

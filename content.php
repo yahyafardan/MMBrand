@@ -173,7 +173,7 @@ class="" style="
                     <!-- Sections for static -->
                     <div id="staticSection" class="event-section d-none">
                         <div class="mb-3">
-                            <label for="Concept" class="form-label">idea </label>
+                            <label for="Concept" class="form-label">idea</label>
                             <input type="text" class="form-control" id="Concept" name="Concept" required>
                         </div>
                         <div>
@@ -188,15 +188,15 @@ class="" style="
   <!-- Additional Static Fields -->
 <div id="additionalFields" class="d-none">
     <div class="mb-3">
-        <label for="ConceptAdditional" class="form-label">الفكرة </label>
+        <label for="ConceptAdditional" class="form-label">idea lang2 </label>
         <input type="text" class="form-control" id="ConceptAdditional" name="ConceptAdditional">
     </div>
     <div>
-                        <label for="Additionaltitle" class="form-label">نص الكتابة</label>
+                        <label for="Additionaltitle" class="form-label">Additionaltitle</label>
                         <input type="text" class="form-control" id="Additionaltitle" name="title" required>
                         </div>
     <div class="mb-3">
-        <label for="captionAdditional" class="form-label">الكتابة</label>
+        <label for="captionAdditional" class="form-label">Additional Caption (Text)</label>
         <textarea class="form-control" id="captionAdditional" name="captionAdditional" rows="3"></textarea>
     </div>
 </div>
@@ -255,7 +255,7 @@ class="" style="
                     <!-- Sections for video -->
                     <div id="videoSection" class="event-section d-none">
                         <div class="mb-3">
-                            <label for="VideoConcept" class="form-label">Concept (theme)</label>
+                            <label for="VideoConcept" class="form-label">idea</label>
                             <input type="text" class="form-control" id="VideoConcept" name="VideoConcept" required>
                         </div>
                         <div class="mb-3">
@@ -335,12 +335,13 @@ class="" style="
             <div class="modal-body">
                 <table class="table table-striped">
                     <thead>
-                        <tr>
+                    <tr>
                             <th>Client Name</th>
                             <th>Date</th>
-                            <th>Language</th>
                             <th>Idea</th>
+                            <th>Title</th>
                             <th>Caption</th>
+                            <th>Language</th>
                             <th>Social Media</th>
                             <th>Sponsorship</th>
                         </tr>
@@ -419,7 +420,7 @@ function handleSubmission() {
 
     // Check if all items are saved
     if (savedItemsCount >= visibleEventsCount) {
-        // If all items are saved, proceed to redirection
+        //If all items are saved, proceed to redirection
         console.log('All items are saved. Redirecting...');
         postLocalStorageData();
 
@@ -690,256 +691,242 @@ function showModal(event) {
 
     // Event listener for client selection
     document.getElementById('clientSelect').addEventListener('change', function() {
-        selectedClient = this.value;
+    selectedClient =this.value;
 
-if (selectedClient) {
-    const xhr = new XMLHttpRequest();
-    xhr.open('POST', 'client_days.php', true);
-    xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
+    if (selectedClient) {
+        console.log('Selected client:', selectedClient); // Log selected client
 
-    xhr.onload = function() {
-        if (xhr.status === 200) {
-            try {
-                const response = JSON.parse(xhr.responseText);
+        const xhr = new XMLHttpRequest();
+        xhr.open('POST', 'client_days.php', true);
+        xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded');
 
-                //console.log('Response from server:', response);
+        xhr.onload = function() {
+            if (xhr.status === 200) {
+                try {
+                    const response = JSON.parse(xhr.responseText);
+                    console.log('Response from server:', response); // Log server response
 
-                if (response.error) {
-                    document.getElementById('resultContainer').innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
-                    console.error('Server Error:', response.error);
-                } else {
-                    startDate = moment(response.start_date);
-                    endDate = adjustEndDate(moment(response.end_date));
-                    globalHashtags = response.hashtags || '';
-                    languages = response.languages || '';
-                    document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
-                    document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
-                    document.getElementById('itemsRequiredContainer').classList.remove('d-none');
-                    document.getElementById('additionalFields').classList.add('d-none');
+                    if (response.error) {
+                        document.getElementById('resultContainer').innerHTML = `<p style="color: red;">Error: ${response.error}</p>`;
+                        console.error('Server Error:', response.error);
+                    } else {
+                        startDate = moment(response.start_date);
+                        endDate = adjustEndDate(moment(response.end_date));
+                        globalHashtags = response.hashtags || '';
+                        languages = response.languages || '';
+                        document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
+                        document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
+                        document.getElementById('itemsRequiredContainer').classList.remove('d-none');
+                        document.getElementById('additionalFields').classList.add('d-none');
 
-                    if (languages==="both"){
-                        document.getElementById('additionalFields').classList.remove('d-none');
+                        if (languages === "both") {
+                            document.getElementById('additionalFields').classList.remove('d-none');
+                        }
 
+                        // Populate months dropdown
+                        const monthSelect = document.getElementById('monthSelect');
+                        monthSelect.innerHTML = ''; // Clear existing options
 
-                    }
+                        // Add default option
+                        const defaultOption = document.createElement('option');
+                        defaultOption.value = '';
+                        defaultOption.textContent = 'Select a month';
+                        defaultOption.disabled = true;
+                        defaultOption.selected = true;
+                        monthSelect.appendChild(defaultOption);
 
-                    // Populate months dropdown
-                    const monthSelect = document.getElementById('monthSelect');
-                    monthSelect.innerHTML = ''; // Clear existing options
+                        // Add dynamic month options
+                        response.months.forEach(month => {
+                            const option = document.createElement('option');
+                            const [monthIndex, year] = month.split(','); // Split into month and year
+                            const date = new Date(year, parseInt(monthIndex, 10) - 1); // Month is zero-based in JavaScript
 
-                    // Add default option
-                    const defaultOption = document.createElement('option');
-                    defaultOption.value = '';
-                    defaultOption.textContent = 'Select a month';
-                    defaultOption.disabled = true;
-                    defaultOption.selected = true;
-                    monthSelect.appendChild(defaultOption);
+                            // Format the month as MMMM/YYYY
+                            const options = { year: 'numeric', month: 'long' };
+                            const formattedMonth = date.toLocaleDateString('en-US', options); // e.g., 'April 2024'
 
-                    // Add dynamic month options
-                    response.months.forEach(month => {
-                        const option = document.createElement('option');
+                            option.value = month;
+                            option.textContent = formattedMonth;
 
-                        // Assuming `month` is in 'MM,YYYY' format
-                        const [monthIndex, year] = month.split(','); // Split into month and year
-                        const date = new Date(year, parseInt(monthIndex, 10) - 1); // Month is zero-based in JavaScript
+                            monthSelect.appendChild(option);
+                            console.log('Month option added:', formattedMonth); // Log month option added
+                        });
 
-                        // Format the month as MMMM/YYYY
-                        const options = { year: 'numeric', month: 'long' };
-                        const formattedMonth = date.toLocaleDateString('en-US', options); // e.g., 'April 2024'
+                        const events = [];
+                        let visibleEvents = [];
 
-                        option.value = month;
-                        option.textContent = formattedMonth;
+                        // Example of fetching and parsing events
+                        response.posting_days.forEach(dayString => {
+                            const daysArray = dayString.split(',').map(day => {
+                                return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
+                            });
 
-                        monthSelect.appendChild(option);
-                    });
+                            // Fetch saved events from local storage
+                            const savedEvents = JSON.parse(localStorage.getItem('modalSavedData')) || {};
+                            console.log('Saved Events from localStorage:', savedEvents);
 
-                    //console.log('Months added to dropdown:', response.months);
+                            daysArray.forEach(dayOfWeek => {
+                                const color = 'red'; // Default color
+                                const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
 
-                    const events = [];
-                    let visibleEvents = [];
+                                dates.forEach(date => {
+                                    if (date.isBetween(startDate, endDate, null, '[]')) {
+                                        const eventId = selectedClient + '_' + date.format('YYYY-MM-DD'); // Include client name
+                                        const isSaved = savedEvents.hasOwnProperty(eventId); // Check if event ID is in saved events
 
-                    // Example of fetching and parsing events
-// Example of fetching and parsing events
-response.posting_days.forEach(dayString => {
-    const daysArray = dayString.split(',').map(day => {
-        return day.charAt(0).toUpperCase() + day.slice(1).toLowerCase();
-    });
+                                        console.log('Generated Event ID:', eventId);
+                                        console.log('Saved Events Keys:', Object.keys(savedEvents));
+                                        console.log('Key Exists:', isSaved);
 
-    // Fetch saved events from local storage
-    const savedEvents = JSON.parse(localStorage.getItem('modalSavedData')) || {}; // Associative array of saved event IDs
-    //console.log('Saved Events from localStorage:', savedEvents);
-
-    daysArray.forEach(dayOfWeek => {
-        const color = 'red'; // Default color
-        const dates = getDatesForDayOfWeek(dayOfWeek, startDate, endDate);
-
-        dates.forEach(date => {
-            if (date.isBetween(startDate, endDate, null, '[]')) {
-                const eventId = selectedClient + '_' + date.format('YYYY-MM-DD'); // Include client name
-                const isSaved = savedEvents.hasOwnProperty(eventId); // Check if event ID is in saved events
-
-                // Log both sides of the if statement
-                //console.log('Generated Event ID:', eventId);
-                //console.log('Saved Events Keys:', Object.keys(savedEvents));
-                //console.log('Key Exists:', isSaved);
-
-                const event = {
-                    id: eventId,
-                    start: date.format('YYYY-MM-DD'),
-                    end: date.format('YYYY-MM-DD'),
-                    rendering: 'background',
-                    backgroundColor: isSaved ? 'blue' : color, // Set color based on saved status
-                    Concept: 'Event on ' + date.format('YYYY-MM-DD'),
-                    hashtags: response.hashtags || []
-                };
-                events.push(event);
-            }
-        });
-    });
-});
-
-//console.log('Events created:', events);
-
-
-// Function to save an event ID to local storage
-function saveEvent(eventId) {
-    let savedEvents = JSON.parse(localStorage.getItem('modalSavedData')) || {};
-    savedEvents[eventId] = true; // Mark event as saved
-    localStorage.setItem('modalSavedData', JSON.stringify(savedEvents));
-}
-function countSavedItems(clientName, monthYear) {
-  // Retrieve the saved data from local storage
-  const savedData = JSON.parse(localStorage.getItem('modalSavedData')) || {};
-  
-  // Initialize count
-  let count = 0;
-
-  // Iterate over the keys in savedData
-  for (const key in savedData) {
-    if (savedData.hasOwnProperty(key)) {
-      // Extract client name and date from the key
-      const [storedClientName, date] = key.split('_');
-      const [yearMonth] = date.split('-');
-      
-      // Check if the client name and month match
-      if (storedClientName === clientName && yearMonth === monthYear) {
-        count++;
-      }
-    }
-  }
-
-  return count;
-}
-
-
-
-
-
-                    monthSelect.addEventListener('change', function() {
-
-
-
-                    
-// Initial call to set count based on default selections
-updateSavedItemsCount();
-
-
-
-
-
-
-
-
-                        const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
-
-
-                        if (selectedMonths.length > 0) {
-                            $('#calendar').fullCalendar('removeEvents'); // Remove all existing events
-                            // Reset counters
-                            visibleEventsCount = 0; // Reset visible events count
-
-                            // Clear UI counters
-                            // document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
-                            document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
-                            document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
-                            document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
-
-                            // Filter and add only the events for the selected months
-                            const filteredEvents = events.filter(event => {
-                                const eventDate = moment(event.start);
-                                return selectedMonths.some(month => {
-                                    const [monthStr, yearStr] = month.split(',');
-                                    const monthStart = moment().year(yearStr).month(monthStr - 1).startOf('month');
-                                    const monthEnd = moment().year(yearStr).month(monthStr - 1).endOf('month');
-                                    return eventDate.isBetween(monthStart, monthEnd, null, '[]');
+                                        const event = {
+                                            id: eventId,
+                                            start: date.format('YYYY-MM-DD'),
+                                            end: date.format('YYYY-MM-DD'),
+                                            rendering: 'background',
+                                            backgroundColor: isSaved ? 'blue' : color, // Set color based on saved status
+                                            Concept: 'Event on ' + date.format('YYYY-MM-DD'),
+                                            hashtags: response.hashtags || []
+                                        };
+                                        events.push(event);
+                                    }
                                 });
                             });
+                        });
 
+                        console.log('Events created:', events);
 
-                            $('#calendar').fullCalendar('addEventSource', filteredEvents);
-                            $('#calendar').fullCalendar('gotoDate', moment(selectedMonths[0], 'MM,YYYY').startOf('month')); // Navigate to the first selected month
-
-                            // Update the visible events
-                            visibleEvents = filteredEvents;
-                            updateVisibleEventsCounter();
+                        // Function to save an event ID to local storage
+                        function saveEvent(eventId) {
+                            let savedEvents = JSON.parse(localStorage.getItem('modalSavedData')) || {};
+                            savedEvents[eventId] = true; // Mark event as saved
+                            localStorage.setItem('modalSavedData', JSON.stringify(savedEvents));
+                            console.log('Event saved:', eventId); // Log event save
                         }
-                        function updateCounter(clientName, monthSelect) {
-   savedItemsCount = countSavedItems(clientName, monthSelect);
-  document.getElementById('savedItemsCount').textContent = savedItemsCount;
-}
 
+                        function countSavedItems(clientName, monthYear) {
+                            // Retrieve the saved data from local storage
+                            const savedData = JSON.parse(localStorage.getItem('modalSavedData')) || {};
+                            console.log('Saved Data for counting:', savedData);
 
-                    });
+                            // Initialize count
+                            let count = 0;
 
-                    $('#calendar').fullCalendar({
-                        viewRender: function(view, element) {
-                            // Function to be called every time the view changes
-                            const visibleRange = view.intervalStart.format('YYYY-MM-DD') + '/' + view.intervalEnd.format('YYYY-MM-DD');
-                            //console.log('Visible range:', visibleRange);
+                            // Iterate over the keys in savedData
+                            for (const key in savedData) {
+                                if (savedData.hasOwnProperty(key)) {
+                                    // Extract client name and date from the key
+                                    const [storedClientName, date] = key.split('_');
+                                    const [yearMonth] = date.split('-');
 
-                            // Example: Update visible events based on the current view
-                            visibleEvents = $('#calendar').fullCalendar('getEvents').filter(event => {
-                                const eventDate = moment(event.start);
-                                return eventDate.isBetween(view.intervalStart, view.intervalEnd, null, '[]');
-                            });
+                                    // Check if the client name and month match
+                                    if (storedClientName === clientName && yearMonth === monthYear) {
+                                        count++;
+                                    }
+                                }
+                            }
 
-                            //console.log('Visible events:', visibleEvents);
-
-                            updateVisibleEventsCounter();
+                            console.log('Count of saved items:', count); // Log saved items count
+                            return count;
                         }
-                    });
 
-                    // Function to update the visible events counter
-                    function updateVisibleEventsCounter() {
-                        visibleEventsCount = visibleEvents.length;
+                        monthSelect.addEventListener('change', function() {
+                            // Initial call to set count based on default selections
+                            updateSavedItemsCount();
 
-                        // Update the counter in the HTML
-                        document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
+                            const selectedMonths = Array.from(this.selectedOptions).map(option => option.value);
+                            console.log('Selected months:', selectedMonths); // Log selected months
 
-                        // Show or hide the visible events container based on the count
-                        const visibleEventsContainer = document.getElementById('visibleEventsContainer');
-                        if (visibleEventsCount > 0) {
-                            visibleEventsContainer.classList.remove('d-none');
-                        } else {
-                            visibleEventsContainer.classList.add('d-none');
+                            if (selectedMonths.length > 0) {
+                                $('#calendar').fullCalendar('removeEvents'); // Remove all existing events
+                                visibleEventsCount = 0; // Reset visible events count
+
+                                // Clear UI counters
+                                document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
+                                document.getElementById('requiredPostsCount').textContent = `Required Number of Posts: ${response.n_of_posts}`;
+                                document.getElementById('requiredVideosCount').textContent = `Required Number of Videos: ${response.n_of_videos}`;
+
+                                // Filter and add only the events for the selected months
+                                const filteredEvents = events.filter(event => {
+                                    const eventDate = moment(event.start);
+                                    return selectedMonths.some(month => {
+                                        const [monthStr, yearStr] = month.split(',');
+                                        const monthStart = moment().year(yearStr).month(monthStr - 1).startOf('month');
+                                        const monthEnd = moment().year(yearStr).month(monthStr - 1).endOf('month');
+                                        return eventDate.isBetween(monthStart, monthEnd, null, '[]');
+                                    });
+                                });
+
+                                console.log('Filtered Events:', filteredEvents); // Log filtered events
+
+                                $('#calendar').fullCalendar('addEventSource', filteredEvents);
+                                $('#calendar').fullCalendar('gotoDate', moment(selectedMonths[0], 'MM,YYYY').startOf('month')); // Navigate to the first selected month
+
+                                // Update the visible events
+                                visibleEvents = filteredEvents;
+                                updateVisibleEventsCounter();
+                            }
+
+                            function updateCounter(clientName, monthSelect) {
+                                savedItemsCount = countSavedItems(clientName, monthSelect);
+                                document.getElementById('savedItemsCount').textContent = savedItemsCount;
+                                console.log('Updated Saved Items Count:', savedItemsCount); // Log updated saved items count
+                            }
+                        });
+
+                        $('#calendar').fullCalendar({
+                            viewRender: function(view, element) {
+                                const visibleRange = view.intervalStart.format('YYYY-MM-DD') + '/' + view.intervalEnd.format('YYYY-MM-DD');
+                                console.log('Visible range:', visibleRange); // Log visible range
+
+                                // Example: Update visible events based on the current view
+                                visibleEvents = $('#calendar').fullCalendar('getEvents').filter(event => {
+                                    const eventDate = moment(event.start);
+                                    return eventDate.isBetween(view.intervalStart, view.intervalEnd, null, '[]');
+                                });
+
+                                console.log('Visible events:', visibleEvents); // Log visible events
+
+                                updateVisibleEventsCounter();
+                            }
+                        });
+
+                        // Function to update the visible events counter
+                        function updateVisibleEventsCounter() {
+                            visibleEventsCount = visibleEvents.length;
+
+                            // Update the counter in the HTML
+                            document.getElementById('visibleEventsCount').textContent = `Visible Events: ${visibleEventsCount}`;
+
+                            // Show or hide the visible events container based on the count
+                            const visibleEventsContainer = document.getElementById('visibleEventsContainer');
+                            if (visibleEventsCount > 0) {
+                                visibleEventsContainer.classList.remove('d-none');
+                            } else {
+                                visibleEventsContainer.classList.add('d-none');
+                            }
                         }
+
+                        applySavedEventColors(); // Apply saved event colors after loading events
                     }
-
-                    applySavedEventColors(); // Apply saved event colors after loading events
+                } catch (e) {
+                    console.error('Error processing response:', e);
+                    document.getElementById('resultContainer').innerHTML = '<p style="color: red;">Error processing response.</p>';
                 }
-            }catch (e) {
-                        console.error('Error processing response:', e);
-                        document.getElementById('resultContainer').innerHTML = '<p style="color: red;">Error processing response.</p>';
-                    }
-                } else {
-                    console.error('Request failed. Status:', xhr.status);
-                    document.getElementById('resultContainer').innerHTML = '<p style="color: red;">Request failed. Status: ' + xhr.status + '</p>';
-                }
-            };
+            } else {
+                console.error('Error with AJAX request:', xhr.statusText);
+                document.getElementById('resultContainer').innerHTML = `<p style="color: red;">Error: ${xhr.statusText}</p>`;
+            }
+        };
 
-            xhr.send('client_name=' + encodeURIComponent(selectedClient));
-        }
-    });
+        xhr.onerror = function() {
+            console.error('Request failed');
+            document.getElementById('resultContainer').innerHTML = '<p style="color: red;">Request failed</p>';
+        };
+
+        xhr.send('client_name=' + encodeURIComponent(selectedClient));
+    }
+});
+
 
     // Function to adjust endDate to the end of the month
     function adjustEndDate(endDate) {
@@ -1178,14 +1165,16 @@ $('#contentModal').modal('hide');
             const formattedDate = new Date(eventDate).toLocaleDateString();
 
             row.innerHTML = `
-                <td>${clientName}</td>
-                <td>${formattedDate}</td>
-                <td>${data.language}</td>
-                <td>${data.Concept}</td>
-                <td>${data.caption}</td>
-                <td>${data.socialMedia.join(', ')}</td>
-                <td>${data.sponsors}</td>
-            `;
+    <td>${clientName}</td>
+    <td>${formattedDate}</td>
+    <td>${data.Concept}</td> <!-- Displaying Concept as 'Idea' -->
+    <td>${data.title}</td>
+    <td>${data.Concept}</td> <!-- Assuming this is the same Concept as the idea -->
+    <td>${data.language}</td>
+    <td>${data.socialMedia.join(', ')}</td>
+    <td>${data.sponsors}</td>
+`;
+
 
             tableBody.appendChild(row);
         }

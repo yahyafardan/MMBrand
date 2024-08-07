@@ -1,47 +1,49 @@
 <!DOCTYPE html>
 <html lang="en">
-<head> <style>body {
-    font-family: Arial, sans-serif;
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    height: 100vh;
-    margin: 0;
-    background-color: #f4f4f9;
-}
+<head>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f4f4f9;
+        }
 
-.container {
-    text-align: center;
-    background-color: #fff;
-    padding: 20px;
-    border-radius: 8px;
-    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
-}
+        .container {
+            text-align: center;
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        }
 
-h1 {
-    color: #4CAF50;
-}
+        h1 {
+            color: #4CAF50;
+        }
 
-p {
-    margin: 15px 0;
-    color: #555;
-}
+        p {
+            margin: 15px 0;
+            color: #555;
+        }
 
-button {
-    padding: 10px 20px;
-    border: none;
-    border-radius: 5px;
-    background-color: #007BFF;
-    color: white;
-    font-size: 16px;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-}
+        button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 5px;
+            background-color: #007BFF;
+            color: white;
+            font-size: 16px;
+            cursor: pointer;
+            transition: background-color 0.3s ease;
+        }
 
-button:hover {
-    background-color: #0056b3;
-}
-</style>
+        button:hover {
+            background-color: #0056b3;
+        }
+    </style>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Thank You</title>
@@ -54,9 +56,9 @@ button:hover {
         <button onclick="goBack()">Go Back</button>
     </div>
     <script>
-        function goBack() {
-            window.history.back();
-        }
+      function goBack() {
+    window.location.href = window.location.href.split('?')[0] + '?formSubmitted=true';
+}
     </script>
 </body>
 </html>
