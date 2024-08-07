@@ -25,7 +25,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
         $month = $input['month'] ?? null;
         $action = $input['action'] ?? null;
         $id = $input['id'] ?? null;
-        $notes = $input['rejection_reason'] ?? null;
+        $notes = $input['notes'] ?? null; // This should be a JSON-encoded string
 
         if (!$clientName || !$month || !$action) {
             echo 'Invalid input';
@@ -42,7 +42,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $status = 'pendingC';
                 $notes = null; // Clear notes if approving
             } elseif ($action === 'reject') {
-                $status = 'rejected';
+                $status = 'rejectedC';
             } else {
                 echo 'Invalid action';
                 exit;
@@ -53,7 +53,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $stmt = $pdo->prepare($sql);
             $stmt->execute([
                 'status' => $status,
-                'notes' => $notes,
+                'notes' => $notes, // JSON string is fine here
                 'id' => $id
             ]);
 
@@ -70,12 +70,12 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                 $checkResult = $checkStmt->fetch(PDO::FETCH_ASSOC);
 
                 if ($checkResult['not_pending'] == 0) {
-                    // If all records are pendingC, update them to clientapp1
+                    // If all records are pendingC, update them to app2
                     $updateSql = "UPDATE content SET status = 'clientapp1' WHERE client_name = :client_name AND month = :month";
                     $updateStmt = $pdo->prepare($updateSql);
                     $updateStmt->execute(['client_name' => $clientName, 'month' => $month]);
 
-                    echo 'All records updated to client approval 1.';
+                    echo 'All records updated to waiting client approval .';
                 }
             }
 
@@ -97,7 +97,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
             $result = $stmt->fetch(PDO::FETCH_ASSOC);
 
             if ($result['not_pending'] > 0) {
-                echo 'Cannot set status to "clientapp1" as not all records are pendingC.';
+                echo 'Cannot set status to "app2" as not all records are pendingC.';
                 exit;
             }
 

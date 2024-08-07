@@ -86,7 +86,6 @@ try {
     echo '<p>Error fetching records: ' . htmlspecialchars($e->getMessage()) . '</p>'; 
 }
 ?>
-
 <script>
 function toggleRejectionField(event, element) {
     event.preventDefault();
@@ -117,6 +116,25 @@ document.addEventListener('change', function(event) {
             noteArea.classList.add('note-area');
             noteArea.innerHTML = `<label>${checkboxValue} Note:</label><textarea name="${checkboxValue}_note" rows="2" style="width: 100%; resize: both;"></textarea>`;
             notesContainer.appendChild(noteArea);
+            
+            // Automatically select other checkboxes if 'idea' is selected
+            if (checkboxValue === 'idea') {
+                const otherCheckboxes = ['title', 'caption', 'someOtherOption']; // Replace with actual checkbox values
+                otherCheckboxes.forEach(value => {
+                    const otherCheckbox = checkbox.closest('.rejection-field').querySelector(`input[name="reject_option"][value="${value}"]`);
+                    if (otherCheckbox && !otherCheckbox.checked) {
+                        otherCheckbox.checked = true;
+                        // Create note area if it does not exist
+                        const existingNoteArea = notesContainer.querySelector(`.note-area textarea[name="${value}_note"]`);
+                        if (!existingNoteArea) {
+                            const noteArea = document.createElement('div');
+                            noteArea.classList.add('note-area');
+                            noteArea.innerHTML = `<label>${value} Note:</label><textarea name="${value}_note" rows="2" style="width: 100%; resize: both;"></textarea>`;
+                            notesContainer.appendChild(noteArea);
+                        }
+                    }
+                });
+            }
         } else {
             // Remove the corresponding note area
             const noteArea = notesContainer.querySelector(`.note-area textarea[name="${checkboxValue}_note"]`).parentElement;
@@ -131,12 +149,12 @@ function submitAction(event, action, recordId, clientName, month) {
     event.preventDefault();
     let rejectionOptions = [];
     let rejectionNotes = {};
-    
+
     if (action === 'reject') {
         // Collect selected checkboxes
         const selectedOptions = document.querySelectorAll(`.record-container[data-id="${recordId}"] .rejection-field input[name="reject_option"]:checked`);
         rejectionOptions = Array.from(selectedOptions).map(option => option.value);
-        
+
         // Get notes
         rejectionOptions.forEach(option => {
             const note = document.querySelector(`.record-container[data-id="${recordId}"] .rejection-field textarea[name="${option}_note"]`).value;
@@ -144,17 +162,30 @@ function submitAction(event, action, recordId, clientName, month) {
                 rejectionNotes[option] = note;
             }
         });
-        
+
+        // Validation checks
         if (rejectionOptions.length === 0) {
             alert('Please select at least one option for rejection.');
             return;
         }
-        if (Object.keys(rejectionNotes).length === 0) {
-            alert('Please provide notes for the selected rejection options.');
+
+        // Check for missing notes
+        let missingNotes = [];
+        rejectionOptions.forEach(option => {
+            if (option !== 'idea') { // Skip validation for 'idea' checkbox
+                const note = rejectionNotes[option];
+                if (!note || !note.trim()) {
+                    missingNotes.push(option);
+                }
+            }
+        });
+
+        if (missingNotes.length > 0) {
+            alert('Please provide a non-empty note for the following selected rejection options: ' + missingNotes.join(', '));
             return;
         }
     }
-    
+
     const data = {
         id: recordId,
         action: action,
@@ -162,9 +193,9 @@ function submitAction(event, action, recordId, clientName, month) {
         client_name: clientName,
         month: month
     };
-    
+
     console.log('Sending data:', data);
-    
+
     fetch('approve2sub.php', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -181,6 +212,9 @@ function submitAction(event, action, recordId, clientName, month) {
     });
 }
 </script>
+
+
+
 
 
 

@@ -173,7 +173,7 @@ class="" style="
                     <!-- Sections for static -->
                     <div id="staticSection" class="event-section d-none">
                         <div class="mb-3">
-                            <label for="Concept" class="form-label">Concept (theme)</label>
+                            <label for="Concept" class="form-label">idea </label>
                             <input type="text" class="form-control" id="Concept" name="Concept" required>
                         </div>
                         <div>
@@ -188,15 +188,15 @@ class="" style="
   <!-- Additional Static Fields -->
 <div id="additionalFields" class="d-none">
     <div class="mb-3">
-        <label for="ConceptAdditional" class="form-label">Additional Concept (theme)</label>
+        <label for="ConceptAdditional" class="form-label">الفكرة </label>
         <input type="text" class="form-control" id="ConceptAdditional" name="ConceptAdditional">
     </div>
     <div>
-                        <label for="Additionaltitle" class="form-label">Additionaltitle</label>
+                        <label for="Additionaltitle" class="form-label">نص الكتابة</label>
                         <input type="text" class="form-control" id="Additionaltitle" name="title" required>
                         </div>
     <div class="mb-3">
-        <label for="captionAdditional" class="form-label">Additional Caption (Text)</label>
+        <label for="captionAdditional" class="form-label">الكتابة</label>
         <textarea class="form-control" id="captionAdditional" name="captionAdditional" rows="3"></textarea>
     </div>
 </div>
@@ -339,7 +339,7 @@ class="" style="
                             <th>Client Name</th>
                             <th>Date</th>
                             <th>Language</th>
-                            <th>Concept</th>
+                            <th>Idea</th>
                             <th>Caption</th>
                             <th>Social Media</th>
                             <th>Sponsorship</th>
