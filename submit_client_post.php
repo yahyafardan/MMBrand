@@ -1,4 +1,18 @@
 <?php
+// Start the session
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['username'])) {
+    include "invaild.html";
+    exit;
+}
+
+// Check if the user is an admin
+if ($_SESSION['role_name'] !== 'admin') {
+    include "acessdenied.html";
+    exit;
+}
 // Database connection settings
 require "db.php";
 

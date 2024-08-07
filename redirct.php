@@ -27,14 +27,14 @@ if ($_SERVER["REQUEST_METHOD"] == "POST") {
 
     // Step 5: Check if user exists
     if (!$user) {
-        echo "Invalid username or password.";
+        include "invaild.html";
         exit;
     }
 
     // Step 6: Verify the password
     $passwordVerified = password_verify($password, $user['password_hash']);
     if (!$passwordVerified) {
-        echo "Invalid username or password.";
+        include "invaild.html";
         exit;
     }
 

@@ -1,4 +1,18 @@
 <?php
+// Start the session
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['username'])) {
+    include "invaild.html";
+    exit;
+}
+
+// Check if the user is an app1
+if ($_SESSION['role_name'] !== 'content') {
+    include "acessdenied.html";
+    exit;
+}
 require 'db.php'; // Ensure db.php is correctly configured and includes PDO setup
 
 // Enable error reporting for debugging

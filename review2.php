@@ -4,14 +4,14 @@ session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) { 
-    header("Location: index.html"); 
+    include "invaild.html";
     exit; 
 }
 
 // Check if the user is an app2
 if ($_SESSION['role_name'] !== 'app2') { 
-    echo "Access denied."; 
-    header("Location: index.html"); 
+    include "acessdenied.html";
+
     exit; 
 }
 
@@ -218,7 +218,10 @@ function submitAction(event, action, recordId, clientName, month) {
 
 
 
-<style>.clients-container {
+<style>
+
+
+.clients-container {
     display: flex;
     flex-direction: column; /* Display clients in a column */
     padding: 20px;

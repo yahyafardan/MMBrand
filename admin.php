@@ -3,14 +3,16 @@
 session_start();
 
 // Check if the user is logged in
-if (!isset($_SESSION['username'])) {
+if (!isset($_SESSION['username'])) {      
+      include "invaild.html";
+
     header("Location: indext.html");
     exit;
 }
 
 // Check if the user is an admin
 if ($_SESSION['role_name'] !== 'admin') {
-    echo "Access denied.";
+    include "acessdenied.html";
     exit;
 }
 ?>

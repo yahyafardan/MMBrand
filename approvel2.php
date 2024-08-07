@@ -1,4 +1,18 @@
 <?php
+// Start the session
+session_start();
+
+// Check if the user is logged in
+if (!isset($_SESSION['username'])) {
+    include "invaild.html";
+    exit;
+}
+
+// Check if the user is an app2
+if ($_SESSION['role_name'] !== 'app2') {
+    include "acessdenied.html";
+    exit;
+}
 require 'db.php';
 
 try {

@@ -5,13 +5,13 @@ session_start();
 
 // Check if the user is logged in
 if (!isset($_SESSION['username'])) {
-    echo json_encode(['success' => false, 'message' => 'User not logged in']);
+    include "invaild.html";
     exit;
 }
 
 // Check if the user is an admin
 if ($_SESSION['role_name'] !== 'admin') {
-    echo json_encode(['success' => false, 'message' => 'Access denied']);
+    include "acessdenied.html";
     exit;
 }
 
