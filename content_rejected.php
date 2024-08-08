@@ -65,11 +65,12 @@ $content = $stmt->fetchAll(PDO::FETCH_ASSOC);
 </head>
 <body>
 <div class="container" id="contentContainer">
-    <h1>Rejected Content</h1>
     <div id="notesDisplay" class="flex-container">
         <?php if (empty($content)): ?>
-            <p>No rejected content found.</p>
-        <?php else: ?>
+            <iframe src="nothing.html" style="border: none; width: 100%; height: 100vh;"></iframe>
+                    <?php else: ?>
+            <h1>Rejected Content</h1>
+
             <?php foreach ($content as $record): ?>
                 <?php
                 $parsedNotes = json_decode($record['notes'], true);
@@ -111,7 +112,7 @@ $content = $stmt->fetchAll(PDO::FETCH_ASSOC);
     </div>
 </div>
 <!-- Add this button to your existing HTML -->
-<button id="debugLocalStorage" type="button">Debug Local Storage</button>
+<!-- <button id="debugLocalStorage" type="button">Debug Local Storage</button> -->
 
 <script>
 $(document).ready(function() {

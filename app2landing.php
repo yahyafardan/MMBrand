@@ -111,8 +111,8 @@ try {
                     </ul>
                     <a href="approvel2.php">Click here to Review content</a>
                 <?php else: ?>
-                    <p>No content currently under review.</p>
-                <?php endif; ?>
+                    <iframe src="nothing.html" style="border: none; width: 100%; height: 100vh;"></iframe>
+                    <?php endif; ?>
             </div>
         </div>
         <div class="option">

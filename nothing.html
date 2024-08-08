@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Great Job!</title>
+    <style>
+        body {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            background-color: #f0f8ff;
+            font-family: 'Arial', sans-serif;
+            font-size: 16px; /* Base font size */
+        }
+        h1 {
+            font-size: 4em; /* Adjusted size */
+            background: linear-gradient(90deg, #ff6347, #3cb371, #1e90ff, #ff69b4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            animation: bounce 1s infinite;
+            text-align: center; /* Center text */
+        }
+        p {
+            color: #555;
+            font-size: 1.2em;
+            margin: 20px 0;
+            text-align: center; /* Center text */
+        }
+        .button {
+            padding: 10px 20px;
+            font-size: 1em;
+            color: white;
+            background-color: #ff69b4;
+            border: none;
+            border-radius: 5px;
+            cursor: pointer;
+            transition: background-color 0.3s;
+        }
+        .button:hover {
+            background-color: #ff1493;
+        }
+        .cute-image {
+            width: 100px; /* Adjusted size */
+            margin: 20px 0;
+        }
+        @keyframes bounce {
+            0%, 100% {
+                transform: translateY(0);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+    </style>
+</head>
+<body>
+    <img src="https://img.icons8.com/emoji/150/000000/smiling-face-with-heart-eyes.png" alt="Cute Emoji" class="cute-image">
+    <h1>GREAT JOB!</h1>
+    <p>There's nothing left to work on right now.</p>
+    <button class="button" onclick="history.back()">Go Back</button>
+</body>
+</html>

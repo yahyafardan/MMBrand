@@ -29,7 +29,7 @@ try {
     $records = $stmt->fetchAll(PDO::FETCH_ASSOC); 
     
     if (!$records) { 
-        echo "<p>No records found for $clientName in $month.</p>"; 
+        echo '<iframe src="nothing.html" style="border: none; width: 100%; height: 100vh;"></iframe>';
         exit; 
     }
     
