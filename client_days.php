@@ -33,6 +33,20 @@ try {
         exit;
     }
 
+    // Update the records to pendingC
+    $update_sql = "UPDATE content SET status = 'pendingC' WHERE client_name = :client_name";
+    $update_stmt = $pdo->prepare($update_sql);
+    $update_stmt->bindParam(':client_name', $client_name, PDO::PARAM_STR);
+    $update_stmt->execute();
+
+    // Check if the update was successful
+    if ($update_stmt->rowCount() > 0) {
+        echo json_encode(["success" => "Records updated to pendingC successfully."]);
+    } else {
+        echo json_encode(["message" => "No records updated."]);
+    }
+
+    // Proceed with the rest of the logic, if needed
     // Split days_of_posting into an array
     $days_of_posting = explode(',', $client_data['days_of_posting']);
 

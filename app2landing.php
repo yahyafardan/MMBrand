@@ -1,6 +1,4 @@
 <?php
-require 'db.php';
-
 // Start the session
 session_start();
 
@@ -10,13 +8,30 @@ if (!isset($_SESSION['username'])) {
     exit;
 }
 
-// Check if the user is an app1
+// Check if the user is an app2
 if ($_SESSION['role_name'] !== 'app2') {
     include "acessdenied.html";
     exit;
 }
-?>
-<!DOCTYPE html>
+
+// Include the database connection file
+require 'db.php';
+
+try {
+    // Query to fetch content with status 'app2' and their client names
+    $sql = "SELECT client_name, COUNT(*) as content_count 
+            FROM content 
+            WHERE status = 'app2' 
+            GROUP BY client_name";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $client_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Handle database query errors
+    echo "Database query failed: " . $e->getMessage();
+    exit;
+}
+?><!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -68,22 +83,43 @@ if ($_SESSION['role_name'] !== 'app2') {
         .option a:hover {
             text-decoration: underline;
         }
+        /* Remove bullets from unordered list */
+        .option ul {
+            list-style-type: none; /* Remove bullet points */
+            padding: 0; /* Remove padding */
+            margin: 0; /* Remove margin */
+        }
+        .option ul li {
+            padding: 8px 0; /* Add some spacing between items */
+            font-size: 18px; /* Adjust font size for list items */
+        }
     </style>
 </head>
 <body>
     <div class="options-container">
         <div class="option">
-            <h2> approve content</h2>
-            <p>clicl blow to approve content </p>
-            <a href="approvel2.php" >Click here </a>
+            <div>
+                <?php if ($client_data): ?>
+                    <h3>Review Content:</h3>
+                    <ul>
+                        <?php foreach ($client_data as $data): ?>
+                            <li>
+                                Client: <?php echo htmlspecialchars($data['client_name']); ?> - 
+                                Number of content: <?php echo htmlspecialchars($data['content_count']); ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <a href="approvel2.php">Click here to Review content</a>
+                <?php else: ?>
+                    <p>No content currently under review.</p>
+                <?php endif; ?>
+            </div>
         </div>
-        
         <div class="option">
             <h2>Option 2 Title</h2>
             <p>This is a brief description of Option 2. It explains what this option entails and why it might be useful.</p>
             <a href="https://example.com/option2" target="_blank">Click here for more details</a>
         </div>
-        
         <div class="option">
             <h2>Option 3 Title</h2>
             <p>This is a brief description of Option 3. Learn more about this option and its benefits by clicking the link below.</p>

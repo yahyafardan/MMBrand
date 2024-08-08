@@ -13,6 +13,24 @@ if ($_SESSION['role_name'] !== 'app1') {
     include "acessdenied.html";
     exit;
 }
+
+// Include the database connection file
+require 'db.php';
+
+try {
+    // Query to fetch content with status 'app1' and their client names
+    $sql = "SELECT client_name, COUNT(*) as content_count 
+            FROM content 
+            WHERE status = 'app1' 
+            GROUP BY client_name";
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute();
+    $client_data = $stmt->fetchAll(PDO::FETCH_ASSOC);
+} catch (PDOException $e) {
+    // Handle database query errors
+    echo "Database query failed: " . $e->getMessage();
+    exit;
+}
 ?>
 <!DOCTYPE html>
 <html lang="en">
@@ -66,14 +84,36 @@ if ($_SESSION['role_name'] !== 'app1') {
         .option a:hover {
             text-decoration: underline;
         }
+        ul {
+            list-style-type: none; /* Remove bullets from the list */
+            padding: 0;
+            margin: 0;
+        }
+        li {
+            font-size: 18px; /* Larger text size for list items */
+            margin-bottom: 10px; /* Space between list items */
+        }
     </style>
 </head>
 <body>
     <div class="options-container">
         <div class="option">
-            <h2> approve content</h2>
-            <p>clicl blow to approve content </p>
-            <a href="approvel1.php" >Click here </a>
+            <div>
+                <?php if ($client_data): ?>
+                    <h3>Review Content:</h3>
+                    <ul>
+                        <?php foreach ($client_data as $data): ?>
+                            <li>
+                                Client: <?php echo htmlspecialchars($data['client_name']); ?> - 
+                                Number of content: <?php echo htmlspecialchars($data['content_count']); ?>
+                            </li>
+                        <?php endforeach; ?>
+                    </ul>
+                    <a href="approvel1.php">Click here to Review content</a>
+                <?php else: ?>
+                    <p>No content currently under review.</p>
+                <?php endif; ?>
+            </div>
         </div>
         
         <div class="option">

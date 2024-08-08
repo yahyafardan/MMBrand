@@ -101,7 +101,7 @@ $hasRejectedContent = count($rejectedContent) > 0;
                 ?>
             </p>
             <?php if ($hasRejectedContent): ?>
-                <a href="content_rejected.php">Click here</a>
+                <a href="content_rejectedland.php">Click here</a>
             <?php endif; ?>
         </div>
         
@@ -121,7 +121,7 @@ $hasRejectedContent = count($rejectedContent) > 0;
     <script>
         document.getElementById('reviewRejectedContent').addEventListener('click', function() {
             if (<?php echo json_encode($hasRejectedContent); ?>) {
-                window.location.href = 'content_rejected.php';
+                window.location.href = 'content_rejectedland.php';
             }
         });
     </script>

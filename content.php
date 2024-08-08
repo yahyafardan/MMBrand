@@ -1082,55 +1082,7 @@ updateEventColor(formData.get('eventID'), 'blue');
 
 // Hide the modal and refetch events
 $('#contentModal').modal('hide');
-// $('#calendar').fullCalendar('refetchEvents');
-// function saveItem(eventID, itemData) {
-//     const localStorageKey = 'modalSavedData';
-    
-//     // Retrieve existing data from local storage
-//     let data = localStorage.getItem(localStorageKey);
-//     let parsedData = {};
 
-//     if (data) {
-//         try {
-//             parsedData = JSON.parse(data);
-//         } catch (error) {
-//             console.error('Error parsing JSON from local storage:', error);
-//             return;
-//         }
-//     }
-
-//     // Check if the item already exists in local storage
-//     if (parsedData.hasOwnProperty(eventID)) {
-//         console.log('Item already exists, updating it.');
-
-//         // If the item exists, update it
-//         parsedData[eventID] = itemData;
-//     } else {
-//         console.log('Item does not exist, adding it.');
-
-//         // If the item does not exist, add it
-//         parsedData[eventID] = itemData;
-//     }
-
-//     // Save the updated data back to local storage
-//     localStorage.setItem(localStorageKey, JSON.stringify(parsedData));
-
-//     // Increment the global saved items count and update display
-//     savedItemsCount = Object.keys(parsedData).length;
-//     document.getElementById('savedItemsCount').textContent = `Saved Items: ${savedItemsCount}`;
-    
-//     // Show the container and buttons if needed
-//     const savedItemsContainer = document.getElementById('savedItemsContainer');
-//     if (savedItemsCount > 0) {
-//         savedItemsContainer.classList.remove('d-none'); // Show container
-//         document.getElementById('submitButton').classList.remove('d-none'); // Show submit button
-//         document.getElementById('previewButton').classList.remove('d-none'); // Show preview button
-//     } else {
-//         savedItemsContainer.classList.add('d-none'); // Hide container
-//     }
-    
-//     console.log('Saved Items Count:', savedItemsCount);
-// }
 
 
 

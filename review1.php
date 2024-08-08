@@ -51,7 +51,6 @@ try {
         echo '<p><strong>Caption:</strong> ' . htmlspecialchars($record['caption']) . '</p>';
         echo '<p><strong>Language:</strong> ' . htmlspecialchars($record['language']) . '</p>';
         echo '<p><strong>Last Updated:</strong> ' . htmlspecialchars($record['updated_at']) . '</p>';
-        // echo '<p><strong>Status:</strong> ' . htmlspecialchars($record['status']) . '</p>';
         
         if (!empty($contributors)) { 
             echo '<p><strong>Contributors:</strong> '; 
@@ -65,14 +64,15 @@ try {
         
         echo '<div class="button-container">';
         echo '<a class="approve-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '" onclick="submitAction(event, \'approve\', ' . htmlspecialchars($record['id']) . ', \'' . htmlspecialchars($clientName) . '\', \'' . htmlspecialchars($month) . '\')">Approve</a>';
-        echo '<a class="reject-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '" onclick="toggleRejectionField(event, this)">Reject</a>';
-        echo '<div class="rejection-field">';
+        echo '<a class="reject-btn" href="#" data-id="' . htmlspecialchars($record['id']) . '" onclick="showRejectionForm(event, this)">Reject</a>';
+        echo '<div class="rejection-field" style="display: none;">';
         echo '<p>Select the fields to include in the rejection notes:</p>';
         echo '<label><input type="checkbox" name="reject_option" value="idea"> Idea</label>';
         echo '<label><input type="checkbox" name="reject_option" value="title"> Title</label>';
         echo '<label><input type="checkbox" name="reject_option" value="caption"> Caption</label>';
         echo '<div class="notes-container"></div>'; // Container for dynamic note areas
-        echo '<button type="button" onclick="submitAction(event, \'reject\', ' . htmlspecialchars($record['id']) . ', \'' . htmlspecialchars($clientName) . '\', \'' . htmlspecialchars($month) . '\')">Submit</button>';
+        echo '<button type="button" class="submit-reject-btn" onclick="submitAction(event, \'reject\', ' . htmlspecialchars($record['id']) . ', \'' . htmlspecialchars($clientName) . '\', \'' . htmlspecialchars($month) . '\')">Reject</button>';
+        echo '<button type="button" class="return-btn" onclick="returnToOptions(event, this)">Return</button>';
         echo '</div>';
         echo '</div>';
         echo '</div>';
@@ -86,22 +86,44 @@ try {
 }
 ?>
 <script>
-function toggleRejectionField(event, element) {
+  function showRejectionForm(event, element) {
     event.preventDefault();
     const buttonContainer = element.closest('.button-container');
-    const approvalButton = buttonContainer.querySelector('.approve-btn');
     const rejectionField = buttonContainer.querySelector('.rejection-field');
-    const notesContainer = buttonContainer.querySelector('.notes-container');
-    
-    if (rejectionField.style.display === 'block') {
-        rejectionField.style.display = 'none'; // Hide the rejection field
-        approvalButton.style.display = 'inline-block'; // Show the approval button
-        notesContainer.innerHTML = ''; // Clear notes when hidden
-    } else {
-        approvalButton.style.display = 'none'; // Hide the approval button
-        rejectionField.style.display = 'block'; // Show the rejection field
-    }
+    const rejectButton = buttonContainer.querySelector('.reject-btn');
+    const approveButton = buttonContainer.querySelector('.approve-btn'); // Select the Approve button
+
+    // Hide the original Reject button and the Approve button, and show the rejection form
+    rejectButton.style.display = 'none';
+    approveButton.style.display = 'none'; // Hide the Approve button
+    rejectionField.style.display = 'block';
 }
+
+function returnToOptions(event, element) {
+    event.preventDefault();
+    const buttonContainer = element.closest('.button-container');
+    const rejectionField = buttonContainer.querySelector('.rejection-field');
+    const rejectButton = buttonContainer.querySelector('.reject-btn');
+    const approveButton = buttonContainer.querySelector('.approve-btn'); // Select the Approve button
+
+    // Hide the rejection form and show the original Reject button, and also show the Approve button
+    rejectionField.style.display = 'none';
+    rejectButton.style.display = 'inline-block';
+    approveButton.style.display = 'inline-block'; // Show the Approve button again
+
+    // Clear the notes container
+    const notesContainer = buttonContainer.querySelector('.notes-container');
+    notesContainer.innerHTML = '';
+
+    // Uncheck all checkboxes
+    const checkboxes = buttonContainer.querySelectorAll('.rejection-field input[name="reject_option"]');
+    checkboxes.forEach(checkbox => checkbox.checked = false);
+
+    // Clear the note areas
+    const noteAreas = buttonContainer.querySelectorAll('.rejection-field .note-area');
+    noteAreas.forEach(noteArea => noteArea.remove());
+}
+
 
 document.addEventListener('change', function(event) {
     if (event.target.name === 'reject_option') {
@@ -118,7 +140,7 @@ document.addEventListener('change', function(event) {
             
             // Automatically select other checkboxes if 'idea' is selected
             if (checkboxValue === 'idea') {
-                const otherCheckboxes = ['title', 'caption', 'someOtherOption']; // Replace with actual checkbox values
+                const otherCheckboxes = ['title', 'caption']; // Replace with actual checkbox values
                 otherCheckboxes.forEach(value => {
                     const otherCheckbox = checkbox.closest('.rejection-field').querySelector(`input[name="reject_option"][value="${value}"]`);
                     if (otherCheckbox && !otherCheckbox.checked) {
@@ -210,6 +232,8 @@ function submitAction(event, action, recordId, clientName, month) {
         console.error('Error:', error);
     });
 }
+
+
 </script>
 
 
@@ -217,7 +241,35 @@ function submitAction(event, action, recordId, clientName, month) {
 
 
 
-<style>.clients-container {
+<style>
+    .reject-btn,
+.return-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    margin-right: 10px; /* Space between buttons */
+}
+
+.reject-btn {
+    background-color: #d9534f; /* Red for reject */
+}
+
+.reject-btn:hover {
+    background-color: #c9302c; /* Darker red for hover */
+}
+
+.return-btn {
+    background-color: #5bc0de; /* Light blue for return */
+}
+
+.return-btn:hover {
+    background-color: #31b0d5; /* Darker blue for hover */
+}
+
+.clients-container {
     display: flex;
     flex-direction: column; /* Display clients in a column */
     padding: 20px;
@@ -453,6 +505,22 @@ function submitAction(event, action, recordId, clientName, month) {
 .rejection-field {
     display: none; /* Initially hidden */
 }
+/* Styling for the Reject button inside the rejection form */
+.submit-reject-btn {
+    padding: 10px 15px;
+    border: none;
+    border-radius: 5px;
+    color: #fff;
+    cursor: pointer;
+    font-size: 16px;
+    background-color: #dc3545; /* Red for reject */
+    margin-right: 10px; /* Space between buttons */
+}
+
+.submit-reject-btn:hover {
+    background-color: #c82333; /* Darker red for hover */
+}
+
 
 </style>
 
